@@ -448,6 +448,7 @@ const photos = $$('.photo').map((btn, index) => {
     alt: img ? img.alt : `Khoảnh khắc ngày cưới ${index + 1}`
   };
 });
+let galleryIgnoreNextClick = false;
 
 function updateLightboxPhoto(index, animate = false) {
   if (photos.length === 0) return;
@@ -494,7 +495,13 @@ function closeLightbox() {
 
 // Gán click cho từng ảnh trong gallery
 $$('.photo').forEach((button, index) => {
-  button.onclick = () => openLightbox(index, button);
+  button.onclick = () => {
+    if (galleryIgnoreNextClick) {
+      galleryIgnoreNextClick = false;
+      return;
+    }
+    openLightbox(index, button);
+  };
 });
 
 const gallerySlider = $('#gallerySlider');
@@ -505,6 +512,11 @@ const galleryReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 let galleryAutoSlideTimeout = null;
 let galleryScrollTimeout = null;
 let galleryPresentationFrame = null;
+let galleryDragStartX = 0;
+let galleryDragStartY = 0;
+let galleryDragStartScrollLeft = 0;
+let galleryDragPointerId = null;
+let galleryIsDragging = false;
 
 function getGalleryActiveIndex() {
   if (!galleryTrack || photos.length === 0) return 0;
@@ -606,6 +618,61 @@ if (gallerySlider && galleryTrack) {
     }, 120);
   }, { passive: true });
 
+  galleryTrack.addEventListener('pointerdown', event => {
+    if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    galleryDragStartX = event.clientX;
+    galleryDragStartY = event.clientY;
+    galleryDragStartScrollLeft = galleryTrack.scrollLeft;
+    galleryDragPointerId = event.pointerId;
+    galleryIsDragging = false;
+    stopGalleryAutoplay();
+  });
+
+  galleryTrack.addEventListener('pointermove', event => {
+    if (event.pointerId !== galleryDragPointerId) return;
+    const deltaX = event.clientX - galleryDragStartX;
+    const deltaY = event.clientY - galleryDragStartY;
+
+    if (!galleryIsDragging) {
+      if (Math.abs(deltaX) < 7 && Math.abs(deltaY) < 7) return;
+      if (Math.abs(deltaX) <= Math.abs(deltaY)) {
+        galleryDragPointerId = null;
+        scheduleGalleryAutoplay();
+        return;
+      }
+
+      galleryIsDragging = true;
+      galleryTrack.classList.add('is-dragging');
+      galleryTrack.setPointerCapture(event.pointerId);
+    }
+
+    event.preventDefault();
+    galleryTrack.scrollLeft = galleryDragStartScrollLeft - deltaX;
+  });
+
+  const finishGalleryDrag = event => {
+    if (event.pointerId !== galleryDragPointerId) return;
+    const wasDragging = galleryIsDragging;
+    galleryDragPointerId = null;
+    galleryIsDragging = false;
+    galleryTrack.classList.remove('is-dragging');
+
+    if (galleryTrack.hasPointerCapture(event.pointerId)) {
+      galleryTrack.releasePointerCapture(event.pointerId);
+    }
+
+    if (wasDragging) {
+      galleryIgnoreNextClick = true;
+      setTimeout(() => { galleryIgnoreNextClick = false; }, 400);
+      updateGalleryCounter();
+    } else {
+      scheduleGalleryAutoplay();
+    }
+  };
+
+  galleryTrack.addEventListener('pointerup', finishGalleryDrag);
+  galleryTrack.addEventListener('pointercancel', finishGalleryDrag);
+
   gallerySlider.addEventListener('mouseenter', stopGalleryAutoplay);
   gallerySlider.addEventListener('mouseleave', scheduleGalleryAutoplay);
   gallerySlider.addEventListener('focusin', stopGalleryAutoplay);
@@ -613,7 +680,6 @@ if (gallerySlider && galleryTrack) {
     if (!gallerySlider.contains(event.relatedTarget)) scheduleGalleryAutoplay();
   });
   gallerySlider.addEventListener('pointerdown', stopGalleryAutoplay);
-  gallerySlider.addEventListener('pointerup', scheduleGalleryAutoplay);
   galleryReducedMotion.addEventListener('change', () => {
     updateGalleryPresentation();
     scheduleGalleryAutoplay();
@@ -707,11 +773,11 @@ class FallingPetals {
     this.maxPetals = window.innerWidth <= 768 ? 16 : 28;
 
     this.colors = [
-      'rgba(240, 195, 190, 0.72)',
-      'rgba(222, 182, 180, 0.68)',
-      'rgba(247, 215, 210, 0.62)',
-      'rgba(255, 235, 230, 0.75)',
-      'rgba(216, 138, 128, 0.55)'
+      { fill: 'rgba(231, 160, 164, 0.78)', vein: 'rgba(255, 245, 239, 0.72)' },
+      { fill: 'rgba(244, 191, 190, 0.8)', vein: 'rgba(255, 250, 243, 0.78)' },
+      { fill: 'rgba(246, 213, 205, 0.84)', vein: 'rgba(255, 253, 247, 0.8)' },
+      { fill: 'rgba(216, 174, 190, 0.76)', vein: 'rgba(255, 245, 246, 0.74)' },
+      { fill: 'rgba(238, 180, 142, 0.76)', vein: 'rgba(255, 247, 225, 0.76)' }
     ];
 
     this.resize = this.resize.bind(this);
@@ -730,13 +796,14 @@ class FallingPetals {
     return {
       x: Math.random() * this.canvas.width,
       y: -20 - Math.random() * 40,
-      size: 9 + Math.random() * 8,
-      speedX: -0.8 + Math.random() * 1.6,
-      speedY: 0.9 + Math.random() * 1.4,
+      size: 11 + Math.random() * 7,
+      type: Math.random() < 0.28 ? 'flower' : 'petal',
+      speedX: -0.55 + Math.random() * 1.1,
+      speedY: 0.65 + Math.random() * 1.05,
       rotation: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.025,
+      rotationSpeed: (Math.random() - 0.5) * 0.035,
       oscillationSpeed: 0.015 + Math.random() * 0.02,
-      oscillationDistance: 0.8 + Math.random() * 1.8,
+      oscillationDistance: 0.55 + Math.random() * 1.3,
       color: this.colors[Math.floor(Math.random() * this.colors.length)],
       angle: Math.random() * Math.PI * 2
     };
@@ -790,21 +857,62 @@ class FallingPetals {
     }
   }
 
+  drawSinglePetal(length, width, color) {
+    const ctx = this.ctx;
+    const halfWidth = width / 2;
+    const tip = -length / 2;
+    const base = length / 2;
+    const gradient = ctx.createLinearGradient(0, tip, 0, base);
+    gradient.addColorStop(0, 'rgba(255, 250, 246, 0.92)');
+    gradient.addColorStop(0.28, color.fill);
+    gradient.addColorStop(1, color.fill);
+
+    ctx.beginPath();
+    ctx.moveTo(0, base);
+    ctx.bezierCurveTo(-halfWidth * 0.18, base - length * 0.2, -halfWidth * 1.25, tip + length * 0.25, 0, tip);
+    ctx.bezierCurveTo(halfWidth * 1.25, tip + length * 0.25, halfWidth * 0.18, base - length * 0.2, 0, base);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(169, 105, 117, 0.18)';
+    ctx.lineWidth = 0.65;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0, base - length * 0.12);
+    ctx.quadraticCurveTo(width * 0.08, 0, 0, tip + length * 0.08);
+    ctx.strokeStyle = color.vein;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+  }
+
   drawPetal(p) {
     const ctx = this.ctx;
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.rotate(p.rotation);
 
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(p.size / 2, -p.size / 2, p.size, -p.size / 4, p.size, p.size / 2);
-    ctx.bezierCurveTo(p.size, p.size, p.size / 2, p.size * 1.2, 0, p.size);
-    ctx.bezierCurveTo(-p.size / 2, p.size * 1.2, -p.size, p.size, -p.size, p.size / 2);
-    ctx.bezierCurveTo(-p.size, -p.size / 4, -p.size / 2, -p.size / 2, 0, 0);
+    if (p.type === 'flower') {
+      for (let i = 0; i < 5; i++) {
+        ctx.save();
+        ctx.rotate((Math.PI * 2 * i) / 5);
+        ctx.translate(0, -p.size * 0.2);
+        this.drawSinglePetal(p.size * 0.9, p.size * 0.48, p.color);
+        ctx.restore();
+      }
 
-    ctx.fillStyle = p.color;
-    ctx.fill();
+      const center = ctx.createRadialGradient(-1, -1, 0, 0, 0, p.size * 0.18);
+      center.addColorStop(0, 'rgba(255, 244, 193, 0.98)');
+      center.addColorStop(1, 'rgba(205, 151, 73, 0.92)');
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size * 0.17, 0, Math.PI * 2);
+      ctx.fillStyle = center;
+      ctx.fill();
+    } else {
+      this.drawSinglePetal(p.size * 1.55, p.size * 0.9, p.color);
+    }
+
     ctx.restore();
   }
 
@@ -818,7 +926,7 @@ class FallingPetals {
       p.y += p.speedY;
       p.rotation += p.rotationSpeed;
 
-      if (p.y > this.canvas.height + 20 || p.x < -40 || p.x > this.canvas.width + 40) {
+      if (p.y > this.canvas.height + p.size * 2 || p.x < -p.size * 2 || p.x > this.canvas.width + p.size * 2) {
         this.petals[i] = this.createPetal();
       }
 
