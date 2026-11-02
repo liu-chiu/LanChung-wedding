@@ -69,7 +69,7 @@ function startAutoWishSlide() {
     return;
   }
 
-  autoSlideInterval = setInterval(nextWishSlide, 8000);
+  autoSlideInterval = setInterval(nextWishSlide, 3000);
 }
 
 function stopAutoWishSlide() {

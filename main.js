@@ -645,7 +645,7 @@ function scheduleGalleryAutoplay() {
   galleryAutoSlideTimeout = setTimeout(() => {
     goToGallerySlide(getGalleryActiveIndex() + 1);
     scheduleGalleryAutoplay();
-  }, 5500);
+  }, 3000);
 }
 
 if (gallerySlider && galleryTrack) {
