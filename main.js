@@ -1113,6 +1113,51 @@ function appendWish(wish, label = 'Đã duyệt') {
 
   article.append(small, quote, author);
   wishList.prepend(article);
+  if (wishBookDialog?.open) renderWishBook();
+}
+
+const wishViewAllButton = $('#wishViewAll');
+const wishBookDialog = $('#wishBookDialog');
+const wishBookEntries = $('#wishBookEntries');
+
+function renderWishBook() {
+  if (!wishBookEntries) return;
+  const wishes = $$('#wishList .wish').filter(wish => $('small', wish)?.textContent?.trim() !== 'Mẫu');
+  wishBookEntries.replaceChildren();
+
+  if (wishes.length === 0) {
+    const emptyMessage = document.createElement('p');
+    emptyMessage.className = 'wish-book-empty';
+    emptyMessage.textContent = 'Chưa có lời chúc nào. Hãy là người gửi lời chúc đầu tiên nhé!';
+    wishBookEntries.append(emptyMessage);
+    return;
+  }
+
+  wishes.forEach(wish => {
+    const quoteText = $('blockquote', wish)?.textContent?.trim() || '';
+    const authorText = $('p', wish)?.textContent?.trim() || '';
+    const entry = document.createElement('article');
+    entry.className = 'wish-book-entry';
+
+    const quote = document.createElement('blockquote');
+    quote.textContent = quoteText;
+    const author = document.createElement('p');
+    author.textContent = authorText;
+    entry.append(quote, author);
+    wishBookEntries.append(entry);
+  });
+}
+
+if (wishViewAllButton && wishBookDialog?.showModal) {
+  wishViewAllButton.addEventListener('click', () => {
+    renderWishBook();
+    wishBookDialog.showModal();
+  });
+
+  $('#wishBookClose')?.addEventListener('click', () => wishBookDialog.close());
+  wishBookDialog.addEventListener('click', event => {
+    if (event.target === wishBookDialog) wishBookDialog.close();
+  });
 }
 
 async function loadApprovedWishes() {

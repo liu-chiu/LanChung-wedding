@@ -504,7 +504,7 @@
       <div class="heading center reveal">
         <span class="eyebrow">Guestbook</span>
         <h2>Lời chúc <em>từ khách mời</em></h2>
-        <a class="wish-view-link" href="#wishList">Xem lời chúc của mọi người <span aria-hidden="true">↓</span></a>
+        <button class="wish-view-link" id="wishViewAll" type="button">Xem tất cả lời chúc <span aria-hidden="true">♡</span></button>
       </div>
       <div class="wish-layout wish-layout--form-first">
         <!-- Form để lại lời chúc -->
@@ -539,6 +539,17 @@
         </div>
       </div>
     </section>
+
+    <dialog aria-labelledby="wishBookTitle" class="wish-book-dialog" id="wishBookDialog">
+      <div class="wish-book-header">
+        <div>
+          <span class="eyebrow">Guestbook</span>
+          <h2 id="wishBookTitle">Lời chúc từ mọi người</h2>
+        </div>
+        <button aria-label="Đóng danh sách lời chúc" class="wish-book-close" id="wishBookClose" type="button">×</button>
+      </div>
+      <div aria-live="polite" class="wish-book-entries" id="wishBookEntries"></div>
+    </dialog>
 
     <!-- 10. Section RSVP (Xác nhận tham dự) -->
     <section class="section rsvp" id="rsvp">
