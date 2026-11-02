@@ -893,6 +893,32 @@ nav a:hover {
   margin-inline: auto;
 }
 
+.wish-view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(57, 127, 125, 0.38);
+  border-radius: 999px;
+  color: var(--green);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.wish-view-link:hover {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+
+.wish-view-link:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
 
 /* ==========================================
    5. CÂU CHUYỆN (STORY & TIMELINE)
@@ -1884,6 +1910,7 @@ address {
   width: 100%;
   flex: 1 1 auto;
   min-height: 340px;
+  scroll-margin-top: 100px;
 }
 
 #wishes #wishList.wish-slider .wish {
