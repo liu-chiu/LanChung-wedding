@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="1067" viewBox="0 0 1600 1067">
+  <title>Lan & Chung — Wedding Invitation Frame</title>
+  <desc>Landscape wedding invitation frame with delicate dusty rose botanical linework in opposite corners, warm ivory paper and a fine elegant border. The centre is intentionally blank for invitation text.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffdfb"/>
+      <stop offset=".48" stop-color="#fbf7f3"/>
+      <stop offset="1" stop-color="#f7f1ec"/>
+    </linearGradient>
+    <linearGradient id="petal" x1="0" y1="0" x2=".8" y2="1">
+      <stop offset="0" stop-color="#fff8f5" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#eed4d0" stop-opacity=".76"/>
+      <stop offset="1" stop-color="#d9b0ad" stop-opacity=".58"/>
+    </linearGradient>
+    <linearGradient id="leafFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f9eeea" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#d8b8b0" stop-opacity=".64"/>
+    </linearGradient>
+    <radialGradient id="paperGlow" cx=".48" cy=".45" r=".75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".68"/>
+      <stop offset="1" stop-color="#e9dcd5" stop-opacity=".12"/>
+    </radialGradient>
+    <filter id="paperGrain" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="12" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .07"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+
+    <!-- Individual petals, with fine centre veins for a hand-illustrated look -->
+    <g id="petal">
+      <path d="M0 0 C-11 -8 -13 -24 0 -38 C13 -24 11 -8 0 0Z" fill="url(#petal)" stroke="#c89b98" stroke-width="1.25"/>
+      <path d="M0 -3 C-1 -13 0 -24 0 -34" fill="none" stroke="#d7b0ab" stroke-width=".8" opacity=".8"/>
+    </g>
+    <g id="blossom">
+      <use xlink:href="#petal" transform="rotate(0)"/>
+      <use xlink:href="#petal" transform="rotate(60)"/>
+      <use xlink:href="#petal" transform="rotate(120)"/>
+      <use xlink:href="#petal" transform="rotate(180)"/>
+      <use xlink:href="#petal" transform="rotate(240)"/>
+      <use xlink:href="#petal" transform="rotate(300)"/>
+      <circle r="5.3" fill="#d5b09c" stroke="#bd8e89" stroke-width="1"/>
+      <circle r="2" fill="#f9eee4"/>
+      <g fill="#b98780" opacity=".85">
+        <circle cx="-2" cy="-1" r=".8"/><circle cx="2" cy="1" r=".8"/><circle cx="1" cy="-2" r=".7"/>
+      </g>
+    </g>
+    <g id="smallBlossom">
+      <use xlink:href="#petal" transform="scale(.62) rotate(0)"/>
+      <use xlink:href="#petal" transform="scale(.62) rotate(72)"/>
+      <use xlink:href="#petal" transform="scale(.62) rotate(144)"/>
+      <use xlink:href="#petal" transform="scale(.62) rotate(216)"/>
+      <use xlink:href="#petal" transform="scale(.62) rotate(288)"/>
+      <circle r="3.1" fill="#d4ad99" stroke="#bd8e89" stroke-width=".8"/>
+    </g>
+    <g id="leaf">
+      <path d="M0 0 C-18 -9 -27 -25 -19 -43 C-2 -38 9 -20 0 0Z" fill="url(#leafFill)" stroke="#bd918b" stroke-width="1.25"/>
+      <path d="M0 -2 C-5 -14 -12 -27 -18 -39 M-7 -18 L-19 -20 M-3 -10 L-13 -11" fill="none" stroke="#c69c95" stroke-width=".8" opacity=".9"/>
+    </g>
+    <g id="bud">
+      <path d="M0 0 C-12 -10 -9 -24 0 -29 C10 -22 12 -10 0 0Z" fill="url(#petal)" stroke="#c69b96" stroke-width="1.1"/>
+      <path d="M0 -1 L0 -24" fill="none" stroke="#c69b96" stroke-width=".8"/>
+      <path d="M-1 0 Q-8 7 -10 12 M1 0 Q8 6 10 10" fill="none" stroke="#bc918b" stroke-width="1.1"/>
+    </g>
+    <g id="hydrangeaCluster">
+      <use xlink:href="#blossom" transform="translate(-39 -18) scale(.65)"/>
+      <use xlink:href="#blossom" transform="translate(-7 -34) scale(.72)"/>
+      <use xlink:href="#blossom" transform="translate(25 -18) scale(.68)"/>
+      <use xlink:href="#blossom" transform="translate(42 12) scale(.66)"/>
+      <use xlink:href="#blossom" transform="translate(16 34) scale(.69)"/>
+      <use xlink:href="#blossom" transform="translate(-17 34) scale(.68)"/>
+      <use xlink:href="#blossom" transform="translate(-43 12) scale(.62)"/>
+      <use xlink:href="#blossom" transform="translate(-8 0) scale(.77)"/>
+      <use xlink:href="#smallBlossom" transform="translate(8 -53) scale(.7)"/>
+      <use xlink:href="#smallBlossom" transform="translate(57 -9) scale(.7)"/>
+      <use xlink:href="#smallBlossom" transform="translate(-57 -5) scale(.65)"/>
+    </g>
+    <g id="branch">
+      <path d="M0 0 C24 -43 16 -84 41 -122 C58 -148 82 -163 95 -193" fill="none" stroke="#b98e88" stroke-width="2" stroke-linecap="round"/>
+      <path d="M23 -48 C-2 -59 -17 -77 -15 -94 C7 -88 21 -72 23 -48Z" fill="url(#leafFill)" stroke="#bd918b" stroke-width="1.2"/>
+      <path d="M34 -82 C57 -86 74 -102 74 -119 C51 -115 37 -101 34 -82Z" fill="url(#leafFill)" stroke="#bd918b" stroke-width="1.2"/>
+      <path d="M45 -115 C25 -131 21 -148 30 -161 C47 -145 51 -130 45 -115Z" fill="url(#leafFill)" stroke="#bd918b" stroke-width="1.2"/>
+      <path d="M63 -143 C84 -148 96 -162 94 -177 C75 -170 65 -157 63 -143Z" fill="url(#leafFill)" stroke="#bd918b" stroke-width="1.2"/>
+      <path d="M10 -27 C-8 -35 -20 -34 -29 -22 C-12 -12 1 -15 10 -27Z" fill="url(#leafFill)" stroke="#bd918b" stroke-width="1.2"/>
+      <path d="M45 -109 C44 -96 42 -88 38 -81 M63 -143 L89 -171 M23 -48 L-9 -85" fill="none" stroke="#c69c95" stroke-width=".8"/>
+      <use xlink:href="#bud" transform="translate(95 -193) rotate(20) scale(.8)"/>
+      <use xlink:href="#bud" transform="translate(30 -161) rotate(-25) scale(.72)"/>
+    </g>
+  </defs>
+
+  <!-- Warm handmade-paper base -->
+  <rect width="1600" height="1067" fill="url(#paper)"/>
+  <rect width="1600" height="1067" fill="url(#paperGlow)"/>
+  <rect width="1600" height="1067" fill="#fffaf7" opacity=".22" filter="url(#paperGrain)"/>
+
+  <!-- Refined double border with softly stepped vintage corners -->
+  <path d="M94 48 H1506 Q1540 48 1540 82 V985 Q1540 1019 1506 1019 H94 Q60 1019 60 985 V82 Q60 48 94 48Z"
+        fill="none" stroke="#c89b96" stroke-width="1.8"/>
+  <path d="M100 58 H1500 Q1528 58 1528 86 V981 Q1528 1009 1500 1009 H100 Q72 1009 72 981 V86 Q72 58 100 58Z"
+        fill="none" stroke="#e3c8c2" stroke-width="1.1"/>
+  <!-- Corner engraved flourishes -->
+  <g fill="none" stroke="#c99d97" stroke-width="1.1" opacity=".9">
+    <path d="M60 143 C82 138 96 121 99 96 C76 103 63 119 60 143Z"/>
+    <path d="M1540 924 C1518 929 1504 946 1501 971 C1524 964 1537 948 1540 924Z"/>
+    <path d="M1455 48 C1466 61 1484 67 1501 61 C1488 47 1471 43 1455 48Z"/>
+    <path d="M145 1019 C156 1006 174 1000 191 1006 C178 1020 161 1024 145 1019Z"/>
+  </g>
+
+  <!-- Upper-right floral cascade: intentionally cropped by the edge -->
+  <g opacity=".92" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M1278 48 C1318 91 1320 130 1361 168 C1392 197 1432 207 1454 248 C1478 294 1485 344 1540 378"
+          fill="none" stroke="#b98f89" stroke-width="2.1"/>
+    <path d="M1324 91 C1300 76 1283 58 1280 38 M1361 168 C1390 145 1417 139 1441 151 M1428 204 C1411 230 1414 253 1435 270 M1470 292 C1496 278 1520 280 1540 298"
+          fill="none" stroke="#c39a93" stroke-width="1.4"/>
+    <use xlink:href="#leaf" transform="translate(1320 88) rotate(-54) scale(.88)"/>
+    <use xlink:href="#leaf" transform="translate(1356 163) rotate(50) scale(.8)"/>
+    <use xlink:href="#leaf" transform="translate(1393 180) rotate(-38) scale(.72)"/>
+    <use xlink:href="#leaf" transform="translate(1422 231) rotate(38) scale(.78)"/>
+    <use xlink:href="#leaf" transform="translate(1473 291) rotate(-47) scale(.85)"/>
+    <use xlink:href="#leaf" transform="translate(1500 330) rotate(42) scale(.75)"/>
+    <use xlink:href="#branch" transform="translate(1375 175) rotate(13) scale(.8)"/>
+    <use xlink:href="#smallBlossom" transform="translate(1307 65) scale(.72)"/>
+    <use xlink:href="#blossom" transform="translate(1451 169) scale(.66)"/>
+    <use xlink:href="#hydrangeaCluster" transform="translate(1507 401) scale(1.55)"/>
+    <use xlink:href="#hydrangeaCluster" transform="translate(1541 466) scale(1.13)"/>
+    <use xlink:href="#blossom" transform="translate(1454 500) scale(.7)"/>
+    <use xlink:href="#leaf" transform="translate(1494 537) rotate(-24) scale(.9)"/>
+    <path d="M1510 486 C1519 527 1533 550 1540 562" fill="none" stroke="#bd938d" stroke-width="1.6"/>
+    <use xlink:href="#leaf" transform="translate(1530 542) rotate(38) scale(.7)"/>
+  </g>
+
+  <!-- Lower-left floral cascade, echoing the top-right corner -->
+  <g opacity=".93" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M60 790 C101 763 132 729 143 687 C155 643 184 617 224 590 C263 564 278 527 284 487"
+          fill="none" stroke="#b98f89" stroke-width="2.1"/>
+    <path d="M105 756 C80 729 62 712 60 687 M143 687 C118 674 101 652 103 630 M190 619 C216 628 242 622 257 604 M235 582 C226 556 233 533 251 516"
+          fill="none" stroke="#c39a93" stroke-width="1.4"/>
+    <use xlink:href="#leaf" transform="translate(101 750) rotate(-57) scale(.84)"/>
+    <use xlink:href="#leaf" transform="translate(140 692) rotate(51) scale(.78)"/>
+    <use xlink:href="#leaf" transform="translate(178 641) rotate(-42) scale(.78)"/>
+    <use xlink:href="#leaf" transform="translate(224 589) rotate(44) scale(.75)"/>
+    <use xlink:href="#leaf" transform="translate(264 538) rotate(-30) scale(.75)"/>
+    <use xlink:href="#branch" transform="translate(183 642) rotate(190) scale(.78)"/>
+    <use xlink:href="#bud" transform="translate(284 487) rotate(14) scale(.8)"/>
+    <use xlink:href="#smallBlossom" transform="translate(111 695) scale(.72)"/>
+    <use xlink:href="#blossom" transform="translate(222 619) scale(.64)"/>
+    <use xlink:href="#hydrangeaCluster" transform="translate(80 849) scale(1.42)"/>
+    <use xlink:href="#hydrangeaCluster" transform="translate(139 900) scale(1.17)"/>
+    <use xlink:href="#blossom" transform="translate(192 831) scale(.72)"/>
+    <use xlink:href="#smallBlossom" transform="translate(209 927) scale(.72)"/>
+    <path d="M60 891 C93 916 104 950 114 989 C121 1008 132 1017 145 1019" fill="none" stroke="#bd938d" stroke-width="1.7"/>
+    <use xlink:href="#leaf" transform="translate(105 960) rotate(-55) scale(.9)"/>
+    <use xlink:href="#leaf" transform="translate(124 1001) rotate(40) scale(.75)"/>
+  </g>
+
+  <!-- Barely-there side sprigs to frame the composition without crowding text -->
+  <g fill="none" stroke="#d5b2ac" stroke-width="1.15" opacity=".7">
+    <path d="M60 345 C72 328 76 309 70 291 M1540 700 C1528 718 1525 738 1531 755"/>
+    <path d="M68 313 C54 302 51 290 56 280 C68 291 71 302 68 313Z"/>
+    <path d="M1532 735 C1546 746 1549 758 1544 768 C1532 757 1529 746 1532 735Z"/>
+  </g>
+
+  <!-- The centre is intentionally empty for the invitation wording. -->
+</svg>

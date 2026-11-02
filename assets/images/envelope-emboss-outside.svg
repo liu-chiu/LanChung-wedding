@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 215" fill="none">
+  <defs>
+    <g id="corner" stroke="#a48b6a" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M74 9C65 15 57 19 49 19C42 19 37 20 32 26C25 35 20 49 16 64C22 59 27 55 27 50C28 45 25 43 22 45C19 47 20 50 23 50C25 49 24 47 23 47" stroke-width=".76"/>
+      <path d="M51 19C49 11 44 7 39 9C40 15 45 20 51 19ZM42 21C38 14 32 13 29 17C32 22 37 24 42 21ZM32 27C26 21 21 23 19 28C23 32 28 32 32 27ZM23 45C18 39 13 42 13 47C17 51 21 49 23 45Z" stroke-width=".68"/>
+      <path d="M48 18C46 14 43 11 40 10M39 21C36 18 33 17 30 17M29 28C26 26 23 26 21 27M21 46C18 44 16 44 14 45" stroke-width=".42"/>
+    </g>
+    <g id="frame" stroke="#a48b6a" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="11" y="9" width="378" height="197" rx="15" stroke-width=".78"/>
+      <rect x="16" y="14" width="368" height="187" rx="12" stroke-width=".42"/>
+      <path d="M200 9V14M200 14C197 11 194 11 192 14C194 18 197 18 200 16C203 18 206 18 208 14C206 11 203 11 200 14ZM200 16C197 17 195 20 196 23C198 24 200 22 200 20C200 22 202 24 204 23C205 20 203 17 200 16Z" stroke-width=".62"/>
+      <path d="M11 92C17 96 17 102 11 107C17 112 17 118 11 123M389 92C383 96 383 102 389 107C383 112 383 118 389 123" stroke-width=".52"/>
+    </g>
+  </defs>
+  <use href="#frame"/>
+  <use href="#corner"/>
+  <use href="#corner" transform="translate(400 0) scale(-1 1)"/>
+  <use href="#corner" transform="translate(0 215) scale(1 -1)"/>
+  <use href="#corner" transform="translate(400 215) scale(-1 -1)"/>
+</svg>
