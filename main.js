@@ -209,43 +209,76 @@ if (coverCta) {
 }
 
 // Bật/tắt menu trên mobile
-if ($('#menu')) {
-  $('#menu').onclick = event => {
-    const isOpen = $('#nav').classList.toggle('open');
-    event.currentTarget.setAttribute('aria-expanded', String(isOpen));
+const menuButton = $('#menu');
+const navigation = $('#nav');
+const mobileNavigation = window.matchMedia('(max-width: 768px)');
+let mobileNavDismissed = false;
+
+function setNavigationOpen(isOpen) {
+  if (!navigation || !menuButton) return;
+  navigation.classList.toggle('open', isOpen);
+  menuButton.setAttribute('aria-expanded', String(isOpen));
+}
+
+if (menuButton && navigation) {
+  menuButton.onclick = () => {
+    const isOpen = !navigation.classList.contains('open');
+    mobileNavDismissed = !isOpen;
+    setNavigationOpen(isOpen);
   };
 }
 
 // Click chọn menu sẽ tự đóng menu mobile lại
 $$('nav a').forEach(link => {
   link.onclick = () => {
-    $('#nav').classList.remove('open');
-    $('#menu')?.setAttribute('aria-expanded', 'false');
+    mobileNavDismissed = true;
+    setNavigationOpen(false);
   };
 });
 
 const siteHeader = $('.site-header');
 let previousScrollY = window.scrollY;
 let headerScrollFrame = null;
+let scrollDirection = 0;
+let directionStartY = previousScrollY;
 
 window.addEventListener('scroll', () => {
   if (!siteHeader || headerScrollFrame !== null) return;
   headerScrollFrame = requestAnimationFrame(() => {
     const currentScrollY = window.scrollY;
     const scrollDelta = currentScrollY - previousScrollY;
+    const nextDirection = Math.sign(scrollDelta);
 
-    if (currentScrollY <= siteHeader.offsetHeight || $('#nav')?.classList.contains('open')) {
+    if (nextDirection && nextDirection !== scrollDirection) {
+      scrollDirection = nextDirection;
+      directionStartY = previousScrollY;
+    }
+
+    const directionDistance = Math.abs(currentScrollY - directionStartY);
+    if (currentScrollY <= siteHeader.offsetHeight) {
       siteHeader.classList.remove('is-hidden');
-    } else if (scrollDelta > 8) {
+      if (mobileNavigation.matches) setNavigationOpen(false);
+    } else if (directionDistance >= 6 && scrollDirection > 0) {
+      mobileNavDismissed = false;
+      if (mobileNavigation.matches) setNavigationOpen(false);
       siteHeader.classList.add('is-hidden');
-    } else if (scrollDelta < -8) {
+      directionStartY = currentScrollY;
+    } else if (directionDistance >= 6 && scrollDirection < 0) {
       siteHeader.classList.remove('is-hidden');
+      if (mobileNavigation.matches && !mobileNavDismissed) setNavigationOpen(true);
+      directionStartY = currentScrollY;
     }
 
     previousScrollY = currentScrollY;
     headerScrollFrame = null;
   });
 }, { passive: true });
+
+mobileNavigation.addEventListener('change', event => {
+  mobileNavDismissed = false;
+  setNavigationOpen(false);
+  if (!event.matches) siteHeader?.classList.remove('is-hidden');
+});
 
 // Hiệu ứng cuộn trang hiện dần (Scroll Reveal)
 const observer = new IntersectionObserver(

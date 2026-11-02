@@ -2430,11 +2430,19 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    width: 100%;
+  }
+  #main {
+    padding-top: 76px;
+  }
   .menu { display: block; }
   nav {
     display: none;
     position: absolute;
-    top: 76px;
+    top: 100%;
     left: 0;
     right: 0;
     background: var(--paper);
@@ -2537,6 +2545,7 @@ footer {
 
 @media (max-width: 480px) {
   header { height: 68px; }
+  #main { padding-top: 68px; }
   section[id] { scroll-margin-top: 84px; }
   .brand img { width: 64px; height: 42px; }
   nav { top: 68px; }
