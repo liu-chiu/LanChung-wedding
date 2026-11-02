@@ -237,7 +237,7 @@ const siteHeader = $('.site-header');
 let previousScrollY = window.scrollY;
 let headerScrollFrame = null;
 let scrollDirection = 0;
-let directionStartY = previousScrollY;
+let scrollDirectionDistance = 0;
 
 window.addEventListener('scroll', () => {
   if (!siteHeader || headerScrollFrame !== null) return;
@@ -248,21 +248,20 @@ window.addEventListener('scroll', () => {
 
     if (nextDirection && nextDirection !== scrollDirection) {
       scrollDirection = nextDirection;
-      directionStartY = previousScrollY;
+      scrollDirectionDistance = 0;
     }
 
-    const directionDistance = Math.abs(currentScrollY - directionStartY);
+    scrollDirectionDistance += Math.abs(scrollDelta);
     if (currentScrollY <= siteHeader.offsetHeight) {
       siteHeader.classList.remove('is-hidden');
       if (Math.abs(scrollDelta) >= 6) setNavigationOpen(false);
-    } else if (directionDistance >= 6 && scrollDirection > 0) {
-      setNavigationOpen(false);
-      siteHeader.classList.add('is-hidden');
-      directionStartY = currentScrollY;
-    } else if (directionDistance >= 6 && scrollDirection < 0) {
+    } else if (scrollDirection < 0 && scrollDelta < 0) {
       setNavigationOpen(false);
       siteHeader.classList.remove('is-hidden');
-      directionStartY = currentScrollY;
+    } else if (scrollDirectionDistance >= 6 && scrollDirection > 0) {
+      setNavigationOpen(false);
+      siteHeader.classList.add('is-hidden');
+      scrollDirectionDistance = 0;
     }
 
     previousScrollY = currentScrollY;
@@ -294,7 +293,7 @@ document.addEventListener('touchmove', event => {
 
   navigationTouchHandled = true;
   previousScrollY = window.scrollY;
-  directionStartY = previousScrollY;
+  scrollDirectionDistance = 0;
   if (deltaY > 0) {
     scrollDirection = -1;
     siteHeader?.classList.remove('is-hidden');
