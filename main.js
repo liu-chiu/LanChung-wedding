@@ -212,7 +212,6 @@ if (coverCta) {
 const menuButton = $('#menu');
 const navigation = $('#nav');
 const mobileNavigation = window.matchMedia('(max-width: 768px)');
-let mobileNavDismissed = false;
 
 function setNavigationOpen(isOpen) {
   if (!navigation || !menuButton) return;
@@ -223,7 +222,6 @@ function setNavigationOpen(isOpen) {
 if (menuButton && navigation) {
   menuButton.onclick = () => {
     const isOpen = !navigation.classList.contains('open');
-    mobileNavDismissed = !isOpen;
     setNavigationOpen(isOpen);
   };
 }
@@ -231,7 +229,6 @@ if (menuButton && navigation) {
 // Click chọn menu sẽ tự đóng menu mobile lại
 $$('nav a').forEach(link => {
   link.onclick = () => {
-    mobileNavDismissed = true;
     setNavigationOpen(false);
   };
 });
@@ -241,12 +238,24 @@ let previousScrollY = window.scrollY;
 let headerScrollFrame = null;
 let scrollDirection = 0;
 let directionStartY = previousScrollY;
+let navigationTouchDirection = 0;
+let navigationTouchTime = 0;
 
 window.addEventListener('scroll', () => {
   if (!siteHeader || headerScrollFrame !== null) return;
   headerScrollFrame = requestAnimationFrame(() => {
     const currentScrollY = window.scrollY;
     const scrollDelta = currentScrollY - previousScrollY;
+    if (mobileNavigation.matches && Date.now() - navigationTouchTime < 400) {
+      siteHeader.classList.toggle('is-hidden', navigationTouchDirection > 0);
+      setNavigationOpen(navigationTouchDirection < 0);
+      previousScrollY = currentScrollY;
+      directionStartY = currentScrollY;
+      scrollDirection = navigationTouchDirection;
+      headerScrollFrame = null;
+      return;
+    }
+
     const nextDirection = Math.sign(scrollDelta);
 
     if (nextDirection && nextDirection !== scrollDirection) {
@@ -257,15 +266,20 @@ window.addEventListener('scroll', () => {
     const directionDistance = Math.abs(currentScrollY - directionStartY);
     if (currentScrollY <= siteHeader.offsetHeight) {
       siteHeader.classList.remove('is-hidden');
-      if (mobileNavigation.matches) setNavigationOpen(false);
+      if (mobileNavigation.matches) {
+        if (scrollDirection < 0 && directionDistance >= 6) {
+          setNavigationOpen(true);
+        } else if (scrollDirection > 0) {
+          setNavigationOpen(false);
+        }
+      }
     } else if (directionDistance >= 6 && scrollDirection > 0) {
-      mobileNavDismissed = false;
       if (mobileNavigation.matches) setNavigationOpen(false);
       siteHeader.classList.add('is-hidden');
       directionStartY = currentScrollY;
     } else if (directionDistance >= 6 && scrollDirection < 0) {
       siteHeader.classList.remove('is-hidden');
-      if (mobileNavigation.matches && !mobileNavDismissed) setNavigationOpen(true);
+      if (mobileNavigation.matches) setNavigationOpen(true);
       directionStartY = currentScrollY;
     }
 
@@ -275,10 +289,42 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 mobileNavigation.addEventListener('change', event => {
-  mobileNavDismissed = false;
   setNavigationOpen(false);
   if (!event.matches) siteHeader?.classList.remove('is-hidden');
 });
+
+let navigationTouchStartX = 0;
+let navigationTouchStartY = 0;
+let navigationTouchHandled = false;
+
+document.addEventListener('touchstart', event => {
+  if (!mobileNavigation.matches || event.touches.length !== 1) return;
+  navigationTouchStartX = event.touches[0].clientX;
+  navigationTouchStartY = event.touches[0].clientY;
+  navigationTouchHandled = false;
+}, { passive: true });
+
+document.addEventListener('touchmove', event => {
+  if (!mobileNavigation.matches || navigationTouchHandled || event.touches.length !== 1) return;
+  const deltaX = event.touches[0].clientX - navigationTouchStartX;
+  const deltaY = event.touches[0].clientY - navigationTouchStartY;
+  if (Math.abs(deltaY) < 10 || Math.abs(deltaY) <= Math.abs(deltaX)) return;
+
+  navigationTouchHandled = true;
+  previousScrollY = window.scrollY;
+  directionStartY = previousScrollY;
+  navigationTouchDirection = deltaY > 0 ? -1 : 1;
+  navigationTouchTime = Date.now();
+  if (deltaY > 0) {
+    scrollDirection = -1;
+    siteHeader?.classList.remove('is-hidden');
+    setNavigationOpen(true);
+  } else {
+    scrollDirection = 1;
+    setNavigationOpen(false);
+    siteHeader?.classList.add('is-hidden');
+  }
+}, { passive: true });
 
 // Hiệu ứng cuộn trang hiện dần (Scroll Reveal)
 const observer = new IntersectionObserver(
