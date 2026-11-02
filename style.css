@@ -11,6 +11,7 @@
   --paper: #fffdf9;
   --ink: #292723;
   --green: #397f7d;
+  --green-deep: #245c58;
   --rose: #d88a80;
   --pink: #deb6b4;
   --gold: #e9ad32;
@@ -121,9 +122,9 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f7efe6;
+  background: #f5eee7;
   background-image:
-    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.88) 0%, rgba(246, 239, 232, 0.96) 65%, #edd9c8 100%),
+    radial-gradient(ellipse at 50% 32%, rgba(255, 255, 255, 0.96) 0%, rgba(246, 239, 232, 0.96) 58%, #ead8c7 100%),
     url("assets/images/cover-floral.svg");
   background-repeat: no-repeat;
   background-position: center;
@@ -148,7 +149,7 @@ a {
   inset: 0;
   z-index: 2;
   background: url("assets/images/khung-thiep.png") center / 100% 100% no-repeat;
-  opacity: 0.96;
+  opacity: 0.24;
   pointer-events: none;
 }
 
@@ -164,23 +165,29 @@ a {
 .cover-content {
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: 500px;
   margin: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.8rem, 2.2vh, 1.4rem);
+  gap: clamp(0.75rem, 2vh, 1.1rem);
+  padding: clamp(1.25rem, 4vh, 2rem) clamp(0.9rem, 4vw, 2rem) clamp(1.1rem, 3vh, 1.6rem);
+  border: 1px solid rgba(177, 144, 99, 0.28);
+  border-radius: 28px;
+  background: linear-gradient(155deg, rgba(255, 253, 249, 0.74), rgba(250, 245, 239, 0.54));
+  box-shadow: 0 24px 70px rgba(89, 66, 45, 0.09), inset 0 1px rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   text-align: center;
   z-index: 5;
 }
 
 .cover-logo {
   display: block;
-  width: clamp(68px, 18vw, 112px);
+  width: clamp(76px, 17vw, 100px);
   flex: 0 0 auto;
-  margin-bottom: -0.35rem;
-  transform: translateY(-clamp(1.5rem, 5vh, 3rem));
+  margin: 0;
   transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
 }
 
@@ -196,7 +203,13 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.45rem;
+  min-width: min(100%, 300px);
+  padding: 0.75rem 1.4rem;
+  border: 1px solid rgba(177, 144, 99, 0.25);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 253, 249, 0.94), rgba(247, 239, 229, 0.86));
+  box-shadow: 0 8px 24px rgba(74, 57, 42, 0.06), inset 0 1px rgba(255, 255, 255, 0.9);
   animation: coverIntroFade 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
@@ -224,10 +237,10 @@ a {
 }
 
 .cover-eyebrow {
-  font-size: clamp(0.68rem, 1.8vw, 0.78rem);
+  font-size: clamp(0.62rem, 1.7vw, 0.72rem);
   text-transform: uppercase;
-  letter-spacing: 0.26em;
-  color: #8c7c6e;
+  letter-spacing: 0.2em;
+  color: var(--green-deep);
   font-weight: 600;
 }
 
@@ -248,11 +261,16 @@ a {
 }
 
 .cover-date {
-  font-size: clamp(0.9rem, 2.2vw, 1.05rem);
-  letter-spacing: 0.32em;
-  color: #76695d;
-  font-weight: 500;
-  margin: 0.25rem 0 0;
+  width: 100%;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(177, 144, 99, 0.3);
+  font-family: var(--serif);
+  font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  color: #65584b;
+  font-weight: 600;
+  margin: 0;
 }
 
 /* Thẻ cá nhân hoá người nhận thiệp */
@@ -320,11 +338,11 @@ a {
   width: 100%;
   height: 100%;
   background: #fdfaf6;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow:
-    0 25px 60px -12px rgba(45, 30, 25, 0.28),
-    0 10px 22px -4px rgba(0, 0, 0, 0.1),
-    inset 0 0 40px rgba(220, 205, 185, 0.35);
+    0 26px 52px -18px rgba(45, 38, 31, 0.3),
+    0 8px 20px -8px rgba(0, 0, 0, 0.12),
+    inset 0 0 36px rgba(220, 205, 185, 0.28);
   transform-style: preserve-3d;
   border: 1px solid rgba(212, 168, 83, 0.45);
 }
@@ -336,8 +354,8 @@ a {
   left: 3%;
   width: 94%;
   height: 92%;
-  background: #fffdfb;
-  border-radius: 4px;
+  background: linear-gradient(145deg, #fffefb, #faf5ed);
+  border-radius: 8px;
   padding: 1.2rem 1rem;
   display: flex;
   flex-direction: column;
@@ -346,15 +364,15 @@ a {
   text-align: center;
   z-index: 2;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(212, 168, 83, 0.4);
+  border: 1px solid rgba(177, 144, 99, 0.38);
   transition: transform 0.75s cubic-bezier(0.2, 0.85, 0.2, 1), box-shadow 0.75s ease;
 }
 
 .envelope-card-border {
   position: absolute;
   inset: 5px;
-  border: 1px solid rgba(212, 168, 83, 0.55);
-  border-radius: 2px;
+  border: 1px solid rgba(177, 144, 99, 0.38);
+  border-radius: 5px;
   pointer-events: none;
 }
 
@@ -458,8 +476,8 @@ a {
   right: -2px;
   height: 32px;
   transform: translateY(-50%);
-  background: linear-gradient(90deg, #b96963 0%, #d98882 25%, #e9a39d 50%, #d98882 75%, #b96963 100%);
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.16);
+  background: linear-gradient(90deg, #245c58 0%, #397f7d 25%, #5b9b91 50%, #397f7d 75%, #245c58 100%);
+  box-shadow: 0 4px 14px rgba(24, 69, 65, 0.24);
   z-index: 4;
   border-top: 1px solid rgba(255, 232, 175, 0.85);
   border-bottom: 1px solid rgba(255, 232, 175, 0.85);
@@ -606,25 +624,39 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.65rem 1.6rem;
-  background: #fffdfa;
-  border: 1px solid rgba(212, 168, 83, 0.75);
+  min-height: 48px;
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(135deg, #fffdf9, #f8f0e5);
+  border: 1px solid rgba(177, 144, 99, 0.58);
   border-radius: 999px;
-  color: var(--ink);
+  color: var(--green-deep);
   font-size: clamp(0.72rem, 1.8vw, 0.82rem);
   font-weight: 600;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
-  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.25);
+  box-shadow: 0 8px 22px rgba(94, 72, 47, 0.1), inset 0 1px rgba(255, 255, 255, 0.9);
   cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cover-cta:focus-visible {
+  outline: 3px solid rgba(57, 127, 125, 0.35);
+  outline-offset: 4px;
+}
+
+.cover.is-opening .cover-cta {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px) scale(0.96);
 }
 
 .cover-cta:hover {
   background: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(212, 168, 83, 0.38);
+  box-shadow: 0 12px 28px rgba(57, 127, 125, 0.16);
 }
 
 .cover-cta:active {
@@ -632,7 +664,7 @@ a {
 }
 
 .cover-cta-sparkle {
-  color: #d4a853;
+  color: #b8904d;
   font-size: 0.75rem;
 }
 

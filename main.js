@@ -162,6 +162,8 @@ if (envelopeScene && coverElem && !window.matchMedia('(prefers-reduced-motion: r
 function openEnvelopeInvitation() {
   if (!coverElem || coverElem.classList.contains('is-opening') || coverElem.classList.contains('open')) return;
   coverElem.classList.add('is-opening');
+  coverElem.setAttribute('aria-hidden', 'true');
+  coverElem.inert = true;
 
   if (navigator.vibrate) {
     try { navigator.vibrate([25, 45, 25]); } catch (e) {}
@@ -1039,21 +1041,58 @@ if ($('#rsvpForm')) {
 // ==========================================
 const musicButton = $('#music');
 const musicPlayer = $('#musicPlayer');
+const backgroundTracks = [
+  { title: 'Beautiful In White', src: 'assets/audio/Beautiful In White.mp3' },
+  { title: 'Hoa và Váy (RnB ver)', src: 'assets/audio/Hoa và Váy (RnB ver).mp3' },
+  { title: 'Hơn Cả Yêu', src: 'assets/audio/Hon-Ca-Yeu-Duc-Phuc.mp3' },
+  { title: 'Thế Giới Của Anh', src: 'assets/audio/THẾ GIỚI CỦA ANH.mp3' }
+];
 let globalAudio = null;
+let musicQueue = [];
+let currentMusicTrack = null;
+let lastMusicTrack = null;
+
+function refillMusicQueue() {
+  musicQueue = [...backgroundTracks];
+  for (let i = musicQueue.length - 1; i > 0; i--) {
+    const swapIndex = Math.floor(Math.random() * (i + 1));
+    [musicQueue[i], musicQueue[swapIndex]] = [musicQueue[swapIndex], musicQueue[i]];
+  }
+
+  if (musicQueue.length > 1 && musicQueue[musicQueue.length - 1] === lastMusicTrack) {
+    const swapIndex = Math.floor(Math.random() * (musicQueue.length - 1));
+    [musicQueue[swapIndex], musicQueue[musicQueue.length - 1]] = [musicQueue[musicQueue.length - 1], musicQueue[swapIndex]];
+  }
+}
+
+function playNextRandomTrack() {
+  if (!globalAudio || !backgroundTracks.length) return;
+  if (!musicQueue.length) refillMusicQueue();
+
+  currentMusicTrack = musicQueue.pop();
+  lastMusicTrack = currentMusicTrack;
+  globalAudio.src = currentMusicTrack.src;
+  globalAudio.load();
+  globalAudio.play().catch(error => {
+    console.warn(`Không thể phát bài nhạc "${currentMusicTrack.title}":`, error);
+  });
+}
 
 function getOrCreateAudio() {
   if (!globalAudio) {
     globalAudio = document.createElement('audio');
-    globalAudio.src = 'assets/audio/Hon-Ca-Yeu-Duc-Phuc.mp3';
-    globalAudio.loop = true;
     globalAudio.preload = 'auto';
     globalAudio.setAttribute('aria-hidden', 'true');
+    globalAudio.addEventListener('ended', playNextRandomTrack);
+    globalAudio.addEventListener('error', () => {
+      console.error(`Không thể tải bài nhạc "${currentMusicTrack?.title || 'không xác định'}":`, globalAudio.error);
+    });
 
     globalAudio.addEventListener('play', () => {
       if (musicButton) {
         musicButton.classList.add('is-open');
         musicButton.setAttribute('aria-pressed', 'true');
-        musicButton.setAttribute('aria-label', 'Tắt nhạc nền Hơn Cả Yêu');
+        musicButton.setAttribute('aria-label', 'Tắt nhạc nền');
         const label = $('.music-label', musicButton);
         if (label) label.textContent = 'Tắt nhạc';
       }
@@ -1063,7 +1102,7 @@ function getOrCreateAudio() {
       if (musicButton) {
         musicButton.classList.remove('is-open');
         musicButton.setAttribute('aria-pressed', 'false');
-        musicButton.setAttribute('aria-label', 'Phát nhạc nền Hơn Cả Yêu');
+        musicButton.setAttribute('aria-label', 'Phát nhạc nền');
         const label = $('.music-label', musicButton);
         if (label) label.textContent = 'Nghe nhạc';
       }
@@ -1075,8 +1114,13 @@ function getOrCreateAudio() {
 }
 
 function startBackgroundMusic() {
-  const player = getOrCreateAudio();
-  player.play().catch(error => {
+  getOrCreateAudio();
+  if (!currentMusicTrack) {
+    playNextRandomTrack();
+    return;
+  }
+
+  globalAudio.play().catch(error => {
     console.warn('Tự động phát nhạc bị chặn bởi trình duyệt:', error);
   });
 }
@@ -1091,7 +1135,11 @@ if (musicButton) {
   musicButton.onclick = () => {
     const player = getOrCreateAudio();
     if (player.paused) {
-      player.play().catch(err => console.warn('Không thể phát nhạc:', err));
+      if (!currentMusicTrack) {
+        playNextRandomTrack();
+      } else {
+        player.play().catch(err => console.warn('Không thể phát nhạc:', err));
+      }
     } else {
       player.pause();
     }

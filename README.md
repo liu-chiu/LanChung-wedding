@@ -5,7 +5,7 @@ Trang sử dụng 100% HTML5, CSS3 và JavaScript ES6 thuần; không phụ thu�
 
 ## 🌟 Các tính năng nổi bật (Bản Luxury)
 
-- **Mở phong bì thư hoàng gia & Con dấu sáp L & C:** Trải nghiệm chạm vào con dấu sáp đỏ dập nổi, nắp phong bì mở ra theo không gian 3D và lá thiệp mời trượt lên cùng tiếng nhạc nền.
+- **Mở phong bì thư hoàng gia & Con dấu sáp L & C:** Trải nghiệm chạm vào con dấu sáp dập nổi, nắp phong bì mở ra theo không gian 3D và lá thiệp mời trượt lên cùng nhạc nền được phát ngẫu nhiên từ danh sách bài hát.
 - **Cá nhân hóa thiệp mời (`?to=...`):** In tên từng vị khách lên lá thiệp, trong lời mời và tự động điền sẵn Form RSVP / Lời chúc.
 - **Công cụ tạo link mời khách (Link Generator):** Nút *"💌 Tạo link khách"* ở cuối trang giúp cô dâu chú rể gõ tên khách và sao chép đường link đã mã hóa gửi qua Zalo / Facebook chỉ trong 1 giây.
 - **Hiệu ứng Cánh hoa rơi Canvas:** Cánh hoa pastel rơi nhẹ nhàng 60fps, tiết kiệm pin, có nút bật/tắt `🌸` chủ động.
