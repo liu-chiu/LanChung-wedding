@@ -2461,23 +2461,28 @@ footer {
     position: fixed;
     inset: 0 0 auto;
     width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
   #main {
     padding-top: 76px;
   }
-  .menu { display: block; }
+  .menu {
+    display: block;
+    justify-self: end;
+  }
   .site-header nav {
     display: none;
     position: absolute;
     top: 100%;
-    left: 0;
-    right: 0;
+    left: auto;
+    right: max(1.25rem, env(safe-area-inset-right));
     z-index: 1;
+    width: min(76vw, 260px);
     min-width: 0;
-    padding: 1.5rem 1rem;
+    padding: 0.75rem;
     flex-direction: column;
     gap: 0;
-    text-align: center;
+    text-align: right;
     transform: none;
     background: var(--paper);
     box-shadow: 0 12px 22px rgba(0, 0, 0, 0.08);
