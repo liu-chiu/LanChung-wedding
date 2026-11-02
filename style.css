@@ -122,10 +122,9 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5eee7;
+  background: #f8f5ef;
   background-image:
-    radial-gradient(ellipse at 50% 32%, rgba(255, 255, 255, 0.96) 0%, rgba(246, 239, 232, 0.96) 58%, #ead8c7 100%),
-    url("assets/images/cover-floral.svg");
+    radial-gradient(ellipse at 50% 42%, #fffdfa 0%, #f8f5ef 66%, #f0e9df 100%);
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -148,8 +147,8 @@ a {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: url("assets/images/khung-thiep.png") center / 100% 100% no-repeat;
-  opacity: 0.24;
+  background: url("assets/images/cover-floral.svg") center / 100% 100% no-repeat;
+  opacity: 0.2;
   pointer-events: none;
 }
 
@@ -165,27 +164,21 @@ a {
 .cover-content {
   position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: 460px;
   margin: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.75rem, 2vh, 1.1rem);
-  padding: clamp(1.25rem, 4vh, 2rem) clamp(0.9rem, 4vw, 2rem) clamp(1.1rem, 3vh, 1.6rem);
-  border: 1px solid rgba(177, 144, 99, 0.28);
-  border-radius: 28px;
-  background: linear-gradient(155deg, rgba(255, 253, 249, 0.74), rgba(250, 245, 239, 0.54));
-  box-shadow: 0 24px 70px rgba(89, 66, 45, 0.09), inset 0 1px rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  gap: clamp(0.85rem, 2.4vh, 1.25rem);
+  padding: 1rem 0;
   text-align: center;
   z-index: 5;
 }
 
 .cover-logo {
   display: block;
-  width: clamp(76px, 17vw, 100px);
+  width: clamp(68px, 14vw, 88px);
   flex: 0 0 auto;
   margin: 0;
   transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
@@ -200,16 +193,23 @@ a {
 
 /* Tiêu đề trang trọng bên trên phong bì */
 .cover-intro {
+  position: relative;
+  top: auto;
+  z-index: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
-  min-width: min(100%, 300px);
-  padding: 0.75rem 1.4rem;
-  border: 1px solid rgba(177, 144, 99, 0.25);
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(255, 253, 249, 0.94), rgba(247, 239, 229, 0.86));
-  box-shadow: 0 8px 24px rgba(74, 57, 42, 0.06), inset 0 1px rgba(255, 255, 255, 0.9);
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 0;
+  height: auto;
+  padding: 0.15rem 1rem 0.35rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   animation: coverIntroFade 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
@@ -237,10 +237,10 @@ a {
 }
 
 .cover-eyebrow {
-  font-size: clamp(0.62rem, 1.7vw, 0.72rem);
+  font-size: clamp(0.6rem, 1.5vw, 0.68rem);
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--green-deep);
+  letter-spacing: 0.24em;
+  color: #777064;
   font-weight: 600;
 }
 
@@ -261,16 +261,13 @@ a {
 }
 
 .cover-date {
-  width: 100%;
-  padding-top: 0.45rem;
-  border-top: 1px solid rgba(177, 144, 99, 0.3);
   font-family: var(--serif);
-  font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+  font-size: clamp(1.05rem, 2.6vw, 1.2rem);
   line-height: 1.2;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.28em;
   color: #65584b;
   font-weight: 600;
-  margin: 0;
+  margin: 0.1rem 0 0;
 }
 
 /* Thẻ cá nhân hoá người nhận thiệp */
@@ -323,9 +320,9 @@ a {
 /* Vùng hiển thị phong bì hoàng gia có hiệu ứng 3D Parallax Tilt */
 .envelope-scene {
   position: relative;
-  width: min(88vw, 410px);
-  height: clamp(210px, 48vw, 255px);
-  margin: 0.2rem auto;
+  width: min(86vw, 390px);
+  height: clamp(190px, 52vw, 232px);
+  margin: 0.25rem auto 0.1rem;
   perspective: 1200px;
   transform-style: preserve-3d;
   cursor: pointer;
@@ -338,11 +335,11 @@ a {
   width: 100%;
   height: 100%;
   background: #fdfaf6;
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow:
-    0 26px 52px -18px rgba(45, 38, 31, 0.3),
-    0 8px 20px -8px rgba(0, 0, 0, 0.12),
-    inset 0 0 36px rgba(220, 205, 185, 0.28);
+    0 24px 44px -20px rgba(45, 38, 31, 0.34),
+    0 7px 18px -8px rgba(0, 0, 0, 0.12),
+    inset 0 0 30px rgba(220, 205, 185, 0.24);
   transform-style: preserve-3d;
   border: 1px solid rgba(212, 168, 83, 0.45);
 }
@@ -623,27 +620,28 @@ a {
 .cover-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  min-height: 48px;
-  padding: 0.7rem 1.5rem;
-  background: linear-gradient(135deg, #fffdf9, #f8f0e5);
-  border: 1px solid rgba(177, 144, 99, 0.58);
-  border-radius: 999px;
+  gap: 0.7rem;
+  min-height: 44px;
+  padding: 0.4rem 0.3rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   color: var(--green-deep);
-  font-size: clamp(0.72rem, 1.8vw, 0.82rem);
+  font-size: clamp(0.68rem, 1.7vw, 0.76rem);
   font-weight: 600;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  box-shadow: 0 8px 22px rgba(94, 72, 47, 0.1), inset 0 1px rgba(255, 255, 255, 0.9);
+  box-shadow: none;
   cursor: pointer;
-  transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease, color 0.25s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 .cover-cta:focus-visible {
-  outline: 3px solid rgba(57, 127, 125, 0.35);
-  outline-offset: 4px;
+  outline: 2px solid rgba(57, 127, 125, 0.45);
+  outline-offset: 5px;
+  border-radius: 3px;
 }
 
 .cover.is-opening .cover-cta {
@@ -654,9 +652,8 @@ a {
 }
 
 .cover-cta:hover {
-  background: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(57, 127, 125, 0.16);
+  color: #173f3c;
+  transform: translateY(-1px);
 }
 
 .cover-cta:active {
@@ -665,7 +662,7 @@ a {
 
 .cover-cta-sparkle {
   color: #b8904d;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
 }
 
 /* ==========================================
@@ -2439,11 +2436,11 @@ footer {
 
   /* Phong bì trên tablet/mobile */
   .envelope-scene {
-    width: min(94vw, 420px);
-    height: min(50svh, 270px);
+    width: min(88vw, 390px);
+    height: clamp(190px, 52vw, 232px);
   }
   .envelope {
-    height: min(50svh, 270px);
+    height: 100%;
   }
   .envelope-card h1 {
     font-size: clamp(2rem, 8vw, 2.8rem);
@@ -2532,11 +2529,11 @@ footer {
   nav { top: 68px; }
 
   .envelope-scene {
-    width: calc(100vw - 2rem);
-    height: 250px;
+    width: min(88vw, 390px);
+    height: clamp(190px, 52vw, 232px);
   }
   .envelope {
-    height: 250px;
+    height: 100%;
   }
   .wax-seal-wrapper {
     width: 74px;
@@ -2616,11 +2613,11 @@ footer {
 /* Xoay ngang màn hình nhỏ (Landscape Phone) */
 @media (orientation: landscape) and (max-height: 520px) {
   .envelope-scene {
-    height: 90svh;
-    width: 380px;
+    height: min(42svh, 200px);
+    width: min(70vw, 380px);
   }
   .envelope {
-    height: 200px;
+    height: 100%;
   }
   .envelope-card h1 {
     font-size: 1.8rem;
