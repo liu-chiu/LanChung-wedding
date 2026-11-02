@@ -770,6 +770,30 @@ nav {
   gap: clamp(0.9rem, 2vw, 1.7rem);
 }
 
+.site-header nav {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 1;
+  min-width: 220px;
+  padding: 0.8rem;
+  flex-direction: column;
+  gap: 0;
+  transform: translateX(-50%);
+  background: var(--paper);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--line);
+}
+
+.site-header nav.open {
+  display: flex;
+}
+
+.site-header nav a {
+  padding: 0.75rem;
+}
+
 nav a, .menu, .share {
   text-decoration: none;
   text-transform: uppercase;
@@ -792,7 +816,7 @@ nav a:hover {
 }
 
 .menu {
-  display: none;
+  display: block;
 }
 
 
@@ -2429,6 +2453,15 @@ footer {
   }
 }
 
+@media (min-width: 769px) {
+  .cover::before {
+    inset: 50% auto auto 50%;
+    width: min(100vw, 56.27svh);
+    aspect-ratio: 736 / 1308;
+    transform: translate(-50%, -50%);
+  }
+}
+
 @media (max-width: 768px) {
   .site-header {
     position: fixed;
@@ -2439,20 +2472,15 @@ footer {
     padding-top: 76px;
   }
   .menu { display: block; }
-  nav {
-    display: none;
+  .site-header nav {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
-    background: var(--paper);
     padding: 1.5rem 1rem;
-    flex-direction: column;
     text-align: center;
-    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.08);
-    border-bottom: 1px solid var(--line);
+    transform: none;
   }
-  nav.open { display: flex; }
   .share { display: none; }
 
   /* Phong bì trên tablet/mobile */
@@ -2548,7 +2576,6 @@ footer {
   #main { padding-top: 68px; }
   section[id] { scroll-margin-top: 84px; }
   .brand img { width: 64px; height: 42px; }
-  nav { top: 68px; }
 
   .envelope-scene {
     width: min(88vw, 390px);

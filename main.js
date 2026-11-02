@@ -208,7 +208,7 @@ if (coverCta) {
   };
 }
 
-// Bật/tắt menu trên mobile
+// Bật/tắt danh mục điều hướng
 const menuButton = $('#menu');
 const navigation = $('#nav');
 const mobileNavigation = window.matchMedia('(max-width: 768px)');
@@ -238,24 +238,12 @@ let previousScrollY = window.scrollY;
 let headerScrollFrame = null;
 let scrollDirection = 0;
 let directionStartY = previousScrollY;
-let navigationTouchDirection = 0;
-let navigationTouchTime = 0;
 
 window.addEventListener('scroll', () => {
   if (!siteHeader || headerScrollFrame !== null) return;
   headerScrollFrame = requestAnimationFrame(() => {
     const currentScrollY = window.scrollY;
     const scrollDelta = currentScrollY - previousScrollY;
-    if (mobileNavigation.matches && Date.now() - navigationTouchTime < 400) {
-      siteHeader.classList.toggle('is-hidden', navigationTouchDirection > 0);
-      setNavigationOpen(navigationTouchDirection < 0);
-      previousScrollY = currentScrollY;
-      directionStartY = currentScrollY;
-      scrollDirection = navigationTouchDirection;
-      headerScrollFrame = null;
-      return;
-    }
-
     const nextDirection = Math.sign(scrollDelta);
 
     if (nextDirection && nextDirection !== scrollDirection) {
@@ -266,20 +254,14 @@ window.addEventListener('scroll', () => {
     const directionDistance = Math.abs(currentScrollY - directionStartY);
     if (currentScrollY <= siteHeader.offsetHeight) {
       siteHeader.classList.remove('is-hidden');
-      if (mobileNavigation.matches) {
-        if (scrollDirection < 0 && directionDistance >= 6) {
-          setNavigationOpen(true);
-        } else if (scrollDirection > 0) {
-          setNavigationOpen(false);
-        }
-      }
+      if (Math.abs(scrollDelta) >= 6) setNavigationOpen(false);
     } else if (directionDistance >= 6 && scrollDirection > 0) {
-      if (mobileNavigation.matches) setNavigationOpen(false);
+      setNavigationOpen(false);
       siteHeader.classList.add('is-hidden');
       directionStartY = currentScrollY;
     } else if (directionDistance >= 6 && scrollDirection < 0) {
+      setNavigationOpen(false);
       siteHeader.classList.remove('is-hidden');
-      if (mobileNavigation.matches) setNavigationOpen(true);
       directionStartY = currentScrollY;
     }
 
@@ -313,12 +295,10 @@ document.addEventListener('touchmove', event => {
   navigationTouchHandled = true;
   previousScrollY = window.scrollY;
   directionStartY = previousScrollY;
-  navigationTouchDirection = deltaY > 0 ? -1 : 1;
-  navigationTouchTime = Date.now();
   if (deltaY > 0) {
     scrollDirection = -1;
     siteHeader?.classList.remove('is-hidden');
-    setNavigationOpen(true);
+    setNavigationOpen(false);
   } else {
     scrollDirection = 1;
     setNavigationOpen(false);
