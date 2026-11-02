@@ -425,10 +425,14 @@
         <h2>Gửi lời <em>chúc mừng</em></h2>
         <p>Sự hiện diện của bạn đã là món quà quý giá nhất. Nếu bạn muốn gửi lời chúc mừng từ xa, hãy chạm mở hộp quà dưới đây nhé.</p>
       </div>
+      <div class="gift-tabs" role="tablist" aria-label="Chọn hộp quà mừng cưới">
+        <button class="gift-tab is-active" id="giftBrideTab" type="button" role="tab" aria-selected="true" aria-controls="giftBrideCard" tabindex="0">Mừng cưới cô dâu</button>
+        <button class="gift-tab" id="giftGroomTab" type="button" role="tab" aria-selected="false" aria-controls="giftGroomCard" tabindex="-1">Mừng cưới chú rể</button>
+      </div>
       <div class="gift-grid">
         <!-- Hộp quà mừng cưới cô dâu -->
-        <article class="gift-box-card reveal" id="giftBrideCard">
-          <small>Mừng cưới cô dâu</small>
+        <article class="gift-box-card reveal" id="giftBrideCard" role="tabpanel" aria-labelledby="giftBrideLabel" tabindex="0">
+          <small id="giftBrideLabel">Mừng cưới cô dâu</small>
           
           <!-- Hộp quà lắc lư (Hiển thị ban đầu) -->
           <div class="gift-box-wrapper" id="giftBoxBride">
@@ -461,8 +465,8 @@
         </article>
 
         <!-- Hộp quà mừng cưới chú rể -->
-        <article class="gift-box-card reveal" id="giftGroomCard">
-          <small>Mừng cưới chú rể</small>
+        <article class="gift-box-card reveal" id="giftGroomCard" role="tabpanel" aria-labelledby="giftGroomLabel" tabindex="0">
+          <small id="giftGroomLabel">Mừng cưới chú rể</small>
           
           <!-- Hộp quà lắc lư (Hiển thị ban đầu) -->
           <div class="gift-box-wrapper" id="giftBoxGroom">

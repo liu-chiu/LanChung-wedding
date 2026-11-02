@@ -1270,6 +1270,51 @@ if (btnCopyGenLink) {
 // ==========================================
 // 12. XỬ LÝ HỘP QUÀ MỪNG CƯỚI LẮC LƯ (GIFT BOX INTERACTION)
 // ==========================================
+const giftTabs = $$('.gift-tab');
+const giftTabsMobile = window.matchMedia('(max-width: 768px)');
+let activeGiftTab = $('#giftBrideTab');
+
+function updateGiftTabs() {
+  giftTabs.forEach(tab => {
+    const isActive = tab === activeGiftTab;
+    const panel = $('#' + tab.getAttribute('aria-controls'));
+    tab.classList.toggle('is-active', isActive);
+    tab.setAttribute('aria-selected', String(isActive));
+    tab.tabIndex = isActive ? 0 : -1;
+    if (panel) panel.hidden = giftTabsMobile.matches && !isActive;
+  });
+}
+
+function activateGiftTab(tab, moveFocus = false) {
+  if (!giftTabs.includes(tab)) return;
+  activeGiftTab = tab;
+  updateGiftTabs();
+  if (moveFocus) tab.focus();
+}
+
+giftTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => activateGiftTab(tab));
+  tab.addEventListener('keydown', event => {
+    let nextIndex;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = (index + 1) % giftTabs.length;
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      nextIndex = (index - 1 + giftTabs.length) % giftTabs.length;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = giftTabs.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    activateGiftTab(giftTabs[nextIndex], true);
+  });
+});
+
+giftTabsMobile.addEventListener('change', updateGiftTabs);
+updateGiftTabs();
+
 function spawnGiftSparkles(element) {
   if (!element) return;
   const icons = ['✨', '💖', '🎁', '⭐', '🌸'];
