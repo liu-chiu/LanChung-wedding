@@ -21,7 +21,8 @@ function setupWeddingSheets() {
       'Event',
       'Attendance',
       'Phone',
-      'Message'
+      'Message',
+      'Transportation'
     ]
   );
 
@@ -221,6 +222,8 @@ function saveRsvp_(
 
   const attendance =
     clean_(parameters.attendance, 50);
+  let transportation =
+    clean_(parameters.transportation, 80);
 
   if (!name) {
     throw new Error(
@@ -240,6 +243,28 @@ function saveRsvp_(
     );
   }
 
+  const allowedTransportation = [
+    'Tự di chuyển',
+    'Đi cùng xe đoàn về nhà gái',
+    'Đi cùng xe đoàn về nhà trai'
+  ];
+  if (attendance === 'Sẽ tham dự' && !transportation) {
+    transportation = event === 'Tiệc nhà trai'
+      ? 'Đi cùng xe đoàn về nhà trai'
+      : 'Đi cùng xe đoàn về nhà gái';
+  }
+  if (
+    attendance === 'Sẽ tham dự' &&
+    !allowedTransportation.includes(transportation)
+  ) {
+    throw new Error(
+      'Phương tiện di chuyển không hợp lệ'
+    );
+  }
+  if (attendance === 'Không thể tham dự') {
+    transportation = '';
+  }
+
   const guests = Number(parameters.guests);
   if (!Number.isInteger(guests) || guests < 1 || guests > 20) {
     throw new Error(
@@ -257,7 +282,8 @@ function saveRsvp_(
       event,
       attendance,
       clean_(parameters.phone, 30),
-      clean_(parameters.message, 500)
+      clean_(parameters.message, 500),
+      transportation
     ]);
 }
 

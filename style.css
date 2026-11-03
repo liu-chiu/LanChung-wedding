@@ -2240,6 +2240,130 @@ fieldset input[type="radio"] {
   margin-top: 0.5rem;
 }
 
+#rsvpTransportationField[hidden] {
+  display: none;
+}
+
+.rsvp-confirmation-dialog {
+  width: min(620px, calc(100% - 2rem));
+  max-width: none;
+  max-height: min(86vh, 780px);
+  max-height: min(86dvh, 780px);
+  overflow: auto;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--cream);
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgba(24, 35, 32, 0.24);
+}
+
+.rsvp-confirmation-dialog::backdrop {
+  background: rgba(25, 34, 31, 0.62);
+  backdrop-filter: blur(3px);
+}
+
+.rsvp-confirmation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.rsvp-confirmation-header .eyebrow {
+  color: var(--green);
+}
+
+.rsvp-confirmation-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.rsvp-confirmation-dialog > h2 {
+  margin: 0.7rem 0 1.25rem;
+  font: 500 clamp(1.7rem, 5vw, 2.4rem)/1.1 var(--serif);
+}
+
+.rsvp-confirmation-content {
+  display: grid;
+  gap: 1rem;
+  line-height: 1.6;
+}
+
+.rsvp-confirmation-content > p {
+  margin: 0;
+}
+
+.rsvp-info-card {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.rsvp-info-card h3 {
+  margin: 0 0 0.75rem;
+  color: var(--green-deep);
+  font: 600 1rem/1.35 var(--sans);
+}
+
+.rsvp-info-card dl {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.rsvp-info-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 0.75rem;
+}
+
+.rsvp-info-row dt {
+  color: #766d61;
+  font-size: 0.82rem;
+}
+
+.rsvp-info-row dd {
+  min-width: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.rsvp-info-row a {
+  color: var(--green-deep);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.rsvp-copy-info {
+  min-height: 40px;
+  margin-top: 0.9rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid rgba(57, 127, 125, 0.45);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--green-deep);
+  font: 600 0.8rem var(--sans);
+  cursor: pointer;
+}
+
+.rsvp-copy-info:hover {
+  background: var(--green);
+  color: #fff;
+}
+
 
 /* ==========================================
    12. LỜI CẢM ƠN (CLOSING) & CHÂN TRANG (FOOTER)

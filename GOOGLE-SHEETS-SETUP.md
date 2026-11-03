@@ -10,10 +10,10 @@ Backend dùng Google Apps Script để ghi phản hồi vào Google Sheets. Th�
 4. Trong **Project Settings**, đặt múi giờ `Asia/Ho_Chi_Minh`.
 5. Chạy `setupWeddingSheets` một lần và cấp quyền. Script tạo hai sheet với tiêu đề:
 
-   - `RSVP`: `Submission ID`, `Timestamp`, `Name`, `Guests`, `Event`, `Attendance`, `Phone`, `Message`.
+   - `RSVP`: `Submission ID`, `Timestamp`, `Name`, `Guests`, `Event`, `Attendance`, `Phone`, `Message`, `Transportation`.
    - `Wishes`: `Submission ID`, `Timestamp`, `Name`, `Wish`, `Status`.
 
-Không đổi tên sheet hoặc thứ tự cột. Khi sửa Apps Script, hãy triển khai phiên bản mới để website dùng mã mới.
+Không đổi tên sheet hoặc thứ tự cột. `setupWeddingSheets` sẽ thêm tiêu đề `Transportation` ở cột cuối của sheet RSVP hiện có. Khi sửa Apps Script, hãy triển khai phiên bản mới để website dùng mã mới.
 
 ## 2. Triển khai Web App và cấu hình website
 
@@ -27,7 +27,7 @@ Không đổi tên sheet hoặc thứ tự cột. Khi sửa Apps Script, hãy tr
 
 Frontend gửi dữ liệu kèm `Submission ID`, sau đó truy vấn trạng thái nhiều lần. Trang chỉ báo lưu thành công khi Apps Script tìm thấy ID trong một trong hai sheet. Nếu không xác minh được, biểu mẫu báo lỗi thay vì hiển thị thành công.
 
-Các trường RSVP được lưu gồm tên, số khách, sự kiện, trạng thái tham dự, số điện thoại và lời nhắn. Apps Script giới hạn độ dài các trường và số khách trong phạm vi 1–20.
+Các trường RSVP được lưu gồm tên, số khách, sự kiện, trạng thái tham dự, phương tiện di chuyển, số điện thoại và lời nhắn. Apps Script giới hạn độ dài các trường và số khách trong phạm vi 1–20.
 
 ## 4. Duyệt lời chúc
 

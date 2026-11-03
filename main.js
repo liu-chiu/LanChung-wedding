@@ -1269,8 +1269,179 @@ if ($('#wishForm')) {
   };
 }
 
+const rsvpTransportOptions = {
+  self: 'Tự di chuyển',
+  bride: 'Đi cùng xe đoàn về nhà gái',
+  groom: 'Đi cùng xe đoàn về nhà trai'
+};
+
+const rsvpTravelDetails = {
+  bride: {
+    title: 'Thông tin di chuyển về nhà gái',
+    items: [
+      ['Thời gian đoàn di chuyển', '7:00 sáng ngày 12/12/2026'],
+      ['Địa điểm đón khách', 'Ngõ 36 Giang Văn Minh, Phường Kim Mã, Hà Nội'],
+      ['Trưởng đoàn', 'Anh A'],
+      ['Số điện thoại trưởng đoàn', '0081028124', 'phone'],
+      ['Cô dâu', 'Ngọc Lan'],
+      ['Số điện thoại cô dâu', '0325022345', 'phone']
+    ]
+  },
+  groom: {
+    title: 'Thông tin di chuyển về nhà trai',
+    items: [
+      ['Thời gian đoàn di chuyển', '15:00 chiều ngày 12/12/2026'],
+      ['Địa điểm đón khách', '11 A Cát Linh, Ô Chợ Dừa, Hà Nội'],
+      ['Trưởng đoàn', 'Anh B'],
+      ['Số điện thoại trưởng đoàn', '0081028124', 'phone'],
+      ['Chú rể', 'Văn Chung'],
+      ['Số điện thoại chú rể', '0376147556', 'phone']
+    ]
+  }
+};
+
+const rsvpConfirmationDialog = $('#rsvpConfirmationDialog');
+const rsvpConfirmationTitle = $('#rsvpConfirmationTitle');
+const rsvpConfirmationContent = $('#rsvpConfirmationContent');
+
+function createRsvpInfoCard(title, items) {
+  const card = document.createElement('section');
+  card.className = 'rsvp-info-card';
+
+  const heading = document.createElement('h3');
+  heading.textContent = title;
+  const list = document.createElement('dl');
+  const copyLines = [];
+
+  items.forEach(([label, value, type]) => {
+    const row = document.createElement('div');
+    row.className = 'rsvp-info-row';
+    const term = document.createElement('dt');
+    term.textContent = label;
+    const description = document.createElement('dd');
+
+    if (type === 'phone') {
+      const link = document.createElement('a');
+      link.href = `tel:${value.replace(/[^\d+]/g, '')}`;
+      link.textContent = value;
+      description.append(link);
+    } else {
+      description.textContent = value;
+    }
+
+    row.append(term, description);
+    list.append(row);
+    copyLines.push(`${label}: ${value}`);
+  });
+
+  const copyButton = document.createElement('button');
+  copyButton.type = 'button';
+  copyButton.className = 'rsvp-copy-info';
+  copyButton.textContent = 'Sao chép thông tin';
+  copyButton.addEventListener('click', async () => {
+    const copied = await copyText(copyLines.join('\n'));
+    copyButton.textContent = copied ? 'Đã sao chép' : 'Không thể sao chép';
+    window.setTimeout(() => {
+      copyButton.textContent = 'Sao chép thông tin';
+    }, 1800);
+  });
+
+  card.append(heading, list, copyButton);
+  return card;
+}
+
+function showRsvpConfirmation(attendance, transportation) {
+  if (!rsvpConfirmationDialog?.showModal || !rsvpConfirmationTitle || !rsvpConfirmationContent) return;
+
+  rsvpConfirmationContent.replaceChildren();
+
+  if (attendance === 'Không thể tham dự') {
+    rsvpConfirmationTitle.textContent = 'Cảm ơn bạn đã phản hồi';
+    const message = document.createElement('p');
+    message.textContent = 'Lan & Chung rất tiếc vì chưa thể đón bạn trong ngày vui. Cảm ơn bạn đã gửi lời chúc và luôn yêu thương, đồng hành cùng chúng mình. Hẹn gặp bạn trong dịp gần nhất nhé!';
+    rsvpConfirmationContent.append(message);
+  } else if (transportation === rsvpTransportOptions.bride) {
+    rsvpConfirmationTitle.textContent = 'Cảm ơn bạn sẽ đến chung vui';
+    const details = rsvpTravelDetails.bride;
+    rsvpConfirmationContent.append(createRsvpInfoCard(details.title, details.items));
+  } else if (transportation === rsvpTransportOptions.groom) {
+    rsvpConfirmationTitle.textContent = 'Cảm ơn bạn sẽ đến chung vui';
+    const details = rsvpTravelDetails.groom;
+    rsvpConfirmationContent.append(createRsvpInfoCard(details.title, details.items));
+  } else {
+    rsvpConfirmationTitle.textContent = 'Hẹn gặp bạn trong ngày vui';
+    const message = document.createElement('p');
+    message.textContent = 'Cảm ơn bạn đã xác nhận tham dự. Chúc bạn di chuyển an toàn và hẹn gặp bạn tại buổi tiệc nhé!';
+
+    const brideContacts = [
+      ['Cô dâu', 'Ngọc Lan'],
+      ['Số điện thoại cô dâu', '0325022345', 'phone'],
+      ['Chú rể', 'Văn Chung'],
+      ['Số điện thoại chú rể', '0376147556', 'phone']
+    ];
+    const brideEvent = [
+      ['Thời gian', '10:30, Thứ Bảy 12/12/2026'],
+      ['Địa điểm', 'Trung tâm tiệc cưới SeaBay Hạ Long'],
+      ['Địa chỉ', 'X232+7MW, Bãi Cháy, Quảng Ninh']
+    ];
+    const groomEvent = [
+      ['Thời gian', '17:00, Thứ Bảy 12/12/2026'],
+      ['Địa điểm', 'Tư gia nhà trai'],
+      ['Địa chỉ', 'Số 8, ngõ 3, đường Văn Hoá, Khối 8 (Xóm Đồng), Sóc Sơn, Hà Nội']
+    ];
+
+    rsvpConfirmationContent.append(
+      message,
+      createRsvpInfoCard('Liên hệ cô dâu & chú rể', brideContacts),
+      createRsvpInfoCard('Tiệc nhà gái', brideEvent),
+      createRsvpInfoCard('Tiệc nhà trai', groomEvent)
+    );
+  }
+
+  rsvpConfirmationDialog.showModal();
+}
+
+if (rsvpConfirmationDialog) {
+  $('.rsvp-confirmation-close', rsvpConfirmationDialog)?.addEventListener('click', () => {
+    rsvpConfirmationDialog.close();
+  });
+  rsvpConfirmationDialog.addEventListener('click', event => {
+    if (event.target === rsvpConfirmationDialog) rsvpConfirmationDialog.close();
+  });
+}
+
 // Gửi form RSVP xác nhận tham dự
 if ($('#rsvpForm')) {
+  const form = $('#rsvpForm');
+  const eventSelect = $('[name="event"]', form);
+  const transportationField = $('#rsvpTransportationField');
+  const transportationSelect = $('[name="transportation"]', form);
+  const attendanceInputs = $$('[name="attendance"]', form);
+
+  function setDefaultTransportation() {
+    if (!transportationSelect || !eventSelect) return;
+    transportationSelect.value = eventSelect.value === 'Tiệc nhà trai'
+      ? rsvpTransportOptions.groom
+      : rsvpTransportOptions.bride;
+  }
+
+  function updateTransportationVisibility() {
+    const attending = $('[name="attendance"]:checked', form)?.value === 'Sẽ tham dự';
+    if (!transportationField || !transportationSelect) return;
+    transportationField.hidden = !attending;
+    transportationSelect.required = attending;
+    if (attending) setDefaultTransportation();
+    else transportationSelect.value = '';
+  }
+
+  attendanceInputs.forEach(input => input.addEventListener('change', updateTransportationVisibility));
+  eventSelect?.addEventListener('change', () => {
+    if ($('[name="attendance"]:checked', form)?.value === 'Sẽ tham dự') {
+      setDefaultTransportation();
+    }
+  });
+  updateTransportationVisibility();
+
   $('#rsvpForm').onsubmit = async event => {
     event.preventDefault();
 
@@ -1291,12 +1462,15 @@ if ($('#rsvpForm')) {
         guests: data.guests,
         event: data.event,
         attendance: data.attendance,
+        transportation: data.transportation || '',
         phone: data.phone || '',
         message: data.message || ''
       });
 
       if (status) status.textContent = `Cảm ơn bạn đã phản hồi! Lan & Chung đã nhận được xác nhận của bạn. Mã xác nhận: ${id}`;
+      showRsvpConfirmation(data.attendance, data.transportation);
       form.reset();
+      updateTransportationVisibility();
     } catch (error) {
       console.error('Không gửi được xác nhận tham dự:', error);
       if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Lan & Chung nhé.';

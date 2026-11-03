@@ -592,6 +592,11 @@
         <label>Số điện thoại, không bắt buộc
           <input autocomplete="tel" maxlength="30" name="phone" type="tel"/>
         </label>
+        <fieldset>
+          <legend>Trạng thái</legend>
+          <label><input name="attendance" required="" type="radio" value="Sẽ tham dự"/> Sẽ tham dự</label>
+          <label><input name="attendance" type="radio" value="Không thể tham dự"/> Không thể tham dự</label>
+        </fieldset>
         <label>Sự kiện
           <select name="event" required="">
             <option value="">Chọn buổi tiệc</option>
@@ -600,18 +605,29 @@
             <option>Cả hai buổi tiệc</option>
           </select>
         </label>
-        <fieldset>
-          <legend>Trạng thái</legend>
-          <label><input name="attendance" required="" type="radio" value="Sẽ tham dự"/> Sẽ tham dự</label>
-          <label><input name="attendance" type="radio" value="Không thể tham dự"/> Không thể tham dự</label>
-        </fieldset>
-        <label>Lời nhắn
+        <label id="rsvpTransportationField" hidden="">Phương tiện di chuyển
+          <select name="transportation">
+            <option value="Tự di chuyển">Tự di chuyển</option>
+            <option value="Đi cùng xe đoàn về nhà gái">Đi cùng xe đoàn về nhà Gái</option>
+            <option value="Đi cùng xe đoàn về nhà trai">Đi cùng xe đoàn về nhà trai</option>
+          </select>
+        </label>
+        <label>Điều chúng tôi cần lưu ý
           <textarea maxlength="500" name="message" rows="4"></textarea>
         </label>
         <button class="btn dark">Gửi xác nhận</button>
         <p id="rsvpStatus" role="status"></p>
       </form>
     </section>
+
+    <dialog aria-labelledby="rsvpConfirmationTitle" class="rsvp-confirmation-dialog" id="rsvpConfirmationDialog">
+      <div class="rsvp-confirmation-header">
+        <span class="eyebrow">Lan & Chung · 12.12.2026</span>
+        <button aria-label="Đóng thông tin xác nhận" class="rsvp-confirmation-close" type="button">×</button>
+      </div>
+      <h2 id="rsvpConfirmationTitle"></h2>
+      <div class="rsvp-confirmation-content" id="rsvpConfirmationContent"></div>
+    </dialog>
 
     <!-- 11. Section Closing (Lời cảm ơn) -->
     <section class="closing reveal">
