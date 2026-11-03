@@ -2304,6 +2304,23 @@ fieldset input[type="radio"] {
   margin: 0;
 }
 
+.rsvp-confirmation-status {
+  padding: 0.7rem 0.85rem;
+  border-radius: 6px;
+  background: rgba(57, 127, 125, 0.1);
+  color: var(--green-deep);
+  font-size: 0.85rem;
+}
+
+.rsvp-confirmation-status.is-success {
+  background: rgba(57, 127, 125, 0.14);
+}
+
+.rsvp-confirmation-status.is-error {
+  background: rgba(184, 79, 83, 0.12);
+  color: #842f36;
+}
+
 .rsvp-info-card {
   padding: 1rem;
   border: 1px solid var(--line);

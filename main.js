@@ -1354,6 +1354,12 @@ function showRsvpConfirmation(attendance, transportation) {
   if (!rsvpConfirmationDialog?.showModal || !rsvpConfirmationTitle || !rsvpConfirmationContent) return;
 
   rsvpConfirmationContent.replaceChildren();
+  const submissionStatus = document.createElement('p');
+  submissionStatus.className = 'rsvp-confirmation-status';
+  submissionStatus.setAttribute('role', 'status');
+  submissionStatus.setAttribute('aria-live', 'polite');
+  submissionStatus.textContent = 'Đang gửi xác nhận…';
+  rsvpConfirmationContent.append(submissionStatus);
 
   if (attendance === 'Không thể tham dự') {
     rsvpConfirmationTitle.textContent = 'Cảm ơn bạn đã phản hồi';
@@ -1399,6 +1405,7 @@ function showRsvpConfirmation(attendance, transportation) {
   }
 
   rsvpConfirmationDialog.showModal();
+  return submissionStatus;
 }
 
 if (rsvpConfirmationDialog) {
@@ -1417,6 +1424,14 @@ if ($('#rsvpForm')) {
   const transportationField = $('#rsvpTransportationField');
   const transportationSelect = $('[name="transportation"]', form);
   const attendanceInputs = $$('[name="attendance"]', form);
+  const status = $('#rsvpStatus');
+  let isSubmitting = false;
+
+  const clearPreviousStatus = () => {
+    if (!isSubmitting && status) status.textContent = '';
+  };
+  form.addEventListener('input', clearPreviousStatus);
+  form.addEventListener('change', clearPreviousStatus);
 
   function setDefaultTransportation() {
     if (!transportationSelect || !eventSelect) return;
@@ -1426,7 +1441,14 @@ if ($('#rsvpForm')) {
   }
 
   function updateTransportationVisibility() {
-    const attending = $('[name="attendance"]:checked', form)?.value === 'Sẽ tham dự';
+    const attendance = $('[name="attendance"]:checked', form)?.value;
+    const attending = attendance === 'Sẽ tham dự';
+    if (eventSelect) {
+      eventSelect.required = attendance !== 'Không thể tham dự';
+      if (attendance === 'Không thể tham dự') {
+        eventSelect.value = 'Cả hai buổi tiệc';
+      }
+    }
     if (!transportationField || !transportationSelect) return;
     transportationField.hidden = !attending;
     transportationSelect.required = attending;
@@ -1449,11 +1471,12 @@ if ($('#rsvpForm')) {
     if (!form.reportValidity()) return;
 
     const data = Object.fromEntries(new FormData(form));
-    const status = $('#rsvpStatus');
     const button = $('button[type="submit"]', form) || $('button', form);
 
+    isSubmitting = true;
     button.disabled = true;
     if (status) status.textContent = 'Cảm ơn bạn, tụi mình đang gửi phản hồi đến Lan & Chung nhé…';
+    const confirmationStatus = showRsvpConfirmation(data.attendance, data.transportation);
 
     try {
       const id = await submitAndVerify({
@@ -1467,14 +1490,22 @@ if ($('#rsvpForm')) {
         message: data.message || ''
       });
 
-      if (status) status.textContent = `Cảm ơn bạn đã phản hồi! Lan & Chung đã nhận được xác nhận của bạn. Mã xác nhận: ${id}`;
-      showRsvpConfirmation(data.attendance, data.transportation);
+      if (status) status.textContent = '';
+      if (confirmationStatus) {
+        confirmationStatus.textContent = 'Đã gửi xác nhận thành công. Cảm ơn bạn!';
+        confirmationStatus.classList.add('is-success');
+      }
       form.reset();
       updateTransportationVisibility();
     } catch (error) {
       console.error('Không gửi được xác nhận tham dự:', error);
       if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Lan & Chung nhé.';
+      if (confirmationStatus) {
+        confirmationStatus.textContent = 'Chưa gửi được xác nhận. Vui lòng đóng cửa sổ này và thử gửi lại.';
+        confirmationStatus.classList.add('is-error');
+      }
     } finally {
+      isSubmitting = false;
       button.disabled = false;
     }
   };
