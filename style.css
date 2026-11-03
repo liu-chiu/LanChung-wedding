@@ -804,10 +804,17 @@ header {
 }
 
 .site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   transform: translateY(0);
   transition: transform 0.3s ease;
+}
+
+#main {
+  padding-top: 76px;
 }
 
 .site-header.is-hidden {

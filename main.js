@@ -235,42 +235,28 @@ $$('nav a').forEach(link => {
 
 const siteHeader = $('.site-header');
 let previousScrollY = window.scrollY;
-let headerScrollFrame = null;
-let scrollDirection = 0;
-let scrollDirectionDistance = 0;
 
 function showSiteHeader() {
   siteHeader?.classList.remove('is-hidden');
 }
 
 window.addEventListener('scroll', () => {
-  if (!siteHeader || headerScrollFrame !== null) return;
-  headerScrollFrame = requestAnimationFrame(() => {
-    const currentScrollY = window.scrollY;
-    const scrollDelta = currentScrollY - previousScrollY;
-    const nextDirection = Math.sign(scrollDelta);
+  if (!siteHeader) return;
 
-    if (nextDirection && nextDirection !== scrollDirection) {
-      scrollDirection = nextDirection;
-      scrollDirectionDistance = 0;
-    }
+  const currentScrollY = window.scrollY;
+  const scrollDelta = currentScrollY - previousScrollY;
 
-    scrollDirectionDistance += Math.abs(scrollDelta);
-    if (currentScrollY <= siteHeader.offsetHeight) {
-      showSiteHeader();
-      if (Math.abs(scrollDelta) >= 6) setNavigationOpen(false);
-    } else if (scrollDirection < 0 && scrollDelta < 0) {
+  if (currentScrollY <= siteHeader.offsetHeight || scrollDelta < 0) {
+    showSiteHeader();
+    if (scrollDelta < 0 || currentScrollY <= siteHeader.offsetHeight) {
       setNavigationOpen(false);
-      showSiteHeader();
-    } else if (scrollDirectionDistance >= 6 && scrollDirection > 0) {
-      setNavigationOpen(false);
-      siteHeader.classList.add('is-hidden');
-      scrollDirectionDistance = 0;
     }
+  } else if (scrollDelta > 0) {
+    siteHeader.classList.add('is-hidden');
+    setNavigationOpen(false);
+  }
 
-    previousScrollY = currentScrollY;
-    headerScrollFrame = null;
-  });
+  previousScrollY = currentScrollY;
 }, { passive: true });
 
 mobileNavigation.addEventListener('change', event => {
@@ -1162,10 +1148,13 @@ async function submitAndVerify(payload) {
   });
 
   let lastError = null;
+  const retryDelays = [0, 300, 600, 1000];
   for (let attempt = 0; attempt < 4; attempt++) {
-    await new Promise(resolve => setTimeout(resolve, 800 + attempt * 400));
+    if (retryDelays[attempt] > 0) {
+      await new Promise(resolve => setTimeout(resolve, retryDelays[attempt]));
+    }
     try {
-      const result = await jsonp({ action: 'status', id }, 5000);
+      const result = await jsonp({ action: 'status', id }, 2500);
       if (result && result.saved) return id;
     } catch (error) {
       lastError = error;
