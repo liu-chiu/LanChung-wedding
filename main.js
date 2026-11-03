@@ -236,26 +236,11 @@ $$('nav a').forEach(link => {
 const siteHeader = $('.site-header');
 let previousScrollY = window.scrollY;
 let headerScrollFrame = null;
-let headerHideTimeout = null;
 let scrollDirection = 0;
 let scrollDirectionDistance = 0;
 
 function showSiteHeader() {
-  if (headerHideTimeout !== null) {
-    clearTimeout(headerHideTimeout);
-    headerHideTimeout = null;
-  }
   siteHeader?.classList.remove('is-hidden');
-}
-
-function scheduleHeaderHide() {
-  if (headerHideTimeout !== null) clearTimeout(headerHideTimeout);
-  headerHideTimeout = window.setTimeout(() => {
-    if (siteHeader && window.scrollY > siteHeader.offsetHeight && scrollDirection > 0) {
-      siteHeader.classList.add('is-hidden');
-    }
-    headerHideTimeout = null;
-  }, 3000);
 }
 
 window.addEventListener('scroll', () => {
@@ -279,10 +264,8 @@ window.addEventListener('scroll', () => {
       showSiteHeader();
     } else if (scrollDirectionDistance >= 6 && scrollDirection > 0) {
       setNavigationOpen(false);
+      siteHeader.classList.add('is-hidden');
       scrollDirectionDistance = 0;
-    }
-    if (currentScrollY > siteHeader.offsetHeight && scrollDirection > 0) {
-      scheduleHeaderHide();
     }
 
     previousScrollY = currentScrollY;
@@ -292,39 +275,7 @@ window.addEventListener('scroll', () => {
 
 mobileNavigation.addEventListener('change', event => {
   setNavigationOpen(false);
-  if (!event.matches) showSiteHeader();
 });
-
-let navigationTouchStartX = 0;
-let navigationTouchStartY = 0;
-let navigationTouchHandled = false;
-
-document.addEventListener('touchstart', event => {
-  if (!mobileNavigation.matches || event.touches.length !== 1) return;
-  navigationTouchStartX = event.touches[0].clientX;
-  navigationTouchStartY = event.touches[0].clientY;
-  navigationTouchHandled = false;
-}, { passive: true });
-
-document.addEventListener('touchmove', event => {
-  if (!mobileNavigation.matches || navigationTouchHandled || event.touches.length !== 1) return;
-  const deltaX = event.touches[0].clientX - navigationTouchStartX;
-  const deltaY = event.touches[0].clientY - navigationTouchStartY;
-  if (Math.abs(deltaY) < 10 || Math.abs(deltaY) <= Math.abs(deltaX)) return;
-
-  navigationTouchHandled = true;
-  previousScrollY = window.scrollY;
-  scrollDirectionDistance = 0;
-  if (deltaY > 0) {
-    scrollDirection = -1;
-    showSiteHeader();
-    setNavigationOpen(false);
-  } else {
-    scrollDirection = 1;
-    setNavigationOpen(false);
-    scheduleHeaderHide();
-  }
-}, { passive: true });
 
 // Hiệu ứng cuộn trang hiện dần (Scroll Reveal)
 const observer = new IntersectionObserver(
