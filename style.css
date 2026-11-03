@@ -381,9 +381,8 @@ a {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: url("assets/images/invitation-emboss-inside.svg") center / 100% 100% no-repeat;
-  opacity: 0.82;
-  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.96)) drop-shadow(0 -0.7px 0 rgba(112, 82, 45, 0.2));
+  background: url("assets/images/cover-floral.svg") center / 100% 100% no-repeat;
+  opacity: 0.48;
   pointer-events: none;
 }
 
@@ -493,18 +492,13 @@ a {
   filter: drop-shadow(0 -3px 8px rgba(41, 39, 35, 0.08));
 }
 
-.envelope-pocket-emboss {
-  display: none;
-}
-
 .envelope-pocket::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: url("assets/images/envelope-emboss-outside.svg") center / 100% 100% no-repeat;
-  opacity: 0.76;
-  filter: drop-shadow(0 0.8px 0 rgba(255, 255, 255, 0.92)) drop-shadow(0 -0.6px 0 rgba(112, 82, 45, 0.2));
+  background: url("assets/images/cover-floral.svg") center / 100% 100% no-repeat;
+  opacity: 0.9;
   pointer-events: none;
 }
 
@@ -547,25 +541,41 @@ a {
 
 .envelope-flap-ornament {
   position: absolute;
-  top: 24%;
-  left: 50%;
+  top: 36%;
+  left: calc(50% + 0.4%);
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 52px;
+  width: 32px;
   aspect-ratio: 1;
-  border: 1px solid rgba(190, 145, 57, 0.72);
-  border-radius: 50% 50% 4px 50%;
-  box-shadow: inset 0 0 0 4px rgba(255, 253, 249, 0.55), 0 1px 5px rgba(140, 103, 39, 0.12);
-  transform: translateX(-50%) rotate(45deg);
+  border: 1px solid rgba(184, 145, 79, 0.7);
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 26%, #fffefa 0, #f8f1e7 62%, #eadcc8 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 0 0 3px rgba(190, 145, 57, 0.16), 0 2px 6px rgba(87, 67, 39, 0.18);
+  transform: translateX(-50%);
   pointer-events: none;
 }
 
 .envelope-flap-ornament span {
-  color: #bd9145;
-  font-size: 1.05rem;
+  color: #b38743;
+  font-size: 0.78rem;
   line-height: 1;
-  transform: rotate(-45deg);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.85);
+}
+
+.envelope-flap-floral {
+  position: absolute;
+  top: 2%;
+  left: calc(50% + 1.8%);
+  z-index: 2;
+  display: block;
+  width: 108%;
+  height: 40%;
+  object-fit: contain;
+  opacity: 0.76;
+  filter: brightness(0) saturate(100%) invert(64%) sepia(22%) saturate(678%) hue-rotate(4deg) brightness(91%) contrast(87%);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .envelope-flap-svg {
@@ -624,7 +634,7 @@ a {
   height: 82px;
   display: grid;
   place-items: center;
-  filter: drop-shadow(0 8px 22px rgba(48, 71, 66, 0.4));
+  filter: drop-shadow(0 8px 22px rgba(112, 36, 47, 0.42));
   transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -648,14 +658,15 @@ a {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 52px;
-  height: 52px;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
-  padding: 2px;
-  border: 1px solid #e8c372;
-  border-radius: 50%;
-  background: #fffdf9;
-  box-shadow: 0 1px 4px rgba(20, 57, 54, 0.3);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   transform: translate(-50%, -50%);
 }
 
@@ -2619,6 +2630,10 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .envelope-pocket::after {
+    background-image: url("assets/images/cover-floral-mobile.svg");
+  }
+
   .site-header {
     position: fixed;
     inset: 0 0 auto;

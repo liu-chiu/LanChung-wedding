@@ -41,7 +41,7 @@ Sau đó mở trình duyệt tại:
 2. **Cách 2 (Gắn trực tiếp vào URL):**
    - Thêm `?to=Tên+Khách+Mời` vào đuôi link website.
    - Thêm `&side=bride` (Tiệc nhà gái) hoặc `&side=groom` (Tiệc nhà trai).
-   - Ví dụ: `https://chungmittu.github.io/LanChung-wedding/?to=Gia+đình+Bác+Ba&side=bride`
+   - Ví dụ: `https://liu-chiu.github.io/LanChung-wedding/?to=Gia+đình+Bác+Ba&side=bride`
 
 ---
 
@@ -49,5 +49,5 @@ Sau đó mở trình duyệt tại:
 
 1. Làm theo [GOOGLE-SHEETS-SETUP.md](./GOOGLE-SHEETS-SETUP.md) để kết nối Google Apps Script.
 2. Cập nhật `apiUrl` và `siteUrl` trong `config.js`.
-3. Các thẻ `canonical`, `og:url`, `og:image` trong `index.html` và `siteUrl` trong `config.js` đang dùng địa chỉ triển khai `https://chungmittu.github.io/LanChung-wedding/`.
+3. Các thẻ `canonical`, `og:url`, `og:image` trong `index.html` và `siteUrl` trong `config.js` đang dùng địa chỉ triển khai `https://liu-chiu.github.io/LanChung-wedding/`.
 4. Tải toàn bộ thư mục lên hosting tĩnh (Netlify, Vercel, Cloudflare Pages, GitHub Pages).

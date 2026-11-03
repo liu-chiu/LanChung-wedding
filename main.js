@@ -236,8 +236,27 @@ $$('nav a').forEach(link => {
 const siteHeader = $('.site-header');
 let previousScrollY = window.scrollY;
 let headerScrollFrame = null;
+let headerHideTimeout = null;
 let scrollDirection = 0;
 let scrollDirectionDistance = 0;
+
+function showSiteHeader() {
+  if (headerHideTimeout !== null) {
+    clearTimeout(headerHideTimeout);
+    headerHideTimeout = null;
+  }
+  siteHeader?.classList.remove('is-hidden');
+}
+
+function scheduleHeaderHide() {
+  if (headerHideTimeout !== null) clearTimeout(headerHideTimeout);
+  headerHideTimeout = window.setTimeout(() => {
+    if (siteHeader && window.scrollY > siteHeader.offsetHeight && scrollDirection > 0) {
+      siteHeader.classList.add('is-hidden');
+    }
+    headerHideTimeout = null;
+  }, 3000);
+}
 
 window.addEventListener('scroll', () => {
   if (!siteHeader || headerScrollFrame !== null) return;
@@ -253,15 +272,17 @@ window.addEventListener('scroll', () => {
 
     scrollDirectionDistance += Math.abs(scrollDelta);
     if (currentScrollY <= siteHeader.offsetHeight) {
-      siteHeader.classList.remove('is-hidden');
+      showSiteHeader();
       if (Math.abs(scrollDelta) >= 6) setNavigationOpen(false);
     } else if (scrollDirection < 0 && scrollDelta < 0) {
       setNavigationOpen(false);
-      siteHeader.classList.remove('is-hidden');
+      showSiteHeader();
     } else if (scrollDirectionDistance >= 6 && scrollDirection > 0) {
       setNavigationOpen(false);
-      siteHeader.classList.add('is-hidden');
       scrollDirectionDistance = 0;
+    }
+    if (currentScrollY > siteHeader.offsetHeight && scrollDirection > 0) {
+      scheduleHeaderHide();
     }
 
     previousScrollY = currentScrollY;
@@ -271,7 +292,7 @@ window.addEventListener('scroll', () => {
 
 mobileNavigation.addEventListener('change', event => {
   setNavigationOpen(false);
-  if (!event.matches) siteHeader?.classList.remove('is-hidden');
+  if (!event.matches) showSiteHeader();
 });
 
 let navigationTouchStartX = 0;
@@ -296,12 +317,12 @@ document.addEventListener('touchmove', event => {
   scrollDirectionDistance = 0;
   if (deltaY > 0) {
     scrollDirection = -1;
-    siteHeader?.classList.remove('is-hidden');
+    showSiteHeader();
     setNavigationOpen(false);
   } else {
     scrollDirection = 1;
     setNavigationOpen(false);
-    siteHeader?.classList.add('is-hidden');
+    scheduleHeaderHide();
   }
 }, { passive: true });
 
