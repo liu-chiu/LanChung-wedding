@@ -327,7 +327,9 @@ if ($('#cal')) {
     '<span class="muted">30</span>' +
     Array.from(
       { length: 31 },
-      (_, i) => `<span class="${i === 11 ? 'today' : ''}">${i + 1}</span>`
+      (_, i) => i === 11
+        ? '<span class="today" aria-label="Ngày cưới: 12 tháng 12"><img src="assets/images/CD-CR.png" alt="" loading="lazy"><span>12</span></span>'
+        : `<span>${i + 1}</span>`
     ).join('') +
     '<span class="muted">1</span><span class="muted">2</span><span class="muted">3</span>';
   $('#cal').innerHTML = daysHTML;

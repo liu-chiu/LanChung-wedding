@@ -978,6 +978,14 @@ nav a:hover {
   color: #fff;
 }
 
+.wish-view-link span {
+  color: #c94f59;
+}
+
+.wish-view-link:hover span {
+  color: #c94f59;
+}
+
 .wish-view-link:focus-visible {
   outline: 2px solid var(--green);
   outline-offset: 3px;
@@ -1349,10 +1357,54 @@ nav a:hover {
 }
 
 .days .today {
-  background: var(--rose);
-  color: white;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   border-radius: 50%;
   font-weight: 600;
+  z-index: 0;
+  transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 280ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .days .today:hover {
+    z-index: 1;
+    transform: translateY(-6px) scale(1.08);
+    filter: drop-shadow(0 7px 8px rgba(75, 43, 40, 0.28));
+  }
+}
+
+@media (hover: none) {
+  .days .today:active {
+    transform: translateY(-3px) scale(1.04);
+    filter: drop-shadow(0 4px 5px rgba(75, 43, 40, 0.22));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .days .today {
+    transition: none;
+  }
+}
+
+.days .today img {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 70%;
+}
+
+.days .today span {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(75, 43, 40, 0.32);
+  color: #fff;
+  font: 600 0.72rem var(--sans);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 
