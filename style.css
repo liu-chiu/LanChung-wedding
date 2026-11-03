@@ -329,9 +329,37 @@ a {
   transition: transform 0.35s ease-out;
 }
 
+.envelope-scene::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  z-index: 0;
+  border: 1px solid rgba(212, 168, 83, 0.3);
+  border-radius: 14px;
+  background: radial-gradient(ellipse, rgba(210, 170, 104, 0.3) 0%, rgba(216, 138, 128, 0.13) 42%, transparent 72%);
+  box-shadow: 0 0 0 5px rgba(212, 168, 83, 0.05), 0 0 24px rgba(210, 170, 104, 0.24);
+  filter: blur(3px);
+  opacity: 0.75;
+  pointer-events: none;
+  animation: envelopeHalo 4s ease-in-out infinite;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+.envelope-scene:hover::before,
+.envelope-scene:focus-within::before {
+  opacity: 1;
+  filter: blur(5px);
+}
+
+@keyframes envelopeHalo {
+  0%, 100% { transform: scale(0.96); }
+  50% { transform: scale(1.04); }
+}
+
 /* Thân phong bì giấy mỹ thuật cao cấp dập nổi viền vàng */
 .envelope {
   position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   background:
