@@ -309,7 +309,7 @@ a {
 }
 
 .cover-guest-name {
-  font-family: 'Fairwater Script', 'Great Vibes', cursive;
+  font-family: 'Great Vibes', cursive;
   font-size: clamp(1.35rem, 4.8vw, 1.8rem);
   color: var(--ink);
   font-weight: 400;
