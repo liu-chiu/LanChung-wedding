@@ -309,7 +309,7 @@ a {
 }
 
 .cover-guest-name {
-  font-family: 'Baguest script', cursive;
+ font-family: 'Fairwater Script', 'Baguest Script', cursive;
   font-size: clamp(1.35rem, 4.8vw, 1.8rem);
   color: var(--ink);
   font-weight: 400;
