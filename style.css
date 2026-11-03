@@ -1118,10 +1118,47 @@ nav a:hover {
   margin-top: 0;
 }
 
-.story figure img {
+.story-photo-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px;
+  box-shadow: 0 16px 38px rgba(41, 39, 35, 0.12);
+}
+
+.story-photo-frame::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.2), transparent 38%, transparent 70%, rgba(216, 138, 128, 0.12));
+  opacity: 0.45;
+  transition: opacity 0.6s ease;
+}
+
+.story-photo-frame img {
+  display: block;
   width: 100%;
   height: auto;
   object-fit: contain;
+  transition: transform 1s cubic-bezier(0.2, 0.65, 0.3, 1), filter 0.8s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .story figure:hover .story-photo-frame img {
+    transform: scale(1.045);
+    filter: saturate(1.06);
+  }
+
+  .story figure:hover .story-photo-frame::after {
+    opacity: 0.8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-photo-frame img,
+  .story-photo-frame::after {
+    transition: none;
+  }
 }
 
 .timeline {
