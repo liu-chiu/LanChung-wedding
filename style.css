@@ -668,6 +668,24 @@ a {
   background: transparent;
   box-shadow: none;
   transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 3px rgba(255, 226, 153, 0.7));
+  animation: sealLogoGleam 3s ease-in-out infinite;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.wax-seal:hover .wax-seal-logo,
+.wax-seal:focus-visible .wax-seal-logo {
+  transform: translate(-50%, -50%) scale(1.14);
+  filter: drop-shadow(0 0 6px rgba(255, 226, 153, 0.95));
+}
+
+.wax-seal:active .wax-seal-logo {
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+@keyframes sealLogoGleam {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
 }
 
 /* Lời mời chạm mở thiệp dạng pill hoàng gia */
