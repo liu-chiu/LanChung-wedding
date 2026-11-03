@@ -502,29 +502,6 @@ a {
   pointer-events: none;
 }
 
-/* Dải ruy băng lụa chạy ngang phong bì */
-.envelope-ribbon {
-  position: absolute;
-  top: 56%;
-  left: -2px;
-  right: -2px;
-  height: 32px;
-  transform: translateY(-50%);
-  background: linear-gradient(90deg, #245c58 0%, #397f7d 25%, #5b9b91 50%, #397f7d 75%, #245c58 100%);
-  box-shadow: 0 4px 14px rgba(24, 69, 65, 0.24);
-  z-index: 4;
-  border-top: 1px solid rgba(255, 232, 175, 0.85);
-  border-bottom: 1px solid rgba(255, 232, 175, 0.85);
-  pointer-events: none;
-}
-
-.envelope-ribbon::before {
-  content: "";
-  position: absolute;
-  inset: 4px 10px;
-  border-inline: 1px solid rgba(255, 232, 175, 0.42);
-}
-
 /* Nắp phong bì tam giác gập xuống */
 .envelope-flap {
   position: absolute;
@@ -753,12 +730,6 @@ a {
   opacity: 0;
   transform: translate(-50%, -50%) scale(1.3);
   pointer-events: none;
-}
-
-.envelope-scene.is-open .envelope-ribbon {
-  opacity: 0;
-  transform: translateY(-50%) scaleY(0.4);
-  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .envelope-scene.is-open .envelope-card {
@@ -1185,6 +1156,7 @@ nav a:hover {
   display: flex;
   gap: clamp(0.75rem, 2vw, 1.25rem);
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 0.75rem max(0.75rem, calc((100% - 780px) / 2)) 1.25rem;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
@@ -2998,13 +2970,6 @@ footer {
     font-size: 0.8rem;
     margin-top: 0.75rem;
   }
-  .envelope-ribbon {
-    height: 32px;
-  }
-  .envelope-ribbon-tag {
-    font-size: 0.58rem;
-    padding: 0.1rem 0.65rem;
-  }
   .envelope-card {
     padding: 1rem 0.75rem;
   }
@@ -3157,8 +3122,6 @@ footer {
 .guest-highlight {
   color: var(--green);
   font-weight: 700;
-  border-bottom: 2px solid var(--rose);
-  padding-bottom: 1px;
 }
 
 .admin-link-btn {
