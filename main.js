@@ -372,10 +372,10 @@ $$('[data-ics]').forEach(button => {
     const ev = calendarEvents[button.dataset.ics];
     if (!ev) return;
 
-    if (
-      window.matchMedia('(max-width: 768px), (pointer: coarse)').matches ||
-      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-    ) {
+    const isIOS =
+      /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (/Android/i.test(navigator.userAgent)) {
       const calendarUrl = new URL('https://calendar.google.com/calendar/render');
       calendarUrl.search = new URLSearchParams({
         action: 'TEMPLATE',
@@ -393,10 +393,14 @@ $$('[data-ics]').forEach(button => {
       return;
     }
 
+    const escapeICSText = value =>
+      value.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
     const blobContent =
-      `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\n` +
-      `DTSTART:${ev.startUtc}\r\nDTEND:${ev.endUtc}\r\nSUMMARY:${ev.title}\r\n` +
-      `LOCATION:${ev.location}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+      `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Lan & Chung//Wedding Invitation//VI\r\n` +
+      `CALSCALE:GREGORIAN\r\nBEGIN:VEVENT\r\nUID:${button.dataset.ics}-lan-chung-20261212@liu-chiu.github.io\r\n` +
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}\r\n` +
+      `DTSTART:${ev.startUtc}\r\nDTEND:${ev.endUtc}\r\nSUMMARY:${escapeICSText(ev.title)}\r\n` +
+      `LOCATION:${escapeICSText(ev.location)}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
 
     const blob = new Blob([blobContent], { type: 'text/calendar;charset=utf-8' });
     const downloadLink = document.createElement('a');
@@ -404,6 +408,7 @@ $$('[data-ics]').forEach(button => {
     downloadLink.download = `lan-chung-${button.dataset.ics}.ics`;
     downloadLink.click();
     setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
+    if (isIOS) notify('Đã tải tệp lịch. Mở tệp vừa tải để thêm sự kiện vào Lịch trên iPhone.');
   };
 });
 
