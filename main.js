@@ -807,6 +807,8 @@ class FallingPetals {
     this.animationId = null;
     this.isRunning = false;
     this.pointer = { x: 0, y: 0, active: false, pressed: false };
+    this.pointerIdleTimer = null;
+    this.catchSequence = 0;
     this.maxPetals = window.innerWidth <= 768 ? 16 : 28;
 
     this.colors = [
@@ -839,6 +841,8 @@ class FallingPetals {
       y: -20 - Math.random() * 40,
       size: 11 + Math.random() * 7,
       type: Math.random() < 0.28 ? 'flower' : 'petal',
+      caught: false,
+      thrown: false,
       speedX: -0.55 + Math.random() * 1.1,
       speedY: 0.65 + Math.random() * 1.05,
       rotation: Math.random() * Math.PI * 2,
@@ -883,6 +887,7 @@ class FallingPetals {
     this.pointer.x = event.clientX;
     this.pointer.y = event.clientY;
     this.pointer.active = event.pointerType === 'mouse' || this.pointer.pressed;
+    if (this.pointer.active) this.schedulePetalThrow();
   }
 
   handlePointerDown(event) {
@@ -890,16 +895,51 @@ class FallingPetals {
     this.pointer.y = event.clientY;
     this.pointer.pressed = true;
     this.pointer.active = true;
+    this.schedulePetalThrow();
   }
 
   handlePointerUp(event) {
     this.pointer.pressed = false;
     this.pointer.active = event.pointerType === 'mouse';
+    if (this.pointer.active) this.schedulePetalThrow();
+    else this.throwCaughtPetals();
   }
 
   handlePointerLeave() {
     this.pointer.active = false;
     this.pointer.pressed = false;
+    this.throwCaughtPetals();
+  }
+
+  schedulePetalThrow() {
+    if (this.pointerIdleTimer !== null) clearTimeout(this.pointerIdleTimer);
+    this.pointerIdleTimer = window.setTimeout(() => {
+      this.pointerIdleTimer = null;
+      this.throwCaughtPetals();
+    }, 260);
+  }
+
+  throwCaughtPetals() {
+    if (this.pointerIdleTimer !== null) {
+      clearTimeout(this.pointerIdleTimer);
+      this.pointerIdleTimer = null;
+    }
+
+    const gatheredPetals = this.petals.filter(petal => petal.caught);
+    if (gatheredPetals.length === 0) return;
+
+    gatheredPetals.forEach(petal => {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.8 + Math.random() * 1.2;
+      petal.caught = false;
+      petal.thrown = true;
+      petal.throwLife = 72 + Math.floor(Math.random() * 24);
+      petal.speedX = Math.cos(angle) * speed;
+      petal.speedY = Math.sin(angle) * speed - 0.5;
+      petal.rotationSpeed = (Math.random() - 0.5) * 0.06;
+    });
+
+    this.catchEffects.push({ x: this.pointer.x, y: this.pointer.y, life: 1 });
   }
 
   start() {
@@ -991,7 +1031,7 @@ class FallingPetals {
       const effect = this.catchEffects[i];
       const progress = 1 - effect.life;
       ctx.beginPath();
-      ctx.arc(effect.x, effect.y, 3 + progress * 18, 0, Math.PI * 2);
+      ctx.arc(effect.x, effect.y, 1 + progress * 6, 0, Math.PI * 2);
       ctx.strokeStyle = `rgba(255, 231, 190, ${effect.life * 0.8})`;
       ctx.lineWidth = 2;
       ctx.stroke();
@@ -1005,21 +1045,32 @@ class FallingPetals {
 
     for (let i = 0; i < this.petals.length; i++) {
       const p = this.petals[i];
-      if (this.pointer.active && !p.caught) {
+      if (this.pointer.active && !p.caught && !p.thrown) {
         const dx = this.pointer.x - p.x;
         const dy = this.pointer.y - p.y;
         const catchRadius = p.type === 'flower' ? 42 : 34;
-        if (dx * dx + dy * dy < catchRadius * catchRadius) p.caught = true;
+        if (dx * dx + dy * dy < catchRadius * catchRadius) {
+          p.caught = true;
+          p.catchOrder = this.catchSequence++;
+        }
       }
 
       if (p.caught) {
-        const dx = this.pointer.x - p.x;
-        const dy = this.pointer.y - p.y;
-        p.x += dx * 0.22;
-        p.y += dy * 0.22;
+        const angle = p.catchOrder * 2.4;
+        const radius = (4 + Math.sqrt(p.catchOrder) * 3) / 3;
+        const targetX = this.pointer.x + Math.cos(angle) * radius;
+        const targetY = this.pointer.y + Math.sin(angle) * radius;
+        p.x += (targetX - p.x) * 0.22;
+        p.y += (targetY - p.y) * 0.22;
         p.rotation += p.rotationSpeed * 2;
-        if (dx * dx + dy * dy < 64) {
-          this.catchEffects.push({ x: p.x, y: p.y, life: 1 });
+      } else if (p.thrown) {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.speedX *= 0.99;
+        p.speedY = p.speedY * 0.99 + 0.02;
+        p.rotation += p.rotationSpeed;
+        p.throwLife--;
+        if (p.throwLife <= 0) {
           this.petals[i] = this.createPetal();
           continue;
         }
