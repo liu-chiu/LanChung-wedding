@@ -309,12 +309,54 @@ a {
 }
 
 .cover-guest-name {
- font-family: 'Fairwater Script', 'Baguest Script', cursive;
-  font-size: clamp(1.35rem, 4.8vw, 1.8rem);
-  color: var(--ink);
-  font-weight: 400;
-  line-height: 1.2;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.12em;
+  color: #76554c;
+  font-family: var(--serif);
+  font-size: clamp(1.45rem, 5vw, 1.9rem);
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
   white-space: nowrap;
+  animation: guestNameReveal 0.85s cubic-bezier(0.2, 0.75, 0.25, 1) both,
+    guestNameGlow 2.4s ease-in-out 0.85s 2;
+}
+
+.cover-guest-name::after {
+  position: absolute;
+  right: 12%;
+  bottom: 0;
+  left: 12%;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(184, 145, 79, 0.78), transparent);
+  transform: scaleX(0);
+  transform-origin: center;
+  animation: guestNameUnderline 0.7s ease-out 0.45s forwards;
+}
+
+@keyframes guestNameReveal {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes guestNameUnderline {
+  to { transform: scaleX(1); }
+}
+
+@keyframes guestNameGlow {
+  0%, 100% { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85); }
+  50% { text-shadow: 0 0 9px rgba(212, 168, 83, 0.42), 0 1px 0 rgba(255, 255, 255, 0.9); }
 }
 
 /* Vùng hiển thị phong bì hoàng gia có hiệu ứng 3D Parallax Tilt */
