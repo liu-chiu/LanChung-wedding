@@ -2802,15 +2802,17 @@ footer {
     gap: 0;
     text-align: right;
     transform: none;
-    background: var(--paper);
-    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--line);
+    background: transparent;
+    box-shadow: none;
+    border: 0;
   }
   .site-header nav.open {
     display: flex;
   }
   .site-header nav a {
     padding: 0.75rem;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
   }
   .share { display: none; }
 
