@@ -1298,10 +1298,21 @@ deferUntilVisible('#wishes', loadApprovedWishes);
 
 // Gửi form lời chúc
 if ($('#wishForm')) {
-  $('#wishForm').onsubmit = async event => {
+  const form = $('#wishForm');
+  const wishTextarea = $('textarea[name="wish"]', form);
+  const resizeWishTextarea = () => {
+    if (!wishTextarea) return;
+    wishTextarea.style.height = 'auto';
+    const minHeight = Number.parseFloat(getComputedStyle(wishTextarea).minHeight) || 0;
+    wishTextarea.style.height = `${Math.max(wishTextarea.scrollHeight, minHeight)}px`;
+  };
+
+  wishTextarea?.addEventListener('input', resizeWishTextarea);
+  resizeWishTextarea();
+
+  form.onsubmit = async event => {
     event.preventDefault();
 
-    const form = event.currentTarget;
     if (!form.reportValidity()) return;
 
     const data = Object.fromEntries(new FormData(form));
@@ -1323,6 +1334,7 @@ if ($('#wishForm')) {
 
       if (status) status.textContent = 'Cảm ơn bạn đã gửi lời chúc thật dễ thương! Tụi mình đã nhận được rồi nhé.';
       form.reset();
+      resizeWishTextarea();
     } catch (error) {
       console.error('Không gửi được lời chúc:', error);
       if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';

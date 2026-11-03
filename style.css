@@ -2096,7 +2096,9 @@ address {
 
 #wishes #wishForm textarea {
   min-height: 120px;
-  resize: vertical;
+  resize: none;
+  overflow-y: hidden;
+  line-height: 1.5;
 }
 
 #wishes #wishForm .btn {
@@ -2861,6 +2863,10 @@ footer {
 }
 
 @media (max-width: 768px) {
+  #wishes #wishForm textarea {
+    min-height: 60px;
+  }
+
   .site-header {
     position: fixed;
     inset: 0 0 auto;
