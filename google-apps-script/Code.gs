@@ -47,10 +47,6 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
 
   try {
-    lock.waitLock(15000);
-
-    setupWeddingSheets();
-
     const parameters = e && e.parameter
       ? e.parameter
       : {};
@@ -72,33 +68,14 @@ function doPost(e) {
       });
     }
 
-    const spreadsheet =
-      SpreadsheetApp.getActiveSpreadsheet();
-
-    /*
-     * Chống ghi trùng khi frontend gửi lại
-     * cùng Submission ID.
-     */
-    if (find_(spreadsheet, submissionId)) {
-      return json_({
-        ok: true,
-        id: submissionId,
-        duplicate: true
-      });
-    }
-
+    let targetSheetName;
+    let row;
     if (submissionType === 'rsvp') {
-      saveRsvp_(
-        spreadsheet,
-        submissionId,
-        parameters
-      );
+      targetSheetName = RSVP_SHEET;
+      row = createRsvpRow_(submissionId, parameters);
     } else if (submissionType === 'wish') {
-      saveWish_(
-        spreadsheet,
-        submissionId,
-        parameters
-      );
+      targetSheetName = WISH_SHEET;
+      row = createWishRow_(submissionId, parameters);
     } else {
       return json_({
         ok: false,
@@ -106,7 +83,32 @@ function doPost(e) {
       });
     }
 
+    lock.waitLock(15000);
+
+    const spreadsheet =
+      SpreadsheetApp.getActiveSpreadsheet();
+    const sheet =
+      spreadsheet.getSheetByName(targetSheetName);
+
+    if (!sheet) {
+      throw new Error(
+        'Chưa khởi tạo Google Sheets. Hãy chạy setupWeddingSheets một lần.'
+      );
+    }
+
+    if (find_(spreadsheet, submissionId, submissionType)) {
+      return json_({
+        ok: true,
+        id: submissionId,
+        duplicate: true
+      });
+    }
+
+    sheet.appendRow(row);
     SpreadsheetApp.flush();
+    CacheService
+      .getScriptCache()
+      .put(submissionCacheKey_(submissionId), '1', 21600);
 
     return json_({
       ok: true,
@@ -137,14 +139,12 @@ function doPost(e) {
  * Endpoint phục vụ:
  *
  * ?action=health
- * ?action=status&id=...
+ * ?action=status&id=...&type=rsvp|wish
  * ?action=wishes
  *
  * Frontend gọi bằng JSONP.
  */
 function doGet(e) {
-  setupWeddingSheets();
-
   const parameters = e && e.parameter
     ? e.parameter
     : {};
@@ -171,13 +171,18 @@ function doGet(e) {
   } else if (action === 'status') {
     const submissionId =
       clean_(parameters.id, 80);
+    const submissionType =
+      clean_(parameters.type, 12).toLowerCase();
 
     output = {
       ok: true,
       saved: Boolean(
         find_(
           SpreadsheetApp.getActiveSpreadsheet(),
-          submissionId
+          submissionId,
+          ['rsvp', 'wish'].includes(submissionType)
+            ? submissionType
+            : ''
         )
       )
     };
@@ -207,10 +212,9 @@ function doGet(e) {
 
 
 /**
- * Lưu RSVP.
+ * Chuẩn hóa một RSVP trước khi lấy khóa ghi.
  */
-function saveRsvp_(
-  spreadsheet,
+function createRsvpRow_(
   submissionId,
   parameters
 ) {
@@ -272,29 +276,26 @@ function saveRsvp_(
     );
   }
 
-  spreadsheet
-    .getSheetByName(RSVP_SHEET)
-    .appendRow([
-      submissionId,
-      new Date(),
-      name,
-      guests,
-      event,
-      attendance,
-      clean_(parameters.phone, 30),
-      clean_(parameters.message, 500),
-      transportation
-    ]);
+  return [
+    submissionId,
+    new Date(),
+    name,
+    guests,
+    event,
+    attendance,
+    clean_(parameters.phone, 30),
+    clean_(parameters.message, 500),
+    transportation
+  ];
 }
 
 
 /**
- * Lưu lời chúc.
+ * Chuẩn hóa lời chúc trước khi lấy khóa ghi.
  *
  * Lời chúc cần được duyệt trước khi công khai.
  */
-function saveWish_(
-  spreadsheet,
+function createWishRow_(
   submissionId,
   parameters
 ) {
@@ -316,16 +317,13 @@ function saveWish_(
     );
   }
 
-  spreadsheet
-    .getSheetByName(WISH_SHEET)
-    .appendRow([
-      submissionId,
-      new Date(),
-      name,
-      wish,
-
-      'Pending'
-    ]);
+  return [
+    submissionId,
+    new Date(),
+    name,
+    wish,
+    'Pending'
+  ];
 }
 
 
@@ -333,6 +331,13 @@ function saveWish_(
  * Lấy tối đa 50 lời chúc Approved mới nhất.
  */
 function approvedWishes_() {
+  const cache = CacheService.getScriptCache();
+  const cacheKey = 'approved-wishes-v1';
+  const cachedWishes = cache.get(cacheKey);
+  if (cachedWishes) {
+    return JSON.parse(cachedWishes);
+  }
+
   const spreadsheet =
     SpreadsheetApp.getActiveSpreadsheet();
 
@@ -340,57 +345,62 @@ function approvedWishes_() {
     spreadsheet.getSheetByName(WISH_SHEET);
 
   if (!sheet || sheet.getLastRow() < 2) {
+    cache.put(cacheKey, '[]', 60);
     return [];
   }
 
-  const rowCount =
-    sheet.getLastRow() - 1;
-
-  const rows =
-    sheet
-      .getRange(
-        2,
-        1,
-        rowCount,
-        5
-      )
+  const wishes = [];
+  let endRow = sheet.getLastRow();
+  while (endRow >= 2 && wishes.length < 50) {
+    const startRow = Math.max(2, endRow - 199);
+    const rows = sheet
+      .getRange(startRow, 1, endRow - startRow + 1, 5)
       .getValues();
 
-  return rows
-    .filter(row => {
-      const status =
-        String(row[4] || '')
-          .trim()
-          .toLowerCase();
+    for (let index = rows.length - 1; index >= 0 && wishes.length < 50; index--) {
+      const row = rows[index];
+      if (String(row[4] || '').trim().toLowerCase() !== 'approved') {
+        continue;
+      }
 
-      return status === 'approved';
-    })
-    .slice(-50)
-    .reverse()
-    .map(row => ({
-      id: String(row[0] || ''),
-      timestamp:
-        row[1] instanceof Date
-          ? row[1].toISOString()
-          : String(row[1] || ''),
-      name: String(row[2] || ''),
-      wish: String(row[3] || '')
-    }));
+      wishes.push({
+        id: String(row[0] || ''),
+        timestamp:
+          row[1] instanceof Date
+            ? row[1].toISOString()
+            : String(row[1] || ''),
+        name: String(row[2] || ''),
+        wish: String(row[3] || '')
+      });
+    }
+
+    endRow = startRow - 1;
+  }
+
+  cache.put(cacheKey, JSON.stringify(wishes), 60);
+  return wishes;
 }
 
 
 /**
- * Tìm Submission ID trong cả hai sheet.
+ * Tìm Submission ID trong sheet phù hợp; request cũ không có type sẽ tìm cả hai.
  */
-function find_(spreadsheet, submissionId) {
+function find_(spreadsheet, submissionId, submissionType) {
   if (!submissionId) {
     return false;
   }
 
-  const sheetNames = [
-    RSVP_SHEET,
-    WISH_SHEET
-  ];
+  const cache = CacheService.getScriptCache();
+  const cacheKey = submissionCacheKey_(submissionId);
+  if (cache.get(cacheKey) === '1') {
+    return true;
+  }
+
+  const sheetNames = submissionType === 'rsvp'
+    ? [RSVP_SHEET]
+    : submissionType === 'wish'
+      ? [WISH_SHEET]
+      : [RSVP_SHEET, WISH_SHEET];
 
   for (const sheetName of sheetNames) {
     const sheet =
@@ -413,11 +423,16 @@ function find_(spreadsheet, submissionId) {
         .findNext();
 
     if (found) {
+      cache.put(cacheKey, '1', 21600);
       return true;
     }
   }
 
   return false;
+}
+
+function submissionCacheKey_(submissionId) {
+  return `saved-${submissionId}`;
 }
 
 
@@ -529,4 +544,5 @@ function approveAllPendingWishes() {
   statusRange.setValues(updatedStatuses);
 
   SpreadsheetApp.flush();
+  CacheService.getScriptCache().remove('approved-wishes-v1');
 }

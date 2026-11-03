@@ -328,7 +328,7 @@ if ($('#cal')) {
     Array.from(
       { length: 31 },
       (_, i) => i === 11
-        ? '<span class="today" aria-label="Ngày cưới: 12 tháng 12"><img src="assets/images/CD-CR.png" alt="" loading="lazy"><span>12</span></span>'
+        ? '<span class="today" aria-label="Ngày cưới: 12 tháng 12"><img src="assets/images/CD-CR-optimized.jpg" alt="" loading="lazy" decoding="async"><span>12</span></span>'
         : `<span>${i + 1}</span>`
     ).join('') +
     '<span class="muted">1</span><span class="muted">2</span><span class="muted">3</span>';
@@ -1156,7 +1156,7 @@ async function submitAndVerify(payload) {
       await new Promise(resolve => setTimeout(resolve, retryDelays[attempt]));
     }
     try {
-      const result = await jsonp({ action: 'status', id }, 2500);
+      const result = await jsonp({ action: 'status', id, type: payload.type }, 2500);
       if (result && result.saved) return id;
     } catch (error) {
       lastError = error;
@@ -1272,8 +1272,29 @@ async function loadApprovedWishes() {
   }
 }
 
-checkBackend();
-loadApprovedWishes();
+function deferUntilVisible(selector, callback) {
+  const target = $(selector);
+  if (!target) return;
+
+  let hasRun = false;
+  const checkVisibility = () => {
+    if (hasRun) return;
+    const rect = target.getBoundingClientRect();
+    if (rect.bottom < -250 || rect.top > window.innerHeight + 250) return;
+
+    hasRun = true;
+    window.removeEventListener('scroll', checkVisibility);
+    window.removeEventListener('resize', checkVisibility);
+    callback();
+  };
+
+  window.addEventListener('scroll', checkVisibility, { passive: true });
+  window.addEventListener('resize', checkVisibility, { passive: true });
+  checkVisibility();
+}
+
+deferUntilVisible('#rsvp', checkBackend);
+deferUntilVisible('#wishes', loadApprovedWishes);
 
 // Gửi form lời chúc
 if ($('#wishForm')) {
@@ -1598,7 +1619,7 @@ function playNextRandomTrack() {
 function getOrCreateAudio() {
   if (!globalAudio) {
     globalAudio = document.createElement('audio');
-    globalAudio.preload = 'auto';
+    globalAudio.preload = 'none';
     globalAudio.setAttribute('aria-hidden', 'true');
     globalAudio.addEventListener('ended', playNextRandomTrack);
     globalAudio.addEventListener('error', () => {

@@ -15,6 +15,8 @@ Backend dùng Google Apps Script để ghi phản hồi vào Google Sheets. Th�
 
 Không đổi tên sheet hoặc thứ tự cột. `setupWeddingSheets` sẽ thêm tiêu đề `Transportation` ở cột cuối của sheet RSVP hiện có. Khi sửa Apps Script, hãy triển khai phiên bản mới để website dùng mã mới.
 
+Các request của website không tự chạy `setupWeddingSheets`; việc tạo sheet và định dạng tiêu đề chỉ thực hiện khi bạn chủ động chạy hàm này. Điều đó tránh ghi/định dạng lại bảng tính cho mỗi khách truy cập.
+
 ## 2. Triển khai Web App và cấu hình website
 
 1. Chọn **Deploy > New deployment > Web app**.
@@ -28,6 +30,8 @@ Không đổi tên sheet hoặc thứ tự cột. `setupWeddingSheets` sẽ thê
 Frontend gửi dữ liệu kèm `Submission ID`, sau đó truy vấn trạng thái nhiều lần. Trang chỉ báo lưu thành công khi Apps Script tìm thấy ID trong một trong hai sheet. Nếu không xác minh được, biểu mẫu báo lỗi thay vì hiển thị thành công.
 
 Các trường RSVP được lưu gồm tên, số khách, sự kiện, trạng thái tham dự, phương tiện di chuyển, số điện thoại và lời nhắn. Apps Script giới hạn độ dài các trường và số khách trong phạm vi 1–20.
+
+Trạng thái submission đã lưu được cache tối đa 6 giờ để xác minh nhanh; danh sách lời chúc đã duyệt được cache 60 giây. Vì vậy, lời chúc vừa được duyệt thủ công có thể mất tối đa một phút mới xuất hiện trên website. Apps Script/Google Sheets vẫn có hạn mức và tuần tự hóa thao tác ghi để tránh ghi trùng; nếu dự kiến có lượng truy cập đồng thời rất lớn, cần chuyển phần lưu RSVP sang backend cơ sở dữ liệu chuyên dụng.
 
 ## 4. Duyệt lời chúc
 

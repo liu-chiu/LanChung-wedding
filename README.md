@@ -9,10 +9,12 @@ Trang sử dụng 100% HTML5, CSS3 và JavaScript ES6 thuần; không phụ thu�
 - **Cá nhân hóa thiệp mời (`?to=...`):** In tên từng vị khách lên lá thiệp, trong lời mời và tự động điền sẵn Form RSVP / Lời chúc.
 - **Công cụ tạo link mời khách (Link Generator):** Nút *"💌 Tạo link khách"* ở cuối trang giúp cô dâu chú rể gõ tên khách và sao chép đường link đã mã hóa gửi qua Zalo / Facebook chỉ trong 1 giây.
 - **Hiệu ứng Cánh hoa rơi Canvas:** Cánh hoa pastel rơi nhẹ nhàng 60fps, có thể rê chuột hoặc chạm và rê để bắt cánh hoa, cùng nút bật/tắt `🌸`.
-- **Album ảnh cưới Touch / Swipe Lightbox:** Hỗ trợ vuốt tay chuyển ảnh trên điện thoại, nút Previous / Next, đếm số ảnh `1 / 9`, phím mũi tên trên máy tính.
+- **Album ảnh cưới Touch / Swipe Lightbox:** Ảnh được nén tối ưu và tải trễ; hỗ trợ vuốt tay chuyển ảnh trên điện thoại, nút Previous / Next, đếm số ảnh `1 / 9`, phím mũi tên trên máy tính.
 - **Tương thích 100% Zalo / Messenger In-App WebView:** Cơ chế sao chép clipboard kép (hỗ trợ cả khi Zalo chặn quyền), chống lỗi đổi màu số tài khoản trên iOS, bộ thẻ OpenGraph chuẩn 1200x630px.
 - **RSVP & Sổ lưu bút thời gian thực:** Kết nối Google Sheets, xác thực gửi tin cậy ngay cả trên mạng 3G/4G chập chờn.
 - **Mừng cưới VietQR & Lưu sự kiện lịch:** Sao chép số tài khoản 1 chạm, file `.ics` lịch sự kiện cho cả 2 buổi tiệc.
+
+Các bản ảnh `*-optimized.jpg` dùng cho website để giảm dung lượng tải; ảnh gốc vẫn được giữ nguyên trong `assets/images`.
 
 ---
 
