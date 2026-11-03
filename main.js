@@ -826,8 +826,10 @@ class FallingPetals {
     if (!this.canvas) return;
     this.ctx = this.canvas.getContext('2d');
     this.petals = [];
+    this.catchEffects = [];
     this.animationId = null;
     this.isRunning = false;
+    this.pointer = { x: 0, y: 0, active: false, pressed: false };
     this.maxPetals = window.innerWidth <= 768 ? 16 : 28;
 
     this.colors = [
@@ -840,6 +842,10 @@ class FallingPetals {
 
     this.resize = this.resize.bind(this);
     this.animate = this.animate.bind(this);
+    this.handlePointerMove = this.handlePointerMove.bind(this);
+    this.handlePointerDown = this.handlePointerDown.bind(this);
+    this.handlePointerUp = this.handlePointerUp.bind(this);
+    this.handlePointerLeave = this.handlePointerLeave.bind(this);
     this.init();
   }
 
@@ -873,6 +879,11 @@ class FallingPetals {
 
     this.resize();
     window.addEventListener('resize', this.resize);
+    window.addEventListener('pointermove', this.handlePointerMove, { passive: true });
+    window.addEventListener('pointerdown', this.handlePointerDown, { passive: true });
+    window.addEventListener('pointerup', this.handlePointerUp, { passive: true });
+    window.addEventListener('pointercancel', this.handlePointerUp, { passive: true });
+    window.addEventListener('pointerleave', this.handlePointerLeave);
 
     for (let i = 0; i < this.maxPetals; i++) {
       const petal = this.createPetal();
@@ -889,6 +900,29 @@ class FallingPetals {
         this.start();
       }
     });
+  }
+
+  handlePointerMove(event) {
+    this.pointer.x = event.clientX;
+    this.pointer.y = event.clientY;
+    this.pointer.active = event.pointerType === 'mouse' || this.pointer.pressed;
+  }
+
+  handlePointerDown(event) {
+    this.pointer.x = event.clientX;
+    this.pointer.y = event.clientY;
+    this.pointer.pressed = true;
+    this.pointer.active = true;
+  }
+
+  handlePointerUp(event) {
+    this.pointer.pressed = false;
+    this.pointer.active = event.pointerType === 'mouse';
+  }
+
+  handlePointerLeave() {
+    this.pointer.active = false;
+    this.pointer.pressed = false;
   }
 
   start() {
@@ -974,15 +1008,50 @@ class FallingPetals {
     ctx.restore();
   }
 
+  drawCatchEffects() {
+    const ctx = this.ctx;
+    for (let i = this.catchEffects.length - 1; i >= 0; i--) {
+      const effect = this.catchEffects[i];
+      const progress = 1 - effect.life;
+      ctx.beginPath();
+      ctx.arc(effect.x, effect.y, 3 + progress * 18, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 231, 190, ${effect.life * 0.8})`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      effect.life -= 0.06;
+      if (effect.life <= 0) this.catchEffects.splice(i, 1);
+    }
+  }
+
   animate() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     for (let i = 0; i < this.petals.length; i++) {
       const p = this.petals[i];
-      p.angle += p.oscillationSpeed;
-      p.x += Math.sin(p.angle) * p.oscillationDistance + p.speedX;
-      p.y += p.speedY;
-      p.rotation += p.rotationSpeed;
+      if (this.pointer.active && !p.caught) {
+        const dx = this.pointer.x - p.x;
+        const dy = this.pointer.y - p.y;
+        const catchRadius = p.type === 'flower' ? 42 : 34;
+        if (dx * dx + dy * dy < catchRadius * catchRadius) p.caught = true;
+      }
+
+      if (p.caught) {
+        const dx = this.pointer.x - p.x;
+        const dy = this.pointer.y - p.y;
+        p.x += dx * 0.22;
+        p.y += dy * 0.22;
+        p.rotation += p.rotationSpeed * 2;
+        if (dx * dx + dy * dy < 64) {
+          this.catchEffects.push({ x: p.x, y: p.y, life: 1 });
+          this.petals[i] = this.createPetal();
+          continue;
+        }
+      } else {
+        p.angle += p.oscillationSpeed;
+        p.x += Math.sin(p.angle) * p.oscillationDistance + p.speedX;
+        p.y += p.speedY;
+        p.rotation += p.rotationSpeed;
+      }
 
       if (p.y > this.canvas.height + p.size * 2 || p.x < -p.size * 2 || p.x > this.canvas.width + p.size * 2) {
         this.petals[i] = this.createPetal();
@@ -991,6 +1060,7 @@ class FallingPetals {
       this.drawPetal(p);
     }
 
+    this.drawCatchEffects();
     this.animationId = requestAnimationFrame(this.animate);
   }
 }
