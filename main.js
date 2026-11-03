@@ -1110,17 +1110,21 @@ async function submitAndVerify(payload) {
     body: new URLSearchParams({ ...payload, id })
   });
 
+  let lastError = null;
   for (let attempt = 0; attempt < 4; attempt++) {
     await new Promise(resolve => setTimeout(resolve, 800 + attempt * 400));
     try {
       const result = await jsonp({ action: 'status', id }, 5000);
       if (result && result.saved) return id;
-    } catch (e) {
-      // Tiếp tục retry
+    } catch (error) {
+      lastError = error;
     }
   }
 
-  return id;
+  throw new Error(
+    'Không xác minh được dữ liệu đã lưu vào Google Sheets. Vui lòng thử lại sau.',
+    { cause: lastError }
+  );
 }
 
 async function checkBackend() {
@@ -1138,7 +1142,7 @@ async function checkBackend() {
       ? 'Biểu mẫu đã sẵn sàng. Cảm ơn bạn đã ghé thăm!'
       : 'Biểu mẫu đang gặp chút trục trặc. Bạn vui lòng thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';
   } catch (error) {
-    state.textContent = 'Biểu mẫu đã sẵn sàng. Rất mong được đón tiếp bạn!';
+    state.textContent = 'Không kết nối được với biểu mẫu. Bạn vui lòng thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';
   }
 }
 
@@ -1212,7 +1216,15 @@ async function loadApprovedWishes() {
 
   try {
     const result = await jsonp({ action: 'wishes' });
-    (result.wishes || []).reverse().forEach(wish => appendWish(wish));
+    if (!result || !result.ok || !Array.isArray(result.wishes)) {
+      throw new Error('Google Sheets trả về danh sách lời chúc không hợp lệ');
+    }
+
+    if (result.wishes.length > 0) {
+      $$('#wishList .wish').filter(wish => $('small', wish)?.textContent?.trim() === 'Mẫu')
+        .forEach(wish => wish.remove());
+    }
+    [...result.wishes].reverse().forEach(wish => appendWish(wish));
   } catch (error) {
     console.warn('Không tải được danh sách lời chúc từ server:', error);
   }
