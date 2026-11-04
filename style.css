@@ -1843,6 +1843,30 @@ address {
   font-weight: 600;
 }
 
+.family-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.18rem;
+  margin-top: 1.5rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid rgba(41, 39, 35, 0.14);
+}
+
+.family-person small {
+  margin: 0 0 0.25rem;
+}
+
+.family-person strong {
+  font: 500 clamp(1.35rem, 2.2vw, 1.8rem)/1.15 var(--serif);
+}
+
+.family-person span {
+  color: rgba(41, 39, 35, 0.7);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
 .family-emblem {
   position: relative;
   display: grid;
