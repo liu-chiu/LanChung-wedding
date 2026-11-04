@@ -3311,7 +3311,7 @@ footer {
   .date { justify-content: center; gap: 0.6rem; }
   .section { padding: 4.5rem 1.1rem; }
   .heading h2, .family h2 { font-size: clamp(2.8rem, 16vw, 4.2rem); }
-  .photo { flex-basis: 84vw; width: 84vw; }
+  .photo { flex-basis: 90vw; width: 90vw; }
   .photo img { height: clamp(260px, 68vw, 420px); }
   .gallery-slider { margin-top: 2rem; }
 
