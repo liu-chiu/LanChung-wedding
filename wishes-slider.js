@@ -1,5 +1,7 @@
 let currentSlideIndex = 0;
 let autoSlideInterval = null;
+const activeWishPointers = new Set();
+let isMouseHoveringWishSlider = false;
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // Hiển thị 3 lời chúc trên desktop, 2 trên tablet và 1 trên điện thoại.
@@ -63,7 +65,7 @@ function startAutoWishSlide() {
     reducedMotionQuery.matches ||
     document.hidden ||
     !wishList ||
-    (wrapper && (wrapper.matches(':hover') || wrapper.contains(document.activeElement))) ||
+    (wrapper && (activeWishPointers.size > 0 || isMouseHoveringWishSlider || wrapper.contains(document.activeElement))) ||
     Math.ceil(wishList.querySelectorAll('.wish').length / getItemsPerPage()) <= 1
   ) {
     return;
@@ -121,8 +123,26 @@ function initWishSlider() {
 
   const wrapper = document.querySelector('.wish-slider-wrapper');
   if (wrapper) {
-    wrapper.addEventListener('mouseenter', stopAutoWishSlide);
-    wrapper.addEventListener('mouseleave', startAutoWishSlide);
+    wrapper.addEventListener('pointerenter', event => {
+      if (event.pointerType !== 'mouse') return;
+      isMouseHoveringWishSlider = true;
+      stopAutoWishSlide();
+    });
+    wrapper.addEventListener('pointerleave', event => {
+      if (event.pointerType !== 'mouse') return;
+      isMouseHoveringWishSlider = false;
+      startAutoWishSlide();
+    });
+    wrapper.addEventListener('pointerdown', event => {
+      activeWishPointers.add(event.pointerId);
+      stopAutoWishSlide();
+    });
+    const releaseWishPointer = event => {
+      if (!activeWishPointers.delete(event.pointerId)) return;
+      startAutoWishSlide();
+    };
+    window.addEventListener('pointerup', releaseWishPointer);
+    window.addEventListener('pointercancel', releaseWishPointer);
     wrapper.addEventListener('focusin', stopAutoWishSlide);
     wrapper.addEventListener('focusout', event => {
       if (!wrapper.contains(event.relatedTarget)) startAutoWishSlide();
