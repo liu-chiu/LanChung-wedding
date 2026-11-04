@@ -573,6 +573,17 @@ function updateGalleryCounter() {
   galleryCounter.textContent = `${activeIndex + 1} / ${photos.length}`;
   gallerySlides.forEach((slide, index) => {
     slide.setAttribute('aria-label', `Ảnh ${index + 1} trên ${photos.length}: ${photos[index].alt}`);
+    slide.classList.toggle('is-active', index === activeIndex);
+    slide.setAttribute('aria-current', index === activeIndex ? 'true' : 'false');
+
+    let caption = $('.photo-caption', slide);
+    if (!caption) {
+      caption = document.createElement('span');
+      caption.className = 'photo-caption';
+      caption.setAttribute('aria-hidden', 'true');
+      slide.append(caption);
+    }
+    caption.textContent = photos[index].alt;
   });
 }
 
