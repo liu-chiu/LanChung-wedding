@@ -1429,7 +1429,7 @@ nav a:hover {
   font-family: "Cormorant Garamond", serif;
   font-size: clamp(1.05rem, 2.2vw, 1.65rem);
   line-height: 1.2;
-  text-align: left;
+  text-align: right;
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.46);
   opacity: 0;
   transform: translateY(8px);
@@ -3133,24 +3133,39 @@ footer {
     left: auto;
     right: max(1.25rem, env(safe-area-inset-right));
     z-index: 1;
-    width: min(56vw, 220px);
-    min-width: 0;
+    width: min(70vw, 260px);
+    min-width: 190px;
     padding: 0.5rem;
     flex-direction: column;
-    gap: 0;
-    text-align: right;
+    gap: 0.15rem;
+    text-align: left;
     transform: none;
-    background: transparent;
-    box-shadow: none;
-    border: 0;
+    background: rgba(255, 253, 249, 0.76);
+    border: 1px solid rgba(177, 144, 99, 0.28);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(41, 39, 35, 0.16);
+    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    backdrop-filter: blur(18px) saturate(1.15);
   }
   .site-header nav.open {
     display: flex;
   }
   .site-header nav a {
-    padding: 0.75rem;
-    color: #fff;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 44px;
+    padding: 0.7rem 0.85rem;
+    border-radius: 9px;
+    color: var(--green-deep);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-shadow: none;
+  }
+  .site-header nav a:hover,
+  .site-header nav a:focus-visible {
+    color: var(--green-deep);
+    background: rgba(212, 168, 83, 0.12);
   }
   .share { display: none; }
 
