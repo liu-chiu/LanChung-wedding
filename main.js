@@ -532,6 +532,7 @@ function updateLightboxPhoto(index, animate = false) {
 
 function openLightbox(index, triggerElement) {
   if (!lightbox) return;
+  stopGalleryAutoplay();
   lightboxTrigger = triggerElement;
   updateLightboxPhoto(index, false);
   lightbox.hidden = false;
@@ -545,6 +546,7 @@ function closeLightbox() {
   document.body.classList.remove('lightbox-open');
   lightboxTrigger?.focus();
   lightboxTrigger = null;
+  scheduleGalleryAutoplay();
 }
 
 // Gán click cho từng ảnh trong gallery
@@ -563,6 +565,7 @@ const galleryTrack = $('#galleryTrack');
 const galleryCounter = $('#galleryCounter');
 const gallerySlides = $$('.photo');
 const galleryReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const galleryFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
 let galleryAutoSlideTimeout = null;
 let galleryScrollTimeout = null;
 let galleryPresentationFrame = null;
@@ -571,6 +574,7 @@ let galleryDragStartY = 0;
 let galleryDragStartScrollLeft = 0;
 let galleryDragPointerId = null;
 let galleryIsDragging = false;
+let galleryIsVisible = false;
 
 function getGalleryActiveIndex() {
   if (!galleryTrack || photos.length === 0) return 0;
@@ -643,8 +647,10 @@ function scheduleGalleryAutoplay() {
     !gallerySlider ||
     galleryReducedMotion.matches ||
     document.hidden ||
-    gallerySlider.matches(':hover') ||
-    gallerySlider.contains(document.activeElement) ||
+    (galleryFinePointer.matches && gallerySlider.matches(':hover')) ||
+    (gallerySlider.contains(document.activeElement) && document.activeElement.matches(':focus-visible')) ||
+    (lightbox && !lightbox.hidden) ||
+    !galleryIsVisible ||
     photos.length < 2
   ) return;
 
@@ -738,11 +744,20 @@ if (gallerySlider && galleryTrack) {
   galleryTrack.addEventListener('pointerup', finishGalleryDrag);
   galleryTrack.addEventListener('pointercancel', finishGalleryDrag);
 
-  gallerySlider.addEventListener('mouseenter', stopGalleryAutoplay);
-  gallerySlider.addEventListener('mouseleave', scheduleGalleryAutoplay);
-  gallerySlider.addEventListener('focusin', stopGalleryAutoplay);
+  gallerySlider.addEventListener('mouseenter', () => {
+    if (galleryFinePointer.matches) stopGalleryAutoplay();
+  });
+  gallerySlider.addEventListener('mouseleave', () => {
+    if (galleryFinePointer.matches) scheduleGalleryAutoplay();
+  });
+  gallerySlider.addEventListener('focusin', event => {
+    if (event.target.matches(':focus-visible')) stopGalleryAutoplay();
+  });
   gallerySlider.addEventListener('focusout', event => {
-    if (!gallerySlider.contains(event.relatedTarget)) scheduleGalleryAutoplay();
+    const nextTarget = event.relatedTarget;
+    if (!gallerySlider.contains(nextTarget) || !(nextTarget instanceof Element && nextTarget.matches(':focus-visible'))) {
+      scheduleGalleryAutoplay();
+    }
   });
   gallerySlider.addEventListener('pointerdown', stopGalleryAutoplay);
   galleryReducedMotion.addEventListener('change', () => {
@@ -750,6 +765,15 @@ if (gallerySlider && galleryTrack) {
     scheduleGalleryAutoplay();
   });
   document.addEventListener('visibilitychange', scheduleGalleryAutoplay);
+  const galleryVisibilityObserver = new IntersectionObserver(entries => {
+    galleryIsVisible = entries.some(entry => entry.isIntersecting);
+    if (galleryIsVisible) {
+      scheduleGalleryAutoplay();
+    } else {
+      stopGalleryAutoplay();
+    }
+  }, { threshold: 0.1 });
+  galleryVisibilityObserver.observe(gallerySlider);
   window.addEventListener('resize', () => {
     updateGalleryPresentation();
     updateGalleryCounter();

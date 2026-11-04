@@ -1433,6 +1433,7 @@ nav a:hover {
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.46);
   opacity: 0;
   transform: translateY(8px);
+  visibility: hidden;
   transition: opacity 0.35s ease, transform 0.35s ease;
   pointer-events: none;
 }
@@ -1446,11 +1447,6 @@ nav a:hover {
   font-size: 0.55rem;
   font-weight: 500;
   letter-spacing: 0.2em;
-}
-
-.photo.is-active .photo-caption {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 @keyframes galleryLightSweep {
@@ -2986,6 +2982,18 @@ footer {
   line-height: 1.4;
 }
 
+.lightbox-caption::before {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #f0d8a6;
+  content: "A MOMENT TO KEEP";
+  font-family: "Manrope", sans-serif;
+  font-size: 0.55rem;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+
 .lightbox-counter {
   position: absolute;
   bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 0.75rem));
@@ -3187,6 +3195,12 @@ footer {
   .hero-copy { padding: 4rem max(1.25rem, 7vw); }
 
   .story, .calendar-section, .gift, .rsvp { grid-template-columns: 1fr; }
+  .story figure.reveal .story-photo-frame img {
+    transform: scale(1.06);
+  }
+  .story figure.reveal.visible .story-photo-frame img {
+    transform: scale(1);
+  }
   .event-grid { grid-template-columns: 1fr; }
 
   .family-groups {
@@ -3361,6 +3375,7 @@ footer {
     transition: none !important;
   }
   .reveal { opacity: 1; transform: none; }
+  .story figure.reveal .story-photo-frame img { transform: none; }
   .music.is-open,
   .music.is-open > span:first-child,
   .music.is-open::before,
