@@ -69,12 +69,15 @@ function triggerOpeningBurst(originEl) {
   const originY = rect.top + rect.height / 2;
 
   const particles = [];
-  const count = window.innerWidth <= 768 ? 18 : 28;
+  const count = window.innerWidth <= 768 ? 36 : 56;
   const colors = [
     '#f7d59b', '#e6bf70', '#d4a853', // Vàng gold
     '#e29590', '#c87670', '#f4c3be', // Cánh hoa hồng
     '#ffffff', '#fff5eb'            // Ánh sáng trắng
   ];
+  const burstStartedAt = performance.now();
+  const burstDuration = 850;
+  const burstRadius = Math.min(Math.hypot(canvas.width, canvas.height) * 0.18, 190);
 
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
@@ -96,8 +99,36 @@ function triggerOpeningBurst(originEl) {
   }
 
   function renderBurst() {
+    const elapsed = performance.now() - burstStartedAt;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let alive = false;
+    let alive = elapsed < burstDuration;
+
+    const flash = Math.max(0, 1 - elapsed / 240);
+    if (flash > 0) {
+      const gradient = ctx.createRadialGradient(originX, originY, 0, originX, originY, 24 + elapsed * 0.28);
+      gradient.addColorStop(0, `rgba(255, 249, 229, ${flash})`);
+      gradient.addColorStop(0.35, `rgba(247, 213, 155, ${flash * 0.72})`);
+      gradient.addColorStop(1, 'rgba(247, 213, 155, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(originX - 100, originY - 100, 200, 200);
+    }
+
+    for (let ring = 0; ring < 3; ring++) {
+      const ringElapsed = elapsed - ring * 115;
+      if (ringElapsed < 0 || ringElapsed > 680) continue;
+
+      const progress = ringElapsed / 680;
+      const radius = 8 + burstRadius * progress;
+      const alpha = (1 - progress) * 0.72;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = ring === 1 ? '#f4c3be' : '#f7d59b';
+      ctx.lineWidth = 2.4 - progress * 1.4;
+      ctx.beginPath();
+      ctx.arc(originX, originY, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];

@@ -152,12 +152,47 @@ a {
   pointer-events: none;
 }
 
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 48%, transparent 36%, rgba(183, 142, 83, 0.1) 100%),
+    radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.72), transparent 68%);
+  pointer-events: none;
+}
+
 /* Canvas hiệu ứng pháo hoa bụi vàng bùng nổ */
 .burst-canvas {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 1;
+}
+
+.cover-sparkles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image:
+    radial-gradient(circle, rgba(190, 145, 57, 0.72) 0 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(216, 138, 128, 0.5) 0 1px, transparent 2px);
+  background-position: 0 0, 36px 62px, 91px 24px;
+  background-size: 137px 151px, 193px 207px, 229px 183px;
+  opacity: 0.46;
+  pointer-events: none;
+  animation: coverSparkleDrift 32s linear infinite, coverSparkleTwinkle 4s ease-in-out infinite alternate;
+}
+
+@keyframes coverSparkleDrift {
+  to { background-position: 137px 151px, 229px 269px, 320px 207px; }
+}
+
+@keyframes coverSparkleTwinkle {
+  from { opacity: 0.3; }
+  to { opacity: 0.62; }
 }
 
 /* Khung chứa nội dung trung tâm của trang bìa (Bố cục dọc chuẩn tỉ lệ vàng trên mobile) */
@@ -685,6 +720,31 @@ a {
   transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+.wax-seal-wrapper::before,
+.wax-seal-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  z-index: 2;
+  border: 1px solid rgba(212, 168, 83, 0.72);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(226, 190, 119, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  animation: sealRipple 3.2s ease-out infinite;
+}
+
+.wax-seal-wrapper::after {
+  border-color: rgba(255, 244, 218, 0.8);
+  animation-delay: 1.6s;
+}
+
+@keyframes sealRipple {
+  0% { transform: scale(0.92); opacity: 0; }
+  18% { opacity: 0.72; }
+  100% { transform: scale(1.48); opacity: 0; }
+}
+
 .wax-seal:hover .wax-seal-wrapper,
 .wax-seal:focus-visible .wax-seal-wrapper {
   transform: scale(1.08) rotate(1deg);
@@ -731,8 +791,8 @@ a {
 }
 
 @keyframes sealLogoGleam {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.9; filter: drop-shadow(0 0 3px rgba(255, 226, 153, 0.7)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 7px rgba(255, 226, 153, 0.95)); }
 }
 
 /* Lời mời chạm mở thiệp dạng pill hoàng gia */
@@ -782,6 +842,16 @@ a {
 .cover-cta-sparkle {
   color: #b8904d;
   font-size: 0.6rem;
+  animation: ctaSparkle 2.4s ease-in-out infinite;
+}
+
+.cover-cta-sparkle:last-child {
+  animation-delay: 1.2s;
+}
+
+@keyframes ctaSparkle {
+  0%, 100% { opacity: 0.46; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.22); }
 }
 
 /* ==========================================
