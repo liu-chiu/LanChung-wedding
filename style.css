@@ -813,7 +813,7 @@ a {
   border: 0;
   border-radius: 0;
   color: var(--green-deep);
-  font-size: clamp(0.82rem, 4.5vw, 0.95rem);
+  font-size: clamp(0.68rem, 1.7vw, 0.76rem);
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
