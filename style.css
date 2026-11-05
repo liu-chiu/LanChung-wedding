@@ -1051,7 +1051,7 @@ a {
 }
 
 .card-viewer-face--front h3 i,
-.card-viewer-monogram i {
+.card-viewer-back-title i {
   color: var(--rose);
   font-style: normal;
 }
@@ -1074,13 +1074,15 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.35rem, 1.5vw, 0.8rem);
+  justify-content: center;
+  width: 100%;
+  gap: clamp(0.2rem, 0.8vw, 0.45rem);
 }
 
-.card-viewer-monogram {
+.card-viewer-back-title {
   color: #397f7d;
   font-family: var(--serif);
-  font-size: clamp(3rem, 10vw, 6rem);
+  font-size: clamp(1.25rem, 3vw, 1.8rem);
   font-weight: 500;
   line-height: 0.95;
   text-shadow: 0 2px 0 rgba(255, 255, 255, 0.8), 0 5px 15px rgba(57, 127, 125, 0.14);
@@ -1092,20 +1094,53 @@ a {
   letter-spacing: 0.16em;
 }
 
-.card-viewer-back-content p {
-  margin: 0;
-  color: #51483d;
-  font-family: var(--serif);
-  font-size: clamp(1.1rem, 3vw, 1.65rem);
-  line-height: 1.1;
+.card-viewer-events {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
 }
 
-.card-viewer-back-content small {
-  color: #766b5e;
-  font-size: clamp(0.56rem, 1.3vw, 0.68rem);
-  letter-spacing: 0.16em;
-  line-height: 1.65;
+.card-viewer-event {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0 0.45rem;
+  text-align: center;
+}
+
+.card-viewer-event + .card-viewer-event {
+  border-left: 1px solid rgba(177, 144, 99, 0.38);
+}
+
+.card-viewer-event-label {
+  color: #397f7d;
+  font-size: clamp(0.56rem, 1.3vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.card-viewer-event time {
+  color: #51483d;
+  font-size: clamp(0.64rem, 1.4vw, 0.82rem);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.card-viewer-event address {
+  color: #766b5e;
+  font-size: clamp(0.58rem, 1.35vw, 0.72rem);
+  font-style: normal;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.card-viewer-event-label,
+.card-viewer-event time,
+.card-viewer-event address {
+  margin: 0;
 }
 
 .card-viewer-controls {

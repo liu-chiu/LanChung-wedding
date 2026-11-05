@@ -604,7 +604,7 @@ const calendarEvents = {
     endUtc: '20261212T053000Z',
     startLocal: '20261212T103000',
     endLocal: '20261212T123000',
-    location: 'SeaBay Hạ Long, X232+7MW, Bãi Cháy, Quảng Ninh'
+    location: 'Ô Số H32, Khu đô thị dịch vụ Hùng Thắng, Phường Bãi Cháy, Hạ Long'
   },
   groom: {
     title: 'Tiệc nhà trai - Lan & Chung',
@@ -1757,8 +1757,8 @@ function showRsvpConfirmation(attendance, transportation) {
     ];
     const brideEvent = [
       ['Thời gian', '10:30, Thứ Bảy 12/12/2026'],
-      ['Địa điểm', 'Trung tâm tiệc cưới SeaBay Hạ Long'],
-      ['Địa chỉ', 'X232+7MW, Bãi Cháy, Quảng Ninh']
+      ['Địa điểm', 'Tư gia nhà gái'],
+      ['Địa chỉ', 'Ô Số H32, Khu đô thị dịch vụ Hùng Thắng, Phường Bãi Cháy, Hạ Long']
     ];
     const groomEvent = [
       ['Thời gian', '17:00, Thứ Bảy 12/12/2026'],
