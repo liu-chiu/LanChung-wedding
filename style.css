@@ -2720,23 +2720,52 @@ fieldset input[type="radio"] {
    12. LỜI CẢM ƠN (CLOSING) & CHÂN TRANG (FOOTER)
    ========================================== */
 .closing {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 100svh;
+  padding: 4rem 1.25rem 2rem;
   text-align: center;
-  padding: clamp(6rem, 10vw, 10rem) 1.25rem;
-  background: var(--cream);
+  background: var(--cream) url("assets/images/thiep-cuoi-chu-hy-desktop.webp") center / cover no-repeat;
 }
 
-.closing img {
-  width: min(360px, 80vw);
+.closing::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto 0 0;
+  height: min(78%, 680px);
+  background: linear-gradient(180deg, rgba(246, 239, 232, 0) 0%, rgba(246, 239, 232, 0.78) 34%, rgba(246, 239, 232, 0.97) 100%);
+  pointer-events: none;
+}
+
+.closing-content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 900px);
+  padding: 1.5rem 1rem 0.5rem;
+}
+
+.closing-content img {
+  width: min(160px, 38vw);
 }
 
 .closing h2 {
-  font-size: clamp(3rem, 8vw, 7rem);
-  max-width: 1000px;
-  margin: 2rem auto;
+  font-size: clamp(2.5rem, 5.5vw, 4.75rem);
+  max-width: 850px;
+  margin: 1.25rem auto;
 }
 
 .closing em {
   display: block;
+}
+
+.closing-content p {
+  margin: 0;
+  letter-spacing: 0.04em;
 }
 
 footer {
@@ -3117,6 +3146,29 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .closing {
+    background-image: url("assets/images/thiep-cuoi-chu-hy-mobile.webp");
+  }
+
+  .closing::before {
+    height: 72%;
+    background: linear-gradient(180deg, rgba(246, 239, 232, 0) 0%, rgba(246, 239, 232, 0.82) 36%, rgba(246, 239, 232, 0.98) 100%);
+  }
+
+  .closing-content {
+    width: min(100%, 540px);
+    padding: 1.25rem 0.25rem max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .closing-content img {
+    width: min(135px, 38vw);
+  }
+
+  .closing h2 {
+    font-size: clamp(2.35rem, 9.5vw, 3.5rem);
+    margin: 1rem auto;
+  }
+
   #wishes #wishForm textarea {
     min-height: 60px;
   }

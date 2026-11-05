@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8f9fa" />
+    </linearGradient>
+    <style>
+      .frame-border {
+        fill: none;
+        stroke: #2c3e50;
+        stroke-width: 8;
+      }
+      .inner-border {
+        fill: none;
+        stroke: #bdc3c7;
+        stroke-width: 2;
+      }
+    </style>
+  </defs>
+  <!-- Nền -->
+  <rect width="1920" height="1080" fill="url(#bg-gradient)" />
+  
+  <!-- Viền ngoài -->
+  <rect x="60" y="60" width="1800" height="960" rx="12" class="frame-border" />
+  
+  <!-- Viền trong -->
+  <rect x="80" y="80" width="1760" height="920" rx="8" class="inner-border" />
+</svg>
