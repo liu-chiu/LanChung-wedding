@@ -1386,7 +1386,7 @@ if ($('#wishForm')) {
     const button = $('button[type="submit"]', form) || $('button', form);
 
     button.disabled = true;
-    if (status) status.textContent = 'Cảm ơn bạn, tụi mình đang gửi lời chúc đến Lan & Chung nhé…';
+    if (status) status.textContent = 'Cảm ơn bạn đã gửi lời chúc thật dễ thương! Tụi mình đã nhận được rồi nhé.';
 
     try {
       const wish = {
@@ -1398,7 +1398,6 @@ if ($('#wishForm')) {
       appendWish(wish, 'Vừa gửi');
       $('#wishList .wish')?.classList.add('is-new');
 
-      if (status) status.textContent = 'Cảm ơn bạn đã gửi lời chúc thật dễ thương! Tụi mình đã nhận được rồi nhé.';
       form.reset();
       resizeWishTextarea();
     } catch (error) {
