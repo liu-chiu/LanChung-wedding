@@ -3058,10 +3058,6 @@ fieldset input[type="radio"] {
   padding: 1.5rem 1rem 0.5rem;
 }
 
-.closing-content img {
-  width: min(160px, 38vw);
-}
-
 .closing h2 {
   font-size: clamp(2.5rem, 5.5vw, 4.75rem);
   max-width: 850px;
@@ -3467,10 +3463,6 @@ footer {
   .closing-content {
     width: min(100%, 540px);
     padding: 1.25rem 0.25rem max(0.5rem, env(safe-area-inset-bottom));
-  }
-
-  .closing-content img {
-    width: min(135px, 38vw);
   }
 
   .closing h2 {
