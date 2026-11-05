@@ -402,8 +402,15 @@ a {
   margin: 0.25rem auto 0.1rem;
   perspective: 1200px;
   transform-style: preserve-3d;
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
   transition: transform 0.35s ease-out;
+}
+
+.envelope-scene.is-dragging {
+  cursor: grabbing;
+  transition: none;
 }
 
 .envelope-scene::before {
@@ -806,7 +813,7 @@ a {
   border: 0;
   border-radius: 0;
   color: var(--green-deep);
-  font-size: clamp(0.68rem, 1.7vw, 0.76rem);
+  font-size: clamp(0.82rem, 4.5vw, 0.95rem);
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -852,6 +859,308 @@ a {
 @keyframes ctaSparkle {
   0%, 100% { opacity: 0.46; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1.22); }
+}
+
+.card-viewer-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 38px;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(177, 144, 99, 0.42);
+  border-radius: 999px;
+  color: var(--green-deep);
+  background: rgba(255, 253, 249, 0.72);
+  box-shadow: 0 5px 16px rgba(41, 39, 35, 0.08);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-viewer-trigger:hover {
+  background: #fffdf9;
+  box-shadow: 0 8px 20px rgba(41, 39, 35, 0.12);
+  transform: translateY(-1px);
+}
+
+.card-viewer-trigger:active {
+  transform: scale(0.97);
+}
+
+.card-viewer {
+  width: min(940px, calc(100vw - 1.5rem));
+  max-width: 940px;
+  max-height: calc(100dvh - 1.5rem);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(212, 168, 83, 0.42);
+  border-radius: 18px;
+  color: var(--ink);
+  background: rgba(255, 253, 249, 0.98);
+  box-shadow: 0 28px 90px rgba(30, 25, 22, 0.32);
+}
+
+.card-viewer::backdrop {
+  background: rgba(35, 31, 28, 0.58);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+
+.card-viewer-shell {
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.card-viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.card-viewer-header .eyebrow {
+  color: #8c8275;
+}
+
+.card-viewer-header h2 {
+  margin: 0.25rem 0 0;
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.card-viewer-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(177, 144, 99, 0.34);
+  border-radius: 50%;
+  color: var(--ink);
+  background: #fff;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.card-viewer-stage {
+  display: grid;
+  place-items: center;
+  min-height: clamp(260px, 45vh, 400px);
+  margin: 0.5rem 0;
+  padding: 1rem;
+  overflow: hidden;
+  perspective: 1400px;
+  touch-action: none;
+  cursor: grab;
+}
+
+.card-viewer-stage:active {
+  cursor: grabbing;
+}
+
+.card-viewer-card {
+  position: relative;
+  width: min(100%, 600px);
+  aspect-ratio: 1.68;
+  border: 1px solid rgba(177, 144, 99, 0.45);
+  border-radius: 12px;
+  background: #e9dfd0;
+  box-shadow: 0 26px 52px rgba(56, 41, 31, 0.24), 0 6px 14px rgba(56, 41, 31, 0.14);
+  transform: rotateX(-7deg) rotateY(-10deg) scale(1);
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.2, 0.75, 0.25, 1);
+  will-change: transform;
+}
+
+.card-viewer-card.is-dragging {
+  transition: none;
+}
+
+.card-viewer-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(177, 144, 99, 0.44);
+  border-radius: 11px;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  text-align: center;
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
+  box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.42), inset 0 0 30px rgba(173, 143, 102, 0.12);
+}
+
+.card-viewer-face--front {
+  transform: translateZ(1px);
+  background:
+    url("assets/images/cover-floral.svg") center / 100% 100% no-repeat,
+    radial-gradient(ellipse at 50% 30%, #fffefa, #f8f0e5 78%);
+}
+
+.card-viewer-face--back {
+  transform: rotateY(180deg) translateZ(1px);
+  background:
+    url("assets/images/invitation-emboss-inside.svg") center / 100% 100% no-repeat,
+    radial-gradient(ellipse at 50% 42%, #fffefa, #f5ecdf 82%);
+}
+
+.card-viewer-face > * {
+  position: relative;
+  z-index: 1;
+}
+
+.card-viewer-face--front .card-viewer-eyebrow,
+.card-viewer-face--back .card-viewer-eyebrow {
+  color: #8c8275;
+  font-size: clamp(0.52rem, 1.3vw, 0.68rem);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.card-viewer-face--front picture {
+  display: block;
+  width: min(24vw, 120px);
+  max-height: 62px;
+  margin: 0.45rem auto;
+}
+
+.card-viewer-face--front picture img {
+  display: block;
+  width: 100%;
+  max-height: 62px;
+  object-fit: contain;
+}
+
+.card-viewer-face--front h3 {
+  margin: 0.1rem 0;
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-weight: 500;
+  line-height: 0.95;
+}
+
+.card-viewer-face--front h3 i,
+.card-viewer-monogram i {
+  color: var(--rose);
+  font-style: normal;
+}
+
+.card-viewer-face--front p {
+  margin: 0.35rem 0 0;
+  color: #6a645b;
+  font-size: clamp(0.62rem, 1.6vw, 0.82rem);
+  letter-spacing: 0.16em;
+}
+
+.card-viewer-ornament {
+  position: absolute !important;
+  bottom: 0.8rem;
+  color: #b8904d;
+  font-size: 0.85rem;
+}
+
+.card-viewer-back-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.35rem, 1.5vw, 0.8rem);
+}
+
+.card-viewer-monogram {
+  color: #397f7d;
+  font-family: var(--serif);
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 500;
+  line-height: 0.95;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.8), 0 5px 15px rgba(57, 127, 125, 0.14);
+}
+
+.card-viewer-divider {
+  color: #b8904d;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+}
+
+.card-viewer-back-content p {
+  margin: 0;
+  color: #51483d;
+  font-family: var(--serif);
+  font-size: clamp(1.1rem, 3vw, 1.65rem);
+  line-height: 1.1;
+}
+
+.card-viewer-back-content small {
+  color: #766b5e;
+  font-size: clamp(0.56rem, 1.3vw, 0.68rem);
+  letter-spacing: 0.16em;
+  line-height: 1.65;
+  text-transform: uppercase;
+}
+
+.card-viewer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.card-viewer-controls button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid rgba(177, 144, 99, 0.42);
+  border-radius: 999px;
+  color: var(--green-deep);
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.card-viewer-controls button:hover:not(:disabled) {
+  background: var(--cream);
+  transform: translateY(-1px);
+}
+
+.card-viewer-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.card-viewer-controls output {
+  min-width: 3.5rem;
+  color: #756a5d;
+  font-size: 0.72rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-viewer-control-divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 0.2rem;
+  background: rgba(177, 144, 99, 0.38);
+}
+
+.card-viewer-hint {
+  margin: 0.85rem 0 0;
+  color: #756a5d;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-align: center;
 }
 
 /* ==========================================
@@ -3328,6 +3637,31 @@ footer {
   #main { padding-top: 68px; }
   section[id] { scroll-margin-top: 84px; }
   .brand img { width: 64px; height: 42px; }
+
+  .card-viewer {
+    width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+    border-radius: 14px;
+  }
+  .card-viewer-shell { padding: 1rem 0.75rem; }
+  .card-viewer-stage {
+    min-height: clamp(230px, 38vh, 310px);
+    margin: 0.25rem 0;
+    padding: 0.5rem;
+  }
+  .card-viewer-face { padding: 0.75rem; }
+  .card-viewer-face--front picture {
+    width: min(27vw, 100px);
+    max-height: 50px;
+    margin: 0.3rem auto;
+  }
+  .card-viewer-face--front picture img { max-height: 50px; }
+  .card-viewer-face--front h3 { font-size: clamp(2rem, 9vw, 2.8rem); }
+  .card-viewer-face--front p { letter-spacing: 0.1em; }
+  .card-viewer-controls { gap: 0.4rem; }
+  .card-viewer-controls button { min-height: 42px; padding-inline: 0.7rem; }
+  .card-viewer-control-divider { display: none; }
+  .card-viewer-hint { font-size: 0.66rem; }
 
   .envelope-scene {
     width: min(88vw, 390px);

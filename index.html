@@ -24,7 +24,7 @@
   <meta content="Lan và Chung trân trọng mời bạn cùng hiện diện trong ngày khởi đầu hành trình mới — 12.12.2026." name="twitter:description"/>
   <meta content="https://liu-chiu.github.io/LanChung-wedding/assets/images/hero.webp" name="twitter:image"/>
 
-  <link href="assets/images/logo-con-dau-liu-chiu.webp" rel="icon" type="image/webp"/>
+  <link href="assets/images/logo_con_dau_liu_chiu-removebg-preview.webp" rel="icon" type="image/webp"/>
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Manrope:wght@300;400;500;600&display=swap&subset=vietnamese" rel="stylesheet"/>
@@ -183,14 +183,61 @@
         </div>
       </div>
 
-      <!-- Lời mời chạm mở thiệp dạng pill hoàng gia bên dưới -->
+      <!-- Lời mời chạm mở thiệp -->
       <div class="cover-cta" id="coverCta" role="button" tabindex="0" aria-label="Chạm để mở thiệp">
-        <span class="cover-cta-sparkle">✦</span>
+        <span aria-hidden="true" class="cover-cta-sparkle">✦</span>
         <span class="cover-cta-text">Chạm để mở thiệp</span>
-        <span class="cover-cta-sparkle">✦</span>
+        <span aria-hidden="true" class="cover-cta-sparkle">✦</span>
       </div>
     </div>
   </div>
+
+  <dialog aria-labelledby="cardViewerTitle" class="card-viewer" id="cardViewer">
+    <div class="card-viewer-shell">
+      <header class="card-viewer-header">
+        <div>
+          <span class="eyebrow">Lan & Chung · 12.12.2026</span>
+          <h2 id="cardViewerTitle">Thiệp cưới 3D</h2>
+        </div>
+        <button aria-label="Đóng chế độ xem thiệp" class="card-viewer-close" id="closeCardViewer" type="button">×</button>
+      </header>
+
+      <div aria-label="Kéo để xoay thiệp, cuộn hoặc chụm hai ngón để thu phóng" class="card-viewer-stage" id="cardViewerStage">
+        <div class="card-viewer-card" id="cardViewerCard">
+          <article aria-label="Mặt trước thiệp cưới" class="card-viewer-face card-viewer-face--front" id="cardViewerFront">
+            <span class="card-viewer-eyebrow">Wedding Invitation</span>
+            <picture>
+              <source media="(min-width: 1024px)" srcset="assets/images/logo_liu_chiu_desktop.webp"/>
+              <source media="(min-width: 768px)" srcset="assets/images/logo_liu_chiu_tablet.webp"/>
+              <img alt="Logo Liu Chiu" src="assets/images/logo_liu_chiu_mobile.webp"/>
+            </picture>
+            <h3>Lan <i>&amp;</i> Chung</h3>
+            <p>Thứ Bảy · 12.12.2026</p>
+            <span aria-hidden="true" class="card-viewer-ornament">✦</span>
+          </article>
+          <article aria-hidden="true" aria-label="Mặt sau thiệp cưới" class="card-viewer-face card-viewer-face--back" id="cardViewerBack">
+            <div class="card-viewer-back-content">
+              <span class="card-viewer-eyebrow">A promise for a lifetime</span>
+              <strong class="card-viewer-monogram">L <i>&amp;</i> C</strong>
+              <span aria-hidden="true" class="card-viewer-divider">✦ &nbsp; ✦ &nbsp; ✦</span>
+              <p>Cùng viết tiếp câu chuyện<br/>mang tên gia đình</p>
+              <small>Hạ Long · Hà Nội<br/>12 · 12 · 2026</small>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div aria-label="Điều khiển thiệp 3D" class="card-viewer-controls" role="group">
+        <button aria-label="Thu nhỏ thiệp" id="cardZoomOut" type="button">−</button>
+        <output aria-live="off" id="cardZoomLevel">100%</output>
+        <button aria-label="Phóng to thiệp" id="cardZoomIn" type="button">+</button>
+        <span aria-hidden="true" class="card-viewer-control-divider"></span>
+        <button id="cardFlip" type="button">Lật thiệp</button>
+        <button id="cardResetView" type="button">Đặt lại</button>
+      </div>
+      <p class="card-viewer-hint">Kéo thiệp để xoay · Cuộn hoặc chụm hai ngón để thu phóng</p>
+    </div>
+  </dialog>
 
   <!-- Thanh điều hướng Header -->
   <header class="site-header">
@@ -231,6 +278,9 @@
           <span>2026</span>
         </div>
         <p id="heroInvitationText"><strong>Bùi Ngọc Lan</strong> và <strong>Nguyễn Văn Chung</strong> trân trọng kính mời <span class="guest-highlight" id="guestHeroName">bạn</span>.<br>Hãy đến chung vui và lưu giữ những khoảnh khắc đáng nhớ cùng chúng mình nhé.</p>
+        <button aria-controls="cardViewer" aria-haspopup="dialog" class="card-viewer-trigger" id="openCardViewer" type="button">
+          <span aria-hidden="true">✧</span> Xem hai mặt · phóng to
+        </button>
       </div>
     </section>
 

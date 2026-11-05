@@ -174,20 +174,250 @@ function triggerOpeningBurst(originEl) {
   renderBurst();
 }
 
-// Hiệu ứng 3D Parallax Tilt khi di chuột trên màn hình bìa
-if (envelopeScene && coverElem && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  coverElem.addEventListener('mousemove', e => {
-    if (envelopeScene.classList.contains('is-open')) return;
-    const rect = coverElem.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    envelopeScene.style.transform = `perspective(1200px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
+// Hiệu ứng 3D Parallax và kéo xoay phong bì trên màn hình bìa
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (envelopeScene && coverElem) {
+  let activePointerId = null;
+  let pointerStartX = 0;
+  let pointerStartY = 0;
+  let lastPointerX = 0;
+  let lastPointerY = 0;
+  let rotationX = 0;
+  let rotationY = 0;
+  let didDrag = false;
+  let suppressClick = false;
+
+  if (!prefersReducedMotion) {
+    coverElem.addEventListener('mousemove', e => {
+      if (envelopeScene.classList.contains('is-open') || envelopeScene.classList.contains('is-dragging')) return;
+      const rect = coverElem.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      envelopeScene.style.transform = `perspective(1200px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
+    });
+
+    coverElem.addEventListener('mouseleave', () => {
+      if (envelopeScene.classList.contains('is-open')) return;
+      envelopeScene.style.transform = 'perspective(1200px) rotateY(0deg) rotateX(0deg)';
+    });
+  }
+
+  envelopeScene.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || envelopeScene.classList.contains('is-open')) return;
+    activePointerId = event.pointerId;
+    pointerStartX = lastPointerX = event.clientX;
+    pointerStartY = lastPointerY = event.clientY;
+    rotationX = 0;
+    rotationY = 0;
+    didDrag = false;
+    envelopeScene.setPointerCapture(event.pointerId);
   });
 
-  coverElem.addEventListener('mouseleave', () => {
-    if (envelopeScene.classList.contains('is-open')) return;
-    envelopeScene.style.transform = 'perspective(1200px) rotateY(0deg) rotateX(0deg)';
+  envelopeScene.addEventListener('pointermove', event => {
+    if (event.pointerId !== activePointerId) return;
+
+    const deltaX = event.clientX - lastPointerX;
+    const deltaY = event.clientY - lastPointerY;
+    lastPointerX = event.clientX;
+    lastPointerY = event.clientY;
+
+    if (!didDrag && Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY) < 6) return;
+    if (!didDrag) {
+      didDrag = true;
+      envelopeScene.classList.add('is-dragging');
+    }
+
+    rotationY += deltaX * 360 / envelopeScene.clientWidth;
+    rotationX -= deltaY * 360 / envelopeScene.clientHeight;
+    envelopeScene.style.transform = `perspective(1200px) rotateY(${rotationY}deg) rotateX(${rotationX}deg)`;
   });
+
+  const finishEnvelopeDrag = (event, allowClick) => {
+    if (event.pointerId !== activePointerId) return;
+
+    if (didDrag) {
+      if (allowClick) {
+        suppressClick = true;
+        setTimeout(() => { suppressClick = false; }, 0);
+      }
+      envelopeScene.classList.remove('is-dragging');
+      envelopeScene.style.transform = 'perspective(1200px) rotateY(0deg) rotateX(0deg)';
+    }
+
+    activePointerId = null;
+    didDrag = false;
+    if (envelopeScene.hasPointerCapture(event.pointerId)) {
+      envelopeScene.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  envelopeScene.addEventListener('pointerup', event => finishEnvelopeDrag(event, true));
+  envelopeScene.addEventListener('pointercancel', event => finishEnvelopeDrag(event, false));
+  envelopeScene.addEventListener('click', event => {
+    if (!suppressClick) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    suppressClick = false;
+  }, true);
+}
+
+// Chế độ xem thiệp hai mặt với xoay 3D và thu phóng
+const cardViewer = $('#cardViewer');
+const cardViewerTrigger = $('#openCardViewer');
+const cardViewerStage = $('#cardViewerStage');
+const cardViewerCard = $('#cardViewerCard');
+const cardViewerFront = $('#cardViewerFront');
+const cardViewerBack = $('#cardViewerBack');
+const cardZoomLevel = $('#cardZoomLevel');
+const cardZoomOut = $('#cardZoomOut');
+const cardZoomIn = $('#cardZoomIn');
+const cardFlip = $('#cardFlip');
+const cardResetView = $('#cardResetView');
+const cardViewerClose = $('#closeCardViewer');
+
+if (
+  cardViewer && cardViewerTrigger && cardViewerStage && cardViewerCard
+  && cardViewerFront && cardViewerBack && cardZoomLevel && cardZoomOut
+  && cardZoomIn && cardFlip && cardResetView && cardViewerClose
+) {
+  const minZoom = 0.65;
+  const maxZoom = 1.65;
+  let rotationX = -7;
+  let rotationY = -10;
+  let zoom = 1;
+  let lastPointer = null;
+  let pinchStartDistance = 0;
+  let pinchStartZoom = 1;
+  const activePointers = new Map();
+
+  const clampZoom = value => Math.min(maxZoom, Math.max(minZoom, value));
+  const updateCardViewer = () => {
+    cardViewerCard.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg) scale(${zoom})`;
+    cardZoomLevel.value = `${Math.round(zoom * 100)}%`;
+    cardZoomOut.disabled = zoom <= minZoom;
+    cardZoomIn.disabled = zoom >= maxZoom;
+
+    const frontFacing = Math.cos(rotationX * Math.PI / 180) * Math.cos(rotationY * Math.PI / 180) >= 0;
+    const visibleFace = frontFacing ? cardViewerFront : cardViewerBack;
+    visibleFace.style.backfaceVisibility = 'visible';
+    visibleFace.style.webkitBackfaceVisibility = 'visible';
+    cardViewerFront.style.visibility = frontFacing ? 'visible' : 'hidden';
+    cardViewerBack.style.visibility = frontFacing ? 'hidden' : 'visible';
+    cardViewerFront.setAttribute('aria-hidden', String(!frontFacing));
+    cardViewerBack.setAttribute('aria-hidden', String(frontFacing));
+    cardViewerCard.setAttribute('aria-label', frontFacing ? 'Mặt trước thiệp cưới' : 'Mặt sau thiệp cưới');
+  };
+
+  const setZoom = value => {
+    zoom = clampZoom(value);
+    updateCardViewer();
+  };
+
+  const resetCardViewer = () => {
+    rotationX = -7;
+    rotationY = -10;
+    zoom = 1;
+    updateCardViewer();
+  };
+
+  const getPointerDistance = (first, second) => Math.hypot(first.x - second.x, first.y - second.y);
+
+  cardViewerTrigger.addEventListener('click', () => {
+    resetCardViewer();
+    cardViewer.showModal();
+  });
+
+  cardViewerClose.addEventListener('click', () => cardViewer.close());
+  cardViewer.addEventListener('click', event => {
+    if (event.target === cardViewer) cardViewer.close();
+  });
+  cardViewer.addEventListener('close', () => {
+    activePointers.clear();
+    lastPointer = null;
+    cardViewerCard.classList.remove('is-dragging');
+    resetCardViewer();
+  });
+
+  cardZoomOut.addEventListener('click', () => setZoom(zoom - 0.1));
+  cardZoomIn.addEventListener('click', () => setZoom(zoom + 0.1));
+  cardFlip.addEventListener('click', () => {
+    const frontFacing = Math.cos(rotationX * Math.PI / 180) * Math.cos(rotationY * Math.PI / 180) >= 0;
+    rotationX = 0;
+    rotationY = frontFacing ? 180 : 0;
+    updateCardViewer();
+  });
+  cardResetView.addEventListener('click', resetCardViewer);
+
+  cardViewerStage.addEventListener('wheel', event => {
+    event.preventDefault();
+    setZoom(zoom + (event.deltaY < 0 ? 0.08 : -0.08));
+  }, { passive: false });
+
+  cardViewerStage.addEventListener('pointerdown', event => {
+    if ((event.pointerType === 'mouse' && event.button !== 0) || activePointers.size >= 2) return;
+    const point = { x: event.clientX, y: event.clientY };
+    activePointers.set(event.pointerId, point);
+    cardViewerStage.setPointerCapture(event.pointerId);
+    cardViewerCard.classList.add('is-dragging');
+
+    if (activePointers.size === 1) {
+      lastPointer = point;
+    } else {
+      const [first, second] = activePointers.values();
+      pinchStartDistance = getPointerDistance(first, second);
+      pinchStartZoom = zoom;
+      lastPointer = null;
+    }
+    event.preventDefault();
+  });
+
+  cardViewerStage.addEventListener('pointermove', event => {
+    if (!activePointers.has(event.pointerId)) return;
+    const point = { x: event.clientX, y: event.clientY };
+    activePointers.set(event.pointerId, point);
+
+    if (activePointers.size === 2) {
+      const [first, second] = activePointers.values();
+      if (pinchStartDistance > 0) {
+        setZoom(pinchStartZoom * getPointerDistance(first, second) / pinchStartDistance);
+      }
+      return;
+    }
+
+    if (!lastPointer) {
+      lastPointer = point;
+      return;
+    }
+
+    const deltaX = point.x - lastPointer.x;
+    const deltaY = point.y - lastPointer.y;
+    const cardRect = cardViewerCard.getBoundingClientRect();
+    rotationY += deltaX * 360 / cardRect.width;
+    rotationX -= deltaY * 360 / cardRect.height;
+    lastPointer = point;
+    updateCardViewer();
+  });
+
+  const finishCardViewerPointer = event => {
+    if (!activePointers.has(event.pointerId)) return;
+    activePointers.delete(event.pointerId);
+    if (cardViewerStage.hasPointerCapture(event.pointerId)) {
+      cardViewerStage.releasePointerCapture(event.pointerId);
+    }
+
+    if (activePointers.size === 1) {
+      lastPointer = activePointers.values().next().value;
+    } else {
+      lastPointer = null;
+      pinchStartDistance = 0;
+    }
+
+    if (activePointers.size === 0) cardViewerCard.classList.remove('is-dragging');
+  };
+
+  cardViewerStage.addEventListener('pointerup', finishCardViewerPointer);
+  cardViewerStage.addEventListener('pointercancel', finishCardViewerPointer);
+  updateCardViewer();
 }
 
 function openEnvelopeInvitation() {
