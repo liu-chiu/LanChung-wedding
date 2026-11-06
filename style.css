@@ -26,7 +26,7 @@
   --wax: #962826;
   --wax-dark: #6e1614;
   --line: rgba(41, 39, 35, 0.17);
-  --serif: 'Cormorant Garamond', 'HighSpirited', serif;
+  --serif: 'HighSpirited', serif;
   --sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
   --guest-font: var(--serif);
 }
