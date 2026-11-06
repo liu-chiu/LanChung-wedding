@@ -779,23 +779,13 @@ function closeLightbox() {
   scheduleGalleryAutoplay();
 }
 
-// Gán click cho từng ảnh trong gallery
-$$('.photo').forEach((button, index) => {
-  button.onclick = () => {
-    if (galleryIgnoreNextClick) {
-      galleryIgnoreNextClick = false;
-      return;
-    }
-    openLightbox(index, button);
-  };
-});
-
 const gallerySlider = $('#gallerySlider');
 const galleryTrack = $('#galleryTrack');
 const galleryCounter = $('#galleryCounter');
 const gallerySlides = $$('.photo');
 const galleryReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const galleryFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+let galleryVisualSlides = gallerySlides;
 let galleryAutoSlideTimeout = null;
 let galleryScrollTimeout = null;
 let galleryPresentationFrame = null;
@@ -806,22 +796,26 @@ let galleryDragPointerId = null;
 let galleryIsDragging = false;
 let galleryIsVisible = false;
 
-function getGalleryActiveIndex() {
-  if (!galleryTrack || photos.length === 0) return 0;
+function getGalleryActiveSlideIndex() {
+  if (!galleryTrack || galleryVisualSlides.length === 0) return 0;
   const trackCenter = galleryTrack.getBoundingClientRect().left + galleryTrack.clientWidth / 2;
-  return gallerySlides.reduce((closestIndex, slide, index) => {
+  return galleryVisualSlides.reduce((closestIndex, slide, index) => {
     const currentDistance = Math.abs(slide.getBoundingClientRect().left + slide.offsetWidth / 2 - trackCenter);
-    const closestSlide = gallerySlides[closestIndex];
+    const closestSlide = galleryVisualSlides[closestIndex];
     const closestDistance = Math.abs(closestSlide.getBoundingClientRect().left + closestSlide.offsetWidth / 2 - trackCenter);
     return currentDistance < closestDistance ? index : closestIndex;
   }, 0);
 }
 
+function getGalleryActiveIndex() {
+  return photos.length ? (getGalleryActiveSlideIndex() - 1 + photos.length) % photos.length : 0;
+}
+
 function updateGalleryPresentation() {
-  if (!galleryTrack || gallerySlides.length === 0 || galleryReducedMotion.matches) return;
+  if (!galleryTrack || galleryVisualSlides.length === 0 || galleryReducedMotion.matches) return;
   const trackCenter = galleryTrack.scrollLeft + galleryTrack.clientWidth / 2;
 
-  gallerySlides.forEach(slide => {
+  galleryVisualSlides.forEach(slide => {
     const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
     const offset = (slideCenter - trackCenter) / Math.max(slide.offsetWidth, galleryTrack.clientWidth * 0.42);
     const distance = Math.min(Math.abs(offset), 1.25);
@@ -834,12 +828,14 @@ function updateGalleryPresentation() {
 
 function updateGalleryCounter() {
   if (!galleryCounter || photos.length === 0) return;
-  const activeIndex = getGalleryActiveIndex();
+  const activeSlideIndex = getGalleryActiveSlideIndex();
+  const activeIndex = (activeSlideIndex - 1 + photos.length) % photos.length;
   galleryCounter.textContent = `${activeIndex + 1} / ${photos.length}`;
-  gallerySlides.forEach((slide, index) => {
-    slide.setAttribute('aria-label', `Ảnh ${index + 1} trên ${photos.length}: ${photos[index].alt}`);
-    slide.classList.toggle('is-active', index === activeIndex);
-    slide.setAttribute('aria-current', index === activeIndex ? 'true' : 'false');
+  galleryVisualSlides.forEach((slide, index) => {
+    const photoIndex = (index - 1 + photos.length) % photos.length;
+    slide.setAttribute('aria-label', `Ảnh ${photoIndex + 1} trên ${photos.length}: ${photos[photoIndex].alt}`);
+    slide.classList.toggle('is-active', index === activeSlideIndex);
+    slide.setAttribute('aria-current', index === activeSlideIndex ? 'true' : 'false');
 
     let caption = $('.photo-caption', slide);
     if (!caption) {
@@ -848,15 +844,19 @@ function updateGalleryCounter() {
       caption.setAttribute('aria-hidden', 'true');
       slide.append(caption);
     }
-    caption.textContent = photos[index].alt;
+    caption.textContent = photos[photoIndex].alt;
   });
 }
 
 function goToGallerySlide(index) {
-  if (!galleryTrack || gallerySlides.length === 0) return;
-  const slides = gallerySlides;
-  const normalizedIndex = (index + slides.length) % slides.length;
-  const slide = slides[normalizedIndex];
+  if (!galleryTrack || gallerySlides.length < 2) return;
+  const activeSlideIndex = getGalleryActiveSlideIndex();
+  const activeIndex = (activeSlideIndex - 1 + photos.length) % photos.length;
+  const step = index - activeIndex;
+  const targetSlideIndex = Math.abs(step) === 1
+    ? activeSlideIndex + step
+    : ((index + photos.length) % photos.length) + 1;
+  const slide = galleryVisualSlides[targetSlideIndex];
   const left = slide.offsetLeft - (galleryTrack.clientWidth - slide.clientWidth) / 2;
   galleryTrack.scrollTo({
     left,
@@ -864,6 +864,24 @@ function goToGallerySlide(index) {
   });
   updateGalleryPresentation();
   updateGalleryCounter();
+}
+
+function normalizeGalleryLoop() {
+  if (!galleryTrack || galleryVisualSlides.length !== photos.length + 2) return;
+  const activeSlideIndex = getGalleryActiveSlideIndex();
+  const targetSlideIndex = activeSlideIndex === 0
+    ? photos.length
+    : activeSlideIndex === photos.length + 1
+      ? 1
+      : activeSlideIndex;
+  if (targetSlideIndex === activeSlideIndex) return;
+
+  const slide = galleryVisualSlides[targetSlideIndex];
+  galleryTrack.style.scrollBehavior = 'auto';
+  galleryTrack.scrollLeft = slide.offsetLeft - (galleryTrack.clientWidth - slide.clientWidth) / 2;
+  requestAnimationFrame(() => {
+    galleryTrack.style.removeProperty('scroll-behavior');
+  });
 }
 
 function stopGalleryAutoplay() {
@@ -891,8 +909,32 @@ function scheduleGalleryAutoplay() {
 }
 
 if (gallerySlider && galleryTrack) {
-  gallerySlides.forEach((slide, index) => {
-    slide.setAttribute('aria-label', `Ảnh ${index + 1} trên ${gallerySlides.length}: ${photos[index].alt}`);
+  if (gallerySlides.length > 1) {
+    const firstClone = gallerySlides[0].cloneNode(true);
+    const lastClone = gallerySlides[gallerySlides.length - 1].cloneNode(true);
+    firstClone.setAttribute('aria-hidden', 'true');
+    firstClone.tabIndex = -1;
+    lastClone.setAttribute('aria-hidden', 'true');
+    lastClone.tabIndex = -1;
+    galleryTrack.prepend(lastClone);
+    galleryTrack.append(firstClone);
+    galleryVisualSlides = $$('.photo', galleryTrack);
+  }
+
+  galleryVisualSlides.forEach((slide, index) => {
+    const photoIndex = (index - 1 + photos.length) % photos.length;
+    slide.dataset.galleryIndex = String(photoIndex);
+    slide.setAttribute('aria-label', `Ảnh ${photoIndex + 1} trên ${photos.length}: ${photos[photoIndex].alt}`);
+  });
+
+  galleryTrack.addEventListener('click', event => {
+    const button = event.target.closest('.photo');
+    if (!button || !galleryTrack.contains(button)) return;
+    if (galleryIgnoreNextClick) {
+      galleryIgnoreNextClick = false;
+      return;
+    }
+    openLightbox(Number(button.dataset.galleryIndex), button);
   });
 
   $('#galleryPrev')?.addEventListener('click', () => {
@@ -914,6 +956,7 @@ if (gallerySlider && galleryTrack) {
     }
     clearTimeout(galleryScrollTimeout);
     galleryScrollTimeout = setTimeout(() => {
+      normalizeGalleryLoop();
       updateGalleryCounter();
       scheduleGalleryAutoplay();
     }, 120);
@@ -1009,6 +1052,10 @@ if (gallerySlider && galleryTrack) {
     updateGalleryCounter();
   });
 
+  const firstSlide = galleryVisualSlides[gallerySlides.length > 1 ? 1 : 0];
+  galleryTrack.style.scrollBehavior = 'auto';
+  galleryTrack.scrollLeft = firstSlide.offsetLeft - (galleryTrack.clientWidth - firstSlide.clientWidth) / 2;
+  galleryTrack.style.removeProperty('scroll-behavior');
   updateGalleryPresentation();
   updateGalleryCounter();
   scheduleGalleryAutoplay();
