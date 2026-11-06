@@ -189,12 +189,18 @@ function triggerOpeningBurst(originEl) {
 
 // Hiệu ứng 3D Parallax, kéo xoay và Thu phóng (Zoom / Pinch) phong bì trên màn hình bìa
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Biến envelope ở outer scope để openEnvelopeInvitation() truy cập được
+var envelopeZoom = 1;
+var envelopeRotationX = 0;
+var envelopeRotationY = 0;
+var isEnvelopeFlipped = false;
+var applyEnvelopeTransform = null;
 if (envelopeScene && coverElem) {
-  let zoom = 1;
+  let zoom = envelopeZoom;
   const minZoom = 0.8;
   const maxZoom = 2.4;
-  let rotationX = 0;
-  let rotationY = 0;
+  let rotationX = envelopeRotationX;
+  let rotationY = envelopeRotationY;
   let didDrag = false;
   let didPinch = false;
   let suppressClick = false;
@@ -205,10 +211,12 @@ if (envelopeScene && coverElem) {
 
   const clampZoom = value => Math.min(maxZoom, Math.max(minZoom, value));
 
-  const applyEnvelopeTransform = (animate = false) => {
+  applyEnvelopeTransform = (animate = false) => {
     if (envelopeScene.classList.contains('is-open')) return;
     envelopeScene.style.transition = animate ? 'transform 0.35s cubic-bezier(0.2, 0.75, 0.25, 1)' : 'none';
     envelopeScene.style.transform = `perspective(1200px) scale(${zoom}) rotateY(${rotationY}deg) rotateX(${rotationX}deg)`;
+    // Sync biến outer scope
+    isEnvelopeFlipped = ((((rotationY % 360) + 360) % 360) > 90 && (((rotationY % 360) + 360) % 360) < 270);
   };
 
   // 1. Phóng to / thu nhỏ bằng con lăn chuột (Mouse Wheel)
@@ -322,6 +330,24 @@ if (envelopeScene && coverElem) {
     }
   });
 
+  const coverFlipBtn = $('#coverFlipBtn');
+  // isEnvelopeFlipped đã khai báo ở outer scope (var)
+  if (coverFlipBtn) {
+    coverFlipBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (envelopeScene.classList.contains('is-open')) return;
+      isEnvelopeFlipped = !isEnvelopeFlipped;
+      rotationY = isEnvelopeFlipped ? 180 : 0;
+      rotationX = 0;
+      applyEnvelopeTransform(true);
+      const textSpan = coverFlipBtn.querySelector('.cover-flip-text');
+      if (textSpan) {
+        textSpan.textContent = isEnvelopeFlipped ? 'Quay lại mặt trước phong bì' : 'Lật xem lịch trình sự kiện';
+      }
+      coverFlipBtn.classList.toggle('is-flipped', isEnvelopeFlipped);
+    });
+  }
+
   const finishPointer = event => {
     if (!activePointers.has(event.pointerId)) return;
     activePointers.delete(event.pointerId);
@@ -337,9 +363,16 @@ if (envelopeScene && coverElem) {
 
     if (activePointers.size === 0) {
       envelopeScene.classList.remove('is-dragging');
+      const modY = ((rotationY % 360) + 360) % 360;
+      isEnvelopeFlipped = modY > 90 && modY < 270;
+      rotationY = isEnvelopeFlipped ? 180 : 0;
       rotationX = 0;
-      rotationY = 0;
       applyEnvelopeTransform(true);
+      const textSpan = coverFlipBtn?.querySelector('.cover-flip-text');
+      if (textSpan) {
+        textSpan.textContent = isEnvelopeFlipped ? 'Quay lại mặt trước phong bì' : 'Lật xem lịch trình sự kiện';
+      }
+      coverFlipBtn?.classList.toggle('is-flipped', isEnvelopeFlipped);
     } else if (activePointers.size === 1) {
       const remaining = [...activePointers.values()][0];
       lastPointerX = remaining.x;
@@ -537,6 +570,15 @@ function openEnvelopeInvitation() {
   coverElem.classList.add('is-opening');
   coverElem.setAttribute('aria-hidden', 'true');
   coverElem.inert = true;
+
+  if (isEnvelopeFlipped) {
+    isEnvelopeFlipped = false;
+    // Reset transform trực tiếp (các biến rotationX/Y là block-scoped)
+    if (envelopeScene) {
+      envelopeScene.style.transition = 'none';
+      envelopeScene.style.transform = 'perspective(1200px) scale(1) rotateY(0deg) rotateX(0deg)';
+    }
+  }
 
   if (navigator.vibrate) {
     try { navigator.vibrate([25, 45, 25]); } catch (e) {}

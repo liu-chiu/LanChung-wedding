@@ -468,6 +468,205 @@ a {
   border: 1px solid rgba(212, 168, 83, 0.45);
 }
 
+.envelope-card,
+.envelope-pocket,
+.envelope-flap,
+.envelope-flap-top,
+.wax-seal,
+.cover-guest-badge {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Mặt sau phong bì: Lịch trình sự kiện hoàng gia (Wedding Timeline) */
+.envelope-back {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  border-radius: 10px;
+  background:
+    url("assets/images/cover-floral.svg") center / 100% 100% no-repeat,
+    radial-gradient(ellipse at 50% 30%, #fffefa, #f8f0e5 78%);
+  border: 1px solid rgba(177, 144, 99, 0.45);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.7),
+    inset 0 0 20px rgba(173, 143, 102, 0.12);
+  transform: rotateY(180deg) translateZ(1px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem 0.4rem;
+  overflow: hidden;
+  user-select: none;
+}
+
+.envelope-back-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+}
+
+.envelope-back-eyebrow {
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: #7f7467;
+  font-weight: 700;
+}
+
+.envelope-back-title {
+  margin: 0;
+  font-family: var(--guest-font);
+  font-size: 1.55rem;
+  font-weight: 400;
+  line-height: 0.95;
+  color: #397f7d;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.envelope-back-date {
+  margin: 0.05rem 0 0;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: #8c7355;
+  font-weight: 600;
+}
+
+.envelope-back-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.envelope-timeline-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0.35rem;
+}
+
+.envelope-timeline-col + .envelope-timeline-col {
+  border-left: 1px dashed rgba(177, 144, 99, 0.4);
+}
+
+.col-badge {
+  color: #397f7d;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.col-location {
+  color: #8c7867;
+  font-size: 0.5rem;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.col-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+}
+
+.col-step {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.12rem 0.25rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(177, 144, 99, 0.15);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.col-step .step-icon {
+  font-size: 0.62rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.col-step .step-text {
+  font-size: 0.52rem;
+  color: #554a3e;
+  white-space: nowrap;
+  display: flex;
+  gap: 0.25rem;
+  align-items: baseline;
+}
+
+.col-step .step-text b {
+  color: #397f7d;
+  font-weight: 700;
+}
+
+.envelope-back-footer {
+  font-size: 0.55rem;
+  color: #b8904d;
+  letter-spacing: 0.1em;
+  margin-top: 0.1rem;
+}
+
+/* Nút lật xem lịch trình ở bìa ngoài */
+.cover-flip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+  padding: 0.45rem 1.15rem;
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.85);
+  border: 1px solid rgba(177, 144, 99, 0.5);
+  color: #6e5233;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(41, 39, 35, 0.08);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.cover-flip-btn:hover {
+  background: #fffdf9;
+  border-color: rgba(177, 144, 99, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(41, 39, 35, 0.14);
+}
+
+.cover-flip-btn:active {
+  transform: scale(0.96);
+}
+
+.cover-flip-btn.is-flipped {
+  background: #397f7d;
+  border-color: #245c58;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(36, 92, 88, 0.28);
+}
+
+.cover-flip-icon {
+  font-size: 0.85rem;
+  display: inline-block;
+  transition: transform 0.4s ease;
+}
+
+.cover-flip-btn.is-flipped .cover-flip-icon {
+  transform: rotate(180deg);
+}
+
 /* Lá thiệp mời sang trọng bên trong lòng phong bì */
 .envelope-card {
   position: absolute;

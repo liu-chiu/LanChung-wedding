@@ -180,8 +180,65 @@
               <img alt="" class="wax-seal-logo" src="assets/images/logo_con_dau_liu_chiu-removebg-preview.webp"/>
             </div>
           </button>
+
+          <!-- Mặt sau của phong bì: Lịch trình sự kiện (Wedding Timeline) -->
+          <div class="envelope-back" id="envelopeBack">
+            <header class="envelope-back-header">
+              <span class="envelope-back-eyebrow">WEDDING</span>
+              <h3 class="envelope-back-title">Timeline</h3>
+              <p class="envelope-back-date">Thứ Bảy · 12.12.2026</p>
+            </header>
+            <div class="envelope-back-grid">
+              <!-- Tiệc nhà gái -->
+              <div class="envelope-timeline-col">
+                <strong class="col-badge">Tiệc nhà gái</strong>
+                <span class="col-location">Nhà hàng Seabay · Bãi Cháy, Hạ Long</span>
+                <div class="col-steps">
+                  <div class="col-step">
+                    <span class="step-icon">🌸</span>
+                    <div class="step-text"><b>10:30</b> Đón khách &amp; Chụp ảnh lưu niệm</div>
+                  </div>
+                  <div class="col-step">
+                    <span class="step-icon">💍</span>
+                    <div class="step-text"><b>11:00</b> Khai tiệc &amp; Chúc phúc</div>
+                  </div>
+                  <div class="col-step">
+                    <span class="step-icon">🥂</span>
+                    <div class="step-text"><b>11:15</b> Chung vui &amp; Nâng ly</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tiệc nhà trai -->
+              <div class="envelope-timeline-col">
+                <strong class="col-badge">Tiệc nhà trai</strong>
+                <span class="col-location">Tư gia · Sóc Sơn, Hà Nội</span>
+                <div class="col-steps">
+                  <div class="col-step">
+                    <span class="step-icon">🌸</span>
+                    <div class="step-text"><b>15:30</b> Cử hành Hôn lễ</div>
+                  </div>
+                  <div class="col-step">
+                    <span class="step-icon">💍</span>
+                    <div class="step-text"><b>16:30</b> Đón khách &amp; Chụp ảnh</div>
+                  </div>
+                  <div class="col-step">
+                    <span class="step-icon">🥂</span>
+                    <div class="step-text"><b>17:00</b> Khai tiệc &amp; Nâng ly</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <span class="envelope-back-footer">✦ Lan &amp; Chung ✦</span>
+          </div>
         </div>
       </div>
+
+      <!-- Nút lật xem lịch trình ở bìa ngoài -->
+      <button aria-label="Lật xem lịch trình sự kiện đám cưới" class="cover-flip-btn" id="coverFlipBtn" type="button">
+        <span class="cover-flip-icon">↻</span>
+        <span class="cover-flip-text">Lật xem lịch trình sự kiện</span>
+      </button>
 
       <!-- Lời mời chạm mở thiệp -->
       <div class="cover-cta" id="coverCta" role="button" tabindex="0" aria-label="Chạm để mở thiệp">
@@ -231,29 +288,29 @@
                 <section class="card-viewer-event">
                   <span class="card-viewer-event-label">Tiệc nhà gái</span>
                   <time datetime="2026-12-12T10:30:00+07:00">10:30 · Thứ Bảy 12.12.2026</time>
-                  <address>Ô Số H32, KĐT Hùng Thắng, P. Bãi Cháy, Hạ Long</address>
+                  <address>Nhà hàng Seabay, Bãi Cháy, Hạ Long</address>
 
                   <!-- Lịch trình chi tiết nhà gái -->
                   <div class="card-viewer-schedule">
                     <div class="schedule-item">
                       <span class="schedule-icon">🌸</span>
                       <div class="schedule-info">
-                        <b>10:00</b>
-                        <span>Đón khách &amp; Chụp ảnh</span>
+                        <b>10:30</b>
+                        <span>Đón khách &amp; Chụp ảnh lưu niệm</span>
                       </div>
                     </div>
                     <div class="schedule-item">
                       <span class="schedule-icon">💍</span>
                       <div class="schedule-info">
-                        <b>10:30</b>
-                        <span>Khai tiệc chúc mừng</span>
+                        <b>11:00</b>
+                        <span>Khai tiệc mừng cưới &amp; Chúc phúc</span>
                       </div>
                     </div>
                     <div class="schedule-item">
                       <span class="schedule-icon">🥂</span>
                       <div class="schedule-info">
-                        <b>11:30</b>
-                        <span>Chung vui &amp; Chúc phúc</span>
+                        <b>11:15</b>
+                        <span>Chung vui &amp; Nâng ly chúc mừng</span>
                       </div>
                     </div>
                   </div>
@@ -262,7 +319,7 @@
                 <!-- Tiệc nhà trai -->
                 <section class="card-viewer-event">
                   <span class="card-viewer-event-label">Tiệc nhà trai</span>
-                  <time datetime="2026-12-12T17:00:00+07:00">17:00 · Thứ Bảy 12.12.2026</time>
+                  <time datetime="2026-12-12T16:30:00+07:00">16:30 · Thứ Bảy 12.12.2026</time>
                   <address>Số 8, ngõ 3 Văn Hoá, Khối 8, Sóc Sơn, Hà Nội</address>
 
                   <!-- Lịch trình chi tiết nhà trai -->
@@ -270,22 +327,22 @@
                     <div class="schedule-item">
                       <span class="schedule-icon">🌸</span>
                       <div class="schedule-info">
-                        <b>16:30</b>
-                        <span>Đón tiếp quan khách</span>
+                        <b>15:30</b>
+                        <span>Cử hành Hôn lễ</span>
                       </div>
                     </div>
                     <div class="schedule-item">
                       <span class="schedule-icon">💍</span>
                       <div class="schedule-info">
-                        <b>17:00</b>
-                        <span>Cử hành Hôn lễ &amp; Tiệc</span>
+                        <b>16:30</b>
+                        <span>Đón khách &amp; Chụp hình lưu niệm</span>
                       </div>
                     </div>
                     <div class="schedule-item">
                       <span class="schedule-icon">🥂</span>
                       <div class="schedule-info">
-                        <b>18:00</b>
-                        <span>Nâng ly chúc phúc</span>
+                        <b>17:00</b>
+                        <span>Khai tiệc &amp; Nâng ly chúc phúc</span>
                       </div>
                     </div>
                   </div>
@@ -368,7 +425,7 @@
             </div>
             <div class="hero-card-cta">
               <span class="hero-card-cta-icon">✦</span>
-              <span>Chạm để xoay 3D &amp; xem lịch trình</span>
+              <span>Chạm để xoay 3D &amp; xem thiệp</span>
               <span class="hero-card-cta-icon">✦</span>
             </div>
           </div>
@@ -737,7 +794,7 @@
           <!-- Nội dung mã QR (Xuất hiện khi mở hộp quà) -->
           <div class="gift-content" id="giftContentBride" hidden>
             <div class="qr-frame">
-              <img alt="Mã QR chuyển khoản VPBank cho cô dâu" class="qr" height="240" loading="lazy" src="assets/images/qr-bride.svg" width="240"/>
+              <img alt="Mã QR chuyển khoản VPBank cho cô dâu" class="qr" height="240" loading="lazy" src="assets/images/QR-co-dau.webp" width="240"/>
             </div>
             <p class="bank-info"><span>Bùi Ngọc Lan</span><span>VPBank</span><strong>176948256</strong></p>
             <button class="btn outline copy-account" data-copy="VPBank - 176948256 - BUI NGOC LAN" data-copy-message="Đã sao chép thông tin tài khoản cô dâu" type="button">Sao chép thông tin</button>
@@ -771,7 +828,7 @@
           <!-- Nội dung mã QR (Xuất hiện khi mở hộp quà) -->
           <div class="gift-content" id="giftContentGroom" hidden>
             <div class="qr-frame">
-              <img alt="Mã QR chuyển khoản Techcombank cho chú rể" class="qr" height="240" loading="lazy" src="assets/images/qr-groom.svg" width="240"/>
+              <img alt="Mã QR chuyển khoản Techcombank cho chú rể" class="qr" height="240" loading="lazy" src="assets/images/QR-chu-re.webp" width="240"/>
             </div>
             <p class="bank-info"><span>Nguyễn Văn Chung</span><span>Techcombank</span><strong>19031119300014</strong></p>
             <button class="btn outline copy-account" data-copy="Techcombank - 19031119300014 - NGUYEN VAN CHUNG" data-copy-message="Đã sao chép thông tin tài khoản chú rể" type="button">Sao chép thông tin</button>
