@@ -424,6 +424,21 @@ if (
     cardViewer.showModal();
   });
 
+  const heroCardWidget = $('#heroCardWidget');
+  if (heroCardWidget) {
+    heroCardWidget.addEventListener('click', () => {
+      resetCardViewer();
+      cardViewer.showModal();
+    });
+    heroCardWidget.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        resetCardViewer();
+        cardViewer.showModal();
+      }
+    });
+  }
+
   cardViewerClose.addEventListener('click', () => cardViewer.close());
   cardViewer.addEventListener('click', event => {
     if (event.target === cardViewer) cardViewer.close();
@@ -2159,6 +2174,12 @@ function applyPersonalization() {
     const guestViewerName = $('#guestViewerName');
     if (guestViewerName) {
       guestViewerName.textContent = guestName;
+    }
+
+    // Hiển thị trên thẻ thiệp 3D ở Hero
+    const heroCardGuestName = $('#heroCardGuestName');
+    if (heroCardGuestName) {
+      heroCardGuestName.textContent = guestName;
     }
 
     // Hiển thị trong lời mời Hero

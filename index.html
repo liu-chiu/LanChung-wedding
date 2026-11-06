@@ -221,19 +221,74 @@
           </article>
           <article aria-hidden="true" aria-label="Mặt sau thiệp cưới" class="card-viewer-face card-viewer-face--back" id="cardViewerBack">
             <div class="card-viewer-back-content">
-              <span class="card-viewer-eyebrow">Thông tin tiệc cưới</span>
-              <strong class="card-viewer-back-title">L <i>&amp;</i> C</strong>
-              <span aria-hidden="true" class="card-viewer-divider">✦ &nbsp; ✦ &nbsp; ✦</span>
+              <div class="card-viewer-back-header">
+                <span class="card-viewer-eyebrow">Lịch trình &amp; Thông tin tiệc cưới</span>
+                <strong class="card-viewer-back-title">L <i>&amp;</i> C</strong>
+                <span aria-hidden="true" class="card-viewer-divider">✦ &nbsp; ✦ &nbsp; ✦</span>
+              </div>
               <div class="card-viewer-events">
+                <!-- Tiệc nhà gái -->
                 <section class="card-viewer-event">
                   <span class="card-viewer-event-label">Tiệc nhà gái</span>
-                  <time datetime="2026-12-12T10:30:00+07:00">10:30<br/>Thứ Bảy · 12.12.2026</time>
-                  <address>Ô Số H32, Khu đô thị dịch vụ Hùng Thắng, Phường Bãi Cháy, Hạ Long</address>
+                  <time datetime="2026-12-12T10:30:00+07:00">10:30 · Thứ Bảy 12.12.2026</time>
+                  <address>Ô Số H32, KĐT Hùng Thắng, P. Bãi Cháy, Hạ Long</address>
+
+                  <!-- Lịch trình chi tiết nhà gái -->
+                  <div class="card-viewer-schedule">
+                    <div class="schedule-item">
+                      <span class="schedule-icon">🌸</span>
+                      <div class="schedule-info">
+                        <b>10:00</b>
+                        <span>Đón khách &amp; Chụp ảnh</span>
+                      </div>
+                    </div>
+                    <div class="schedule-item">
+                      <span class="schedule-icon">💍</span>
+                      <div class="schedule-info">
+                        <b>10:30</b>
+                        <span>Khai tiệc chúc mừng</span>
+                      </div>
+                    </div>
+                    <div class="schedule-item">
+                      <span class="schedule-icon">🥂</span>
+                      <div class="schedule-info">
+                        <b>11:30</b>
+                        <span>Chung vui &amp; Chúc phúc</span>
+                      </div>
+                    </div>
+                  </div>
                 </section>
+
+                <!-- Tiệc nhà trai -->
                 <section class="card-viewer-event">
                   <span class="card-viewer-event-label">Tiệc nhà trai</span>
-                  <time datetime="2026-12-12T17:00:00+07:00">17:00<br/>Thứ Bảy · 12.12.2026</time>
-                  <address>Số 8, ngõ 3, đường Văn Hoá, Khối 8 (Xóm Đồng), Sóc Sơn, Hà Nội</address>
+                  <time datetime="2026-12-12T17:00:00+07:00">17:00 · Thứ Bảy 12.12.2026</time>
+                  <address>Số 8, ngõ 3 Văn Hoá, Khối 8, Sóc Sơn, Hà Nội</address>
+
+                  <!-- Lịch trình chi tiết nhà trai -->
+                  <div class="card-viewer-schedule">
+                    <div class="schedule-item">
+                      <span class="schedule-icon">🌸</span>
+                      <div class="schedule-info">
+                        <b>16:30</b>
+                        <span>Đón tiếp quan khách</span>
+                      </div>
+                    </div>
+                    <div class="schedule-item">
+                      <span class="schedule-icon">💍</span>
+                      <div class="schedule-info">
+                        <b>17:00</b>
+                        <span>Cử hành Hôn lễ &amp; Tiệc</span>
+                      </div>
+                    </div>
+                    <div class="schedule-item">
+                      <span class="schedule-icon">🥂</span>
+                      <div class="schedule-info">
+                        <b>18:00</b>
+                        <span>Nâng ly chúc phúc</span>
+                      </div>
+                    </div>
+                  </div>
                 </section>
               </div>
             </div>
@@ -295,6 +350,29 @@
         <button aria-controls="cardViewer" aria-haspopup="dialog" class="card-viewer-trigger" id="openCardViewer" type="button">
           <span aria-hidden="true">✧</span> Xem thiệp hai mặt · phóng to
         </button>
+
+        <!-- Khung xem trước thiệp 3D trực tiếp trong Hero -->
+        <div class="hero-card-widget" id="heroCardWidget" role="button" tabindex="0" aria-label="Chạm để mở thiệp cưới 3D hai mặt phóng to">
+          <div class="hero-card-face">
+            <span class="hero-card-badge-top">Wedding Invitation</span>
+            <picture class="hero-card-logo">
+              <source media="(min-width: 1024px)" srcset="assets/images/logo_liu_chiu_desktop.webp"/>
+              <source media="(min-width: 768px)" srcset="assets/images/logo_liu_chiu_tablet.webp"/>
+              <img alt="Logo Liu Chiu" src="assets/images/logo_liu_chiu_mobile.webp"/>
+            </picture>
+            <h3 class="hero-card-title">Lan <i>&amp;</i> Chung</h3>
+            <p class="hero-card-date">Thứ Bảy · 12.12.2026</p>
+            <div class="hero-card-guest">
+              <span class="hero-card-guest-prefix">Thân mời:</span>
+              <strong class="hero-card-guest-name" id="heroCardGuestName">Quý khách</strong>
+            </div>
+            <div class="hero-card-cta">
+              <span class="hero-card-cta-icon">✦</span>
+              <span>Chạm để xoay 3D &amp; xem lịch trình</span>
+              <span class="hero-card-cta-icon">✦</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
