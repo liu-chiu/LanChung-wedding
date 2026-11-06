@@ -3,6 +3,14 @@
    Style Sheet - Luxury Edition: Phong bì sáp hoàng gia, Cánh hoa rơi & Touch Lightbox
    ========================================================================== */
 
+@font-face {
+  font-family: "HighSpirited";
+  src: url("1KHighSpirited.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 /* ==========================================
    1. CẤU HÌNH GỐC & BIẾN MÀU (CSS VARIABLES)
    ========================================== */
@@ -348,7 +356,7 @@ a {
   display: inline-block;
   padding-bottom: 0.12em;
   color: #76554c;
-  font-family: var(--serif);
+  font-family: "HighSpirited", var(--serif);
   font-size: clamp(1.45rem, 5vw, 1.9rem);
   font-style: italic;
   font-weight: 600;
@@ -3863,6 +3871,7 @@ footer {
 
 .guest-highlight {
   color: var(--green);
+  font-family: "HighSpirited", var(--serif);
   font-weight: 700;
 }
 
