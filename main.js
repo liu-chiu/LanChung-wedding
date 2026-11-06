@@ -2071,6 +2071,12 @@ function applyPersonalization() {
       guestCardBadge.hidden = false;
     }
 
+    // Hiển thị trong Chế độ xem thiệp 3D
+    const guestViewerName = $('#guestViewerName');
+    if (guestViewerName) {
+      guestViewerName.textContent = guestName;
+    }
+
     // Hiển thị trong lời mời Hero
     const guestHeroName = $('#guestHeroName');
     if (guestHeroName) {
