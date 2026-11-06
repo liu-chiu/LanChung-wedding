@@ -1,5 +1,18 @@
 'use strict';
 
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.addEventListener('pageshow', () => {
+  const fragment = window.location.hash.slice(1);
+  const target = fragment ? document.getElementById(fragment) : null;
+  if (target) {
+    target.scrollIntoView();
+    return;
+  }
+  window.scrollTo(0, 0);
+});
+
 // ==========================================
 // 1. CÁC HÀM TIỆN ÍCH DÙNG CHUNG (HELPERS)
 // ==========================================
