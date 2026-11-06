@@ -139,8 +139,8 @@ a {
   background-size: cover;
   padding: max(1.2rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1.2rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.65s ease;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
+  touch-action: none;
   isolation: isolate;
   perspective: 1400px;
 }

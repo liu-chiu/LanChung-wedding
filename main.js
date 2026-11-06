@@ -187,85 +187,169 @@ function triggerOpeningBurst(originEl) {
   renderBurst();
 }
 
-// Hiệu ứng 3D Parallax và kéo xoay phong bì trên màn hình bìa
+// Hiệu ứng 3D Parallax, kéo xoay và Thu phóng (Zoom / Pinch) phong bì trên màn hình bìa
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (envelopeScene && coverElem) {
-  let activePointerId = null;
-  let pointerStartX = 0;
-  let pointerStartY = 0;
-  let lastPointerX = 0;
-  let lastPointerY = 0;
+  let zoom = 1;
+  const minZoom = 0.8;
+  const maxZoom = 2.4;
   let rotationX = 0;
   let rotationY = 0;
   let didDrag = false;
+  let didPinch = false;
   let suppressClick = false;
+  let pinchStartDistance = 0;
+  let pinchStartZoom = 1;
+  let lastTapTime = 0;
+  const activePointers = new Map();
 
+  const clampZoom = value => Math.min(maxZoom, Math.max(minZoom, value));
+
+  const applyEnvelopeTransform = (animate = false) => {
+    if (envelopeScene.classList.contains('is-open')) return;
+    envelopeScene.style.transition = animate ? 'transform 0.35s cubic-bezier(0.2, 0.75, 0.25, 1)' : 'none';
+    envelopeScene.style.transform = `perspective(1200px) scale(${zoom}) rotateY(${rotationY}deg) rotateX(${rotationX}deg)`;
+  };
+
+  // 1. Phóng to / thu nhỏ bằng con lăn chuột (Mouse Wheel)
+  coverElem.addEventListener('wheel', event => {
+    if (envelopeScene.classList.contains('is-open') || coverElem.classList.contains('open')) return;
+    event.preventDefault();
+    const delta = event.deltaY < 0 ? 0.09 : -0.09;
+    zoom = clampZoom(zoom + delta);
+    applyEnvelopeTransform(true);
+  }, { passive: false });
+
+  // 2. Parallax theo chuyển động chuột trên Desktop khi không kéo/pinch
   if (!prefersReducedMotion) {
     coverElem.addEventListener('mousemove', e => {
-      if (envelopeScene.classList.contains('is-open') || envelopeScene.classList.contains('is-dragging')) return;
+      if (
+        envelopeScene.classList.contains('is-open') ||
+        envelopeScene.classList.contains('is-dragging') ||
+        activePointers.size > 0
+      ) return;
       const rect = coverElem.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
-      envelopeScene.style.transform = `perspective(1200px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
+      envelopeScene.style.transition = 'transform 0.15s ease-out';
+      envelopeScene.style.transform = `perspective(1200px) scale(${zoom}) rotateY(${rotationY + x * 4}deg) rotateX(${rotationX - y * 4}deg)`;
     });
 
     coverElem.addEventListener('mouseleave', () => {
       if (envelopeScene.classList.contains('is-open')) return;
-      envelopeScene.style.transform = 'perspective(1200px) rotateY(0deg) rotateX(0deg)';
+      applyEnvelopeTransform(true);
     });
   }
 
-  envelopeScene.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || envelopeScene.classList.contains('is-open')) return;
-    activePointerId = event.pointerId;
-    pointerStartX = lastPointerX = event.clientX;
-    pointerStartY = lastPointerY = event.clientY;
-    rotationX = 0;
-    rotationY = 0;
-    didDrag = false;
-    envelopeScene.setPointerCapture(event.pointerId);
-  });
+  // 3. Pointer Events: Kéo xoay 3D (1 ngón) & Pinch-to-zoom (2 ngón trên điện thoại)
+  const getPointersDistance = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
 
-  envelopeScene.addEventListener('pointermove', event => {
-    if (event.pointerId !== activePointerId) return;
+  let singlePointerStartX = 0;
+  let singlePointerStartY = 0;
+  let lastPointerX = 0;
+  let lastPointerY = 0;
 
-    const deltaX = event.clientX - lastPointerX;
-    const deltaY = event.clientY - lastPointerY;
-    lastPointerX = event.clientX;
-    lastPointerY = event.clientY;
+  coverElem.addEventListener('pointerdown', event => {
+    if (event.button !== 0 && event.pointerType === 'mouse') return;
+    if (envelopeScene.classList.contains('is-open') || coverElem.classList.contains('open')) return;
 
-    if (!didDrag && Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY) < 6) return;
-    if (!didDrag) {
-      didDrag = true;
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    // Double-tap để zoom nhanh 1.5x / 1.0x
+    const now = Date.now();
+    if (activePointers.size === 1 && now - lastTapTime < 300) {
+      zoom = zoom > 1.15 ? 1.0 : 1.55;
+      rotationX = 0;
+      rotationY = 0;
+      applyEnvelopeTransform(true);
+      suppressClick = true;
+      setTimeout(() => { suppressClick = false; }, 250);
+      lastTapTime = 0;
+      return;
+    }
+    lastTapTime = now;
+
+    if (activePointers.size === 1) {
+      singlePointerStartX = lastPointerX = event.clientX;
+      singlePointerStartY = lastPointerY = event.clientY;
+      didDrag = false;
+      didPinch = false;
+    } else if (activePointers.size === 2) {
+      didPinch = true;
+      suppressClick = true;
       envelopeScene.classList.add('is-dragging');
+      const [p1, p2] = [...activePointers.values()];
+      pinchStartDistance = getPointersDistance(p1, p2);
+      pinchStartZoom = zoom;
     }
-
-    rotationY += deltaX * 360 / envelopeScene.clientWidth;
-    rotationX -= deltaY * 360 / envelopeScene.clientHeight;
-    envelopeScene.style.transform = `perspective(1200px) rotateY(${rotationY}deg) rotateX(${rotationX}deg)`;
   });
 
-  const finishEnvelopeDrag = (event, allowClick) => {
-    if (event.pointerId !== activePointerId) return;
+  coverElem.addEventListener('pointermove', event => {
+    if (!activePointers.has(event.pointerId)) return;
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
-    if (didDrag) {
-      if (allowClick) {
-        suppressClick = true;
-        setTimeout(() => { suppressClick = false; }, 0);
+    // Khi có 2 ngón tay -> Pinch Zoom
+    if (activePointers.size >= 2) {
+      const [p1, p2] = [...activePointers.values()];
+      const currentDistance = getPointersDistance(p1, p2);
+      if (pinchStartDistance > 0) {
+        zoom = clampZoom(pinchStartZoom * (currentDistance / pinchStartDistance));
+        applyEnvelopeTransform(false);
       }
-      envelopeScene.classList.remove('is-dragging');
-      envelopeScene.style.transform = 'perspective(1200px) rotateY(0deg) rotateX(0deg)';
+      return;
     }
 
-    activePointerId = null;
-    didDrag = false;
-    if (envelopeScene.hasPointerCapture(event.pointerId)) {
-      envelopeScene.releasePointerCapture(event.pointerId);
+    // Khi có 1 ngón tay -> Kéo xoay 3D
+    if (activePointers.size === 1 && !didPinch) {
+      const deltaX = event.clientX - lastPointerX;
+      const deltaY = event.clientY - lastPointerY;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+
+      if (!didDrag && Math.hypot(event.clientX - singlePointerStartX, event.clientY - singlePointerStartY) < 7) {
+        return;
+      }
+
+      if (!didDrag) {
+        didDrag = true;
+        envelopeScene.classList.add('is-dragging');
+      }
+
+      rotationY += deltaX * 360 / (envelopeScene.clientWidth || 360);
+      rotationX -= deltaY * 360 / (envelopeScene.clientHeight || 220);
+      rotationX = Math.max(-45, Math.min(45, rotationX));
+      applyEnvelopeTransform(false);
+    }
+  });
+
+  const finishPointer = event => {
+    if (!activePointers.has(event.pointerId)) return;
+    activePointers.delete(event.pointerId);
+
+    if (didPinch || didDrag) {
+      suppressClick = true;
+      setTimeout(() => {
+        suppressClick = false;
+        didPinch = false;
+        didDrag = false;
+      }, 200);
+    }
+
+    if (activePointers.size === 0) {
+      envelopeScene.classList.remove('is-dragging');
+      rotationX = 0;
+      rotationY = 0;
+      applyEnvelopeTransform(true);
+    } else if (activePointers.size === 1) {
+      const remaining = [...activePointers.values()][0];
+      lastPointerX = remaining.x;
+      lastPointerY = remaining.y;
     }
   };
 
-  envelopeScene.addEventListener('pointerup', event => finishEnvelopeDrag(event, true));
-  envelopeScene.addEventListener('pointercancel', event => finishEnvelopeDrag(event, false));
+  coverElem.addEventListener('pointerup', finishPointer);
+  coverElem.addEventListener('pointercancel', finishPointer);
+
   envelopeScene.addEventListener('click', event => {
     if (!suppressClick) return;
     event.preventDefault();
