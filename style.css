@@ -28,6 +28,7 @@
   --line: rgba(41, 39, 35, 0.17);
   --serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --guest-font: var(--serif);
 }
 
 *, *::before, *::after {
@@ -356,9 +357,9 @@ a {
   display: inline-block;
   padding-bottom: 0.12em;
   color: #76554c;
-  font-family: "HighSpirited", var(--serif);
-  font-size: clamp(1.45rem, 5vw, 1.9rem);
-  font-style: italic;
+  font-family: var(--guest-font), var(--serif);
+  font-size: clamp(1.45rem, 5vw, 1.95rem);
+  font-style: normal;
   font-weight: 600;
   line-height: 1.1;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
@@ -3862,8 +3863,9 @@ footer {
 }
 
 .guest-card-name {
-  font-family: var(--serif);
+  font-family: var(--guest-font), var(--serif);
   font-size: clamp(1rem, 2.2vw, 1.25rem);
+  font-style: normal;
   font-weight: 600;
   color: var(--ink);
   letter-spacing: 0.02em;
@@ -3871,8 +3873,16 @@ footer {
 
 .guest-highlight {
   color: var(--green);
-  font-family: "HighSpirited", var(--serif);
-  font-weight: 700;
+  font-family: var(--guest-font), var(--serif);
+  font-size: clamp(1.35rem, 3.2vw, 1.7rem);
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.25;
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: baseline;
+  letter-spacing: 0.01em;
+  padding: 0 0.15em;
 }
 
 .admin-link-btn {
