@@ -4,8 +4,8 @@
    ========================================================================== */
 
 @font-face {
-  font-family: "Fz-Amira";
-  src: url("Fz-Amira.ttf") format("truetype");
+  font-family: "iCielBrittanySignature";
+  src: url("iCielBrittanySignature-Regular.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -28,7 +28,7 @@
   --line: rgba(41, 39, 35, 0.17);
   --serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-  --guest-font: 'Fz-Amira', var(--serif);
+  --guest-font: 'iCielBrittanySignature', var(--serif);
 }
 
 *, *::before, *::after {
