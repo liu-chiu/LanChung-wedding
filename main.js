@@ -623,6 +623,31 @@ function applyPersonalization() {
       qrGroom.onerror = () => { qrGroom.src = fallbackGroom; };
       qrGroom.src = groomQRUrl;
     }
+  } else {
+    // Không có tên khách mời → hiển thị mặc định "Quý Khách"
+    const defaultName = 'Quý Khách';
+
+    const guestCardBadge = window.__weddingHelpers.$('#guestCardBadge');
+    const guestCoverName = window.__weddingHelpers.$('#guestCoverName');
+    if (guestCardBadge && guestCoverName) {
+      guestCoverName.textContent = defaultName;
+      guestCardBadge.hidden = false;
+    }
+
+    const guestViewerName = window.__weddingHelpers.$('#guestViewerName');
+    if (guestViewerName) {
+      guestViewerName.textContent = defaultName;
+    }
+
+    const heroCardGuestName = window.__weddingHelpers.$('#heroCardGuestName');
+    if (heroCardGuestName) {
+      heroCardGuestName.textContent = defaultName;
+    }
+
+    const guestHeroName = window.__weddingHelpers.$('#guestHeroName');
+    if (guestHeroName) {
+      guestHeroName.textContent = defaultName;
+    }
   }
 
   // 2. Nếu có chỉ định buổi tiệc (nhà trai / nhà gái)

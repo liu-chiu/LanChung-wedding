@@ -4,8 +4,8 @@
    ========================================================================== */
 
 @font-face {
-  font-family: "HighSpirited";
-  src: url("1KHighSpirited.otf") format("opentype");
+  font-family: "Fz-Amira";
+  src: url("Fz-Amira.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -28,7 +28,7 @@
   --line: rgba(41, 39, 35, 0.17);
   --serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-  --guest-font: 'HighSpirited', var(--serif);
+  --guest-font: 'Fz-Amira', var(--serif);
 }
 
 *, *::before, *::after {
@@ -358,7 +358,7 @@ a {
   padding-bottom: 0.12em;
   color: #76554c;
   font-family: var(--guest-font);
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-style: normal;
   font-weight: 400;
   line-height: 1.1;
@@ -1253,7 +1253,7 @@ a {
   font-family: var(--guest-font);
   font-style: normal;
   font-weight: 400;
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   line-height: 1.1;
   color: #76554c;
   white-space: nowrap;
@@ -1488,7 +1488,7 @@ a {
   font-family: var(--guest-font);
   font-style: normal;
   font-weight: 400;
-  font-size: 2rem;
+  font-size: 1.5rem;
   line-height: 1.1;
   color: #76554c;
   display: inline-block;
@@ -4229,7 +4229,7 @@ button[data-copy].is-copied {
   .card-viewer-face--front p { letter-spacing: 0.1em; }
   .card-viewer-guest { margin-top: 0.25rem; gap: 0.35rem; }
   .card-viewer-guest-prefix { font-size: 0.88rem; }
-  .card-viewer-guest-name { font-size: clamp(1.4rem, 5.5vw, 1.85rem); }
+  .card-viewer-guest-name { font-size: clamp(1.2rem, 4.5vw, 1.5rem); }
   .card-viewer-events { gap: 0.3rem; }
   .card-viewer-event { padding: 0 0.25rem; }
   .card-viewer-schedule { gap: 0.15rem; }
@@ -4417,7 +4417,7 @@ button[data-copy].is-copied {
 .guest-highlight {
   color: var(--green);
   font-family: var(--guest-font);
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-style: normal;
   font-weight: 400;
   line-height: 1.25;
