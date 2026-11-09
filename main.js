@@ -1,5 +1,17 @@
 'use strict';
 
+// ==========================================
+// ENTRY POINT — NẠP CÁC MODULE TÍNH NĂNG
+// ==========================================
+// Scripts được tải bằng <script defer> (không phải ES modules) nên mỗi module
+// tự thực thi khi tải. File này giữ lại các mảnh glue dùng chung.
+
+// ==========================================
+// CÁC MODULE CON ĐƯỢC NẠP TRƯỚC (helpers.js, envelope.js, card-viewer.js,
+// lightbox.js, gallery.js, ics.js, backend.js, rsvp.js, utilities.js)
+// File này chứa các mảnh glue còn lại của trang.
+// ==========================================
+
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
@@ -14,505 +26,11 @@ window.addEventListener('pageshow', () => {
 });
 
 // ==========================================
-// 1. CÁC HÀM TIỆN ÍCH DÙNG CHUNG (HELPERS)
+// MENU & THANH HEADER (NAVIGATION)
 // ==========================================
-const $ = (selector, root = document) => root.querySelector(selector);
-const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
-// Hiển thị thông báo dạng Toast (nổi lên rồi tự ẩn)
-const notify = message => {
-  const toast = $('#toast');
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add('show');
-  clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
-};
-
-// Hàm sao chép đa nền tảng (Hoạt động 100% trên Zalo In-App WebView & Mobile Safari/Chrome)
-async function copyText(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch (err) {
-      console.warn('navigator.clipboard bị hạn chế, chuyển sang cơ chế fallback:', err);
-    }
-  }
-
-  try {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-9999px';
-    textArea.style.top = '-9999px';
-    textArea.style.opacity = '0';
-    textArea.setAttribute('readonly', '');
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    textArea.setSelectionRange(0, 99999);
-    const successful = document.execCommand('copy');
-    document.body.removeChild(textArea);
-    return successful;
-  } catch (err) {
-    console.error('Không thể sao chép bằng execCommand:', err);
-    return false;
-  }
-}
-
-// ==========================================
-// 2. MỞ PHONG BÌ THƯ HOÀNG GIA & CON DẤU SÁP L & C
-// ==========================================
-const openBtn = $('#open');
-const coverElem = $('#cover');
-const envelopeScene = $('#envelopeScene');
-
-// Hiệu ứng pháo hoa bụi vàng & cánh hoa bùng nổ khi mở thiệp
-function triggerOpeningBurst(originEl) {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const canvas = document.getElementById('burstCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  const rect = originEl.getBoundingClientRect();
-  const originX = rect.left + rect.width / 2;
-  const originY = rect.top + rect.height / 2;
-
-  const particles = [];
-  const count = window.innerWidth <= 768 ? 36 : 56;
-  const colors = [
-    '#f7d59b', '#e6bf70', '#d4a853', // Vàng gold
-    '#e29590', '#c87670', '#f4c3be', // Cánh hoa hồng
-    '#ffffff', '#fff5eb'            // Ánh sáng trắng
-  ];
-  const burstStartedAt = performance.now();
-  const burstDuration = 850;
-  const burstRadius = Math.min(Math.hypot(canvas.width, canvas.height) * 0.18, 190);
-
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 2.5 + Math.random() * 4;
-    particles.push({
-      x: originX,
-      y: originY,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 1.5,
-      size: 2 + Math.random() * 3,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      alpha: 1,
-      decay: 0.025 + Math.random() * 0.015,
-      gravity: 0.12,
-      rotation: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.15,
-      isFlowerPetal: Math.random() > 0.5
-    });
-  }
-
-  function renderBurst() {
-    const elapsed = performance.now() - burstStartedAt;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let alive = elapsed < burstDuration;
-
-    const flash = Math.max(0, 1 - elapsed / 240);
-    if (flash > 0) {
-      const gradient = ctx.createRadialGradient(originX, originY, 0, originX, originY, 24 + elapsed * 0.28);
-      gradient.addColorStop(0, `rgba(255, 249, 229, ${flash})`);
-      gradient.addColorStop(0.35, `rgba(247, 213, 155, ${flash * 0.72})`);
-      gradient.addColorStop(1, 'rgba(247, 213, 155, 0)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(originX - 100, originY - 100, 200, 200);
-    }
-
-    for (let ring = 0; ring < 3; ring++) {
-      const ringElapsed = elapsed - ring * 115;
-      if (ringElapsed < 0 || ringElapsed > 680) continue;
-
-      const progress = ringElapsed / 680;
-      const radius = 8 + burstRadius * progress;
-      const alpha = (1 - progress) * 0.72;
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = ring === 1 ? '#f4c3be' : '#f7d59b';
-      ctx.lineWidth = 2.4 - progress * 1.4;
-      ctx.beginPath();
-      ctx.arc(originX, originY, radius, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      if (p.alpha <= 0) continue;
-      alive = true;
-
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += p.gravity;
-      p.vx *= 0.98;
-      p.rotation += p.rotationSpeed;
-      p.alpha -= p.decay;
-
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, p.alpha);
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rotation);
-      ctx.fillStyle = p.color;
-
-      if (p.isFlowerPetal) {
-        ctx.beginPath();
-        ctx.ellipse(0, 0, p.size * 1.2, p.size * 0.7, 0, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.beginPath();
-        ctx.moveTo(0, -p.size);
-        ctx.lineTo(p.size * 0.6, 0);
-        ctx.lineTo(0, p.size);
-        ctx.lineTo(-p.size * 0.6, 0);
-        ctx.closePath();
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    if (alive) {
-      requestAnimationFrame(renderBurst);
-    } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  }
-
-  renderBurst();
-}
-
-// Hiệu ứng 3D Parallax, kéo xoay và Thu phóng (Zoom / Pinch) phong bì trên màn hình bìa
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-// Biến envelope ở outer scope để openEnvelopeInvitation() truy cập được
-var envelopeZoom = 1;
-var envelopeRotationX = 0;
-var envelopeRotationY = 0;
-var isEnvelopeFlipped = false;
-var applyEnvelopeTransform = null;
-if (envelopeScene && coverElem) {
-  let zoom = envelopeZoom;
-  const minZoom = 0.8;
-  const maxZoom = 2.4;
-  let rotationX = envelopeRotationX;
-  let rotationY = envelopeRotationY;
-  let suppressClick = false;
-  let lastTapTime = 0;
-
-  const clampZoom = value => Math.min(maxZoom, Math.max(minZoom, value));
-
-  applyEnvelopeTransform = (animate = false) => {
-    if (envelopeScene.classList.contains('is-open')) return;
-    envelopeScene.style.transition = animate ? 'transform 0.35s cubic-bezier(0.2, 0.75, 0.25, 1)' : 'none';
-    envelopeScene.style.transform = `perspective(1200px) scale(${zoom}) rotateY(${rotationY}deg) rotateX(${rotationX}deg)`;
-    // Sync biến outer scope
-    isEnvelopeFlipped = ((((rotationY % 360) + 360) % 360) > 90 && (((rotationY % 360) + 360) % 360) < 270);
-  };
-
-  // 1. Phóng to / thu nhỏ bằng con lăn chuột (Mouse Wheel)
-  coverElem.addEventListener('wheel', event => {
-    if (envelopeScene.classList.contains('is-open') || coverElem.classList.contains('open')) return;
-    event.preventDefault();
-    const delta = event.deltaY < 0 ? 0.09 : -0.09;
-    zoom = clampZoom(zoom + delta);
-    applyEnvelopeTransform(true);
-  }, { passive: false });
-
-  // 2. Parallax theo chuyển động chuột trên Desktop khi không kéo/pinch
-  if (!prefersReducedMotion) {
-    coverElem.addEventListener('mousemove', e => {
-      if (
-        envelopeScene.classList.contains('is-open') ||
-        envelopeScene.classList.contains('is-dragging') ||
-        envelopeGestures.activePointers.size > 0
-      ) return;
-      const rect = coverElem.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      envelopeScene.style.transition = 'transform 0.15s ease-out';
-      envelopeScene.style.transform = `perspective(1200px) scale(${zoom}) rotateY(${rotationY + x * 4}deg) rotateX(${rotationX - y * 4}deg)`;
-    });
-
-    coverElem.addEventListener('mouseleave', () => {
-      if (envelopeScene.classList.contains('is-open')) return;
-      applyEnvelopeTransform(true);
-    });
-  }
-
-  const coverFlipBtn = $('#coverFlipBtn');
-  // isEnvelopeFlipped đã khai báo ở outer scope (var)
-  if (coverFlipBtn) {
-    coverFlipBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      if (envelopeScene.classList.contains('is-open')) return;
-      isEnvelopeFlipped = !isEnvelopeFlipped;
-      rotationY = isEnvelopeFlipped ? 180 : 0;
-      rotationX = 0;
-      applyEnvelopeTransform(true);
-      updateCoverFlipLabel();
-    });
-  }
-
-  function updateCoverFlipLabel() {
-    const textSpan = coverFlipBtn?.querySelector('.cover-flip-text');
-    if (textSpan) {
-      textSpan.textContent = isEnvelopeFlipped ? 'Quay lại mặt trước phong bì' : 'Lật xem lịch trình sự kiện';
-    }
-    coverFlipBtn?.classList.toggle('is-flipped', isEnvelopeFlipped);
-  }
-
-  // 3. Pointer Events: Kéo xoay 3D (1 ngón) & Pinch-to-zoom (2 ngón trên điện thoại)
-  // Dùng bộ điều khiển chung trong pinch-zoom.js
-  const envelopeGestures = createPinchZoomController(coverElem, {
-    dragSlop: 7,
-    draggingClass: '',
-    canStart: () => !envelopeScene.classList.contains('is-open') && !coverElem.classList.contains('open'),
-    onStart: (_event, pointerCount) => {
-      // Double-tap để zoom nhanh 1.5x / 1.0x
-      const now = Date.now();
-      if (pointerCount === 1 && now - lastTapTime < 300) {
-        zoom = zoom > 1.15 ? 1.0 : 1.55;
-        rotationX = 0;
-        rotationY = 0;
-        applyEnvelopeTransform(true);
-        suppressClick = true;
-        setTimeout(() => { suppressClick = false; }, 250);
-        lastTapTime = 0;
-        // Hủy cú chạm này khỏi bộ điều khiển để không bị xử lý thành kéo
-        envelopeGestures.activePointers.clear();
-        envelopeScene.classList.remove('is-dragging');
-        return;
-      }
-      lastTapTime = now;
-
-      if (pointerCount === 2) {
-        suppressClick = true;
-        envelopeScene.classList.add('is-dragging');
-      }
-    },
-    getZoom: () => zoom,
-    onPinch: scale => {
-      zoom = clampZoom(envelopeGestures.getPinchStartZoom() * scale);
-      applyEnvelopeTransform(false);
-    },
-    onDrag: (deltaX, deltaY) => {
-      envelopeScene.classList.add('is-dragging');
-      rotationY += deltaX * 360 / (envelopeScene.clientWidth || 360);
-      rotationX -= deltaY * 360 / (envelopeScene.clientHeight || 220);
-      rotationX = Math.max(-45, Math.min(45, rotationX));
-      applyEnvelopeTransform(false);
-    },
-    onSettle: ({ dragged }) => {
-      if (dragged) suppressClick = true;
-      setTimeout(() => { suppressClick = false; }, 200);
-      envelopeScene.classList.remove('is-dragging');
-      const modY = ((rotationY % 360) + 360) % 360;
-      isEnvelopeFlipped = modY > 90 && modY < 270;
-      rotationY = isEnvelopeFlipped ? 180 : 0;
-      rotationX = 0;
-      applyEnvelopeTransform(true);
-      updateCoverFlipLabel();
-    }
-  });
-
-  envelopeScene.addEventListener('click', event => {
-    if (!suppressClick) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    suppressClick = false;
-  }, true);
-}
-
-// Chế độ xem thiệp hai mặt với xoay 3D và thu phóng
-const cardViewer = $('#cardViewer');
-const cardViewerTrigger = $('#openCardViewer');
-const cardViewerStage = $('#cardViewerStage');
-const cardViewerCard = $('#cardViewerCard');
-const cardViewerFront = $('#cardViewerFront');
-const cardViewerBack = $('#cardViewerBack');
-const cardZoomLevel = $('#cardZoomLevel');
-const cardZoomOut = $('#cardZoomOut');
-const cardZoomIn = $('#cardZoomIn');
-const cardFlip = $('#cardFlip');
-const cardResetView = $('#cardResetView');
-const cardViewerClose = $('#closeCardViewer');
-
-if (
-  cardViewer && cardViewerTrigger && cardViewerStage && cardViewerCard
-  && cardViewerFront && cardViewerBack && cardZoomLevel && cardZoomOut
-  && cardZoomIn && cardFlip && cardResetView && cardViewerClose
-) {
-  const minZoom = 0.65;
-  const maxZoom = 1.65;
-  let rotationX = -7;
-  let rotationY = -10;
-  let zoom = 1;
-
-  const clampZoom = value => Math.min(maxZoom, Math.max(minZoom, value));
-  const updateCardViewer = () => {
-    cardViewerCard.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg) scale(${zoom})`;
-    cardZoomLevel.value = `${Math.round(zoom * 100)}%`;
-    cardZoomOut.disabled = zoom <= minZoom;
-    cardZoomIn.disabled = zoom >= maxZoom;
-
-    const frontFacing = Math.cos(rotationX * Math.PI / 180) * Math.cos(rotationY * Math.PI / 180) >= 0;
-    const visibleFace = frontFacing ? cardViewerFront : cardViewerBack;
-    visibleFace.style.backfaceVisibility = 'visible';
-    visibleFace.style.webkitBackfaceVisibility = 'visible';
-    cardViewerFront.style.visibility = frontFacing ? 'visible' : 'hidden';
-    cardViewerBack.style.visibility = frontFacing ? 'hidden' : 'visible';
-    cardViewerFront.setAttribute('aria-hidden', String(!frontFacing));
-    cardViewerBack.setAttribute('aria-hidden', String(frontFacing));
-    cardViewerCard.setAttribute('aria-label', frontFacing ? 'Mặt trước thiệp cưới' : 'Mặt sau thiệp cưới');
-  };
-
-  const setZoom = value => {
-    zoom = clampZoom(value);
-    updateCardViewer();
-  };
-
-  const resetCardViewer = () => {
-    rotationX = -7;
-    rotationY = -10;
-    zoom = 1;
-    updateCardViewer();
-  };
-
-
-
-  cardViewerTrigger.addEventListener('click', () => {
-    resetCardViewer();
-    cardViewer.showModal();
-  });
-
-  const heroCardWidget = $('#heroCardWidget');
-  if (heroCardWidget) {
-    heroCardWidget.addEventListener('click', () => {
-      resetCardViewer();
-      cardViewer.showModal();
-    });
-    heroCardWidget.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        resetCardViewer();
-        cardViewer.showModal();
-      }
-    });
-  }
-
-  cardViewerClose.addEventListener('click', () => cardViewer.close());
-  cardViewer.addEventListener('click', event => {
-    if (event.target === cardViewer) cardViewer.close();
-  });
-  cardViewer.addEventListener('close', () => {
-    cardViewerGestures.reset();
-    resetCardViewer();
-  });
-
-  cardZoomOut.addEventListener('click', () => setZoom(zoom - 0.1));
-  cardZoomIn.addEventListener('click', () => setZoom(zoom + 0.1));
-  cardFlip.addEventListener('click', () => {
-    const frontFacing = Math.cos(rotationX * Math.PI / 180) * Math.cos(rotationY * Math.PI / 180) >= 0;
-    rotationX = 0;
-    rotationY = frontFacing ? 180 : 0;
-    updateCardViewer();
-  });
-  cardResetView.addEventListener('click', resetCardViewer);
-
-  cardViewerStage.addEventListener('wheel', event => {
-    event.preventDefault();
-    setZoom(zoom + (event.deltaY < 0 ? 0.08 : -0.08));
-  }, { passive: false });
-
-  // Kéo xoay & pinch-zoom thiệp dùng bộ điều khiển chung trong pinch-zoom.js
-  const cardViewerGestures = createPinchZoomController(cardViewerStage, {
-    draggingClass: '',
-    preventDefaultOnStart: true,
-    canStart: () => cardViewer.open,
-    onStart: event => {
-      cardViewerStage.setPointerCapture(event.pointerId);
-      cardViewerCard.classList.add('is-dragging');
-    },
-    getZoom: () => zoom,
-    onPinch: scale => setZoom(zoom * scale),
-    onDrag: (deltaX, deltaY) => {
-      const cardRect = cardViewerCard.getBoundingClientRect();
-      rotationY += deltaX * 360 / cardRect.width;
-      rotationX -= deltaY * 360 / cardRect.height;
-      updateCardViewer();
-    },
-    onSettle: () => cardViewerCard.classList.remove('is-dragging')
-  });
-
-  updateCardViewer();
-}
-
-function openEnvelopeInvitation() {
-  if (!coverElem || coverElem.classList.contains('is-opening') || coverElem.classList.contains('open')) return;
-  coverElem.classList.add('is-opening');
-  coverElem.setAttribute('aria-hidden', 'true');
-  coverElem.inert = true;
-
-  if (isEnvelopeFlipped) {
-    isEnvelopeFlipped = false;
-    // Reset transform trực tiếp (các biến rotationX/Y là block-scoped)
-    if (envelopeScene) {
-      envelopeScene.style.transition = 'none';
-      envelopeScene.style.transform = 'perspective(1200px) scale(1) rotateY(0deg) rotateX(0deg)';
-    }
-  }
-
-  if (navigator.vibrate) {
-    try { navigator.vibrate([25, 45, 25]); } catch (e) {}
-  }
-
-  // 1. Kích hoạt bùng nổ pháo hoa cánh hoa & bụi vàng
-  const burstOrigin = openBtn || envelopeScene || coverElem;
-  triggerOpeningBurst(burstOrigin);
-
-  // 2. Mở nắp phong bì và nhô lá thiệp mời lên
-  if (envelopeScene) {
-    envelopeScene.style.transform = 'none';
-    envelopeScene.classList.add('is-open');
-  }
-
-  // 3. Bắt đầu phát nhạc nền
-  startBackgroundMusic();
-
-  // 4. Chờ nắp mở xong rồi chuyển nhẹ sang nội dung chính
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const openingDelay = (reducedMotion ? 0 : 900) + 500;
-  setTimeout(() => {
-    coverElem.classList.add('open');
-    document.body.classList.remove('locked');
-
-    setTimeout(() => {
-      coverElem.remove();
-    }, 700);
-  }, openingDelay);
-}
-
-if (openBtn) openBtn.onclick = openEnvelopeInvitation;
-if (envelopeScene) envelopeScene.onclick = openEnvelopeInvitation;
-const coverCta = $('#coverCta');
-if (coverCta) {
-  coverCta.onclick = openEnvelopeInvitation;
-  coverCta.onkeydown = e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openEnvelopeInvitation();
-    }
-  };
-}
-
-// Bật/tắt danh mục điều hướng
-const menuButton = $('#menu');
-const navigation = $('#nav');
+const menuButton = window.__weddingHelpers.$('#menu');
+const navigation = window.__weddingHelpers.$('#nav');
 const mobileNavigation = window.matchMedia('(max-width: 768px)');
 
 function setNavigationOpen(isOpen) {
@@ -529,18 +47,14 @@ if (menuButton && navigation) {
 }
 
 // Click chọn menu sẽ tự đóng menu mobile lại
-$$('nav a').forEach(link => {
+window.__weddingHelpers.$$('nav a').forEach(link => {
   link.onclick = () => {
     setNavigationOpen(false);
   };
 });
 
-const siteHeader = $('.site-header');
+const siteHeader = window.__weddingHelpers.$('.site-header');
 let previousScrollY = window.scrollY;
-
-function showSiteHeader() {
-  siteHeader?.classList.remove('is-hidden');
-}
 
 window.addEventListener('scroll', () => {
   if (!siteHeader) return;
@@ -549,7 +63,7 @@ window.addEventListener('scroll', () => {
   const scrollDelta = currentScrollY - previousScrollY;
 
   if (currentScrollY <= siteHeader.offsetHeight || scrollDelta < 0) {
-    showSiteHeader();
+    siteHeader?.classList.remove('is-hidden');
     if (scrollDelta < 0 || currentScrollY <= siteHeader.offsetHeight) {
       setNavigationOpen(false);
     }
@@ -561,27 +75,36 @@ window.addEventListener('scroll', () => {
   previousScrollY = currentScrollY;
 }, { passive: true });
 
-mobileNavigation.addEventListener('change', event => {
+mobileNavigation.addEventListener('change', () => {
   setNavigationOpen(false);
 });
 
 // Hiệu ứng cuộn trang hiện dần (Scroll Reveal)
-const observer = new IntersectionObserver(
-  entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.08 }
-);
+function setupRevealObserver() {
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.08 }
+  );
 
-$$('.reveal').forEach(element => observer.observe(element));
+  window.__weddingHelpers.$$('.reveal').forEach(element => observer.observe(element));
+}
+
+// Initialize reveal observer after cover is removed (or immediately if no cover)
+if (document.getElementById('cover')) {
+  window.addEventListener('wedding:coverRemoved', setupRevealObserver, { once: true });
+} else {
+  setupRevealObserver();
+}
 
 // ==========================================
-// 3. BỘ ĐẾM NGƯỢC THỜI GIAN (COUNTDOWN)
+// BỘ ĐẾM NGƯỢC THỜI GIAN (COUNTDOWN)
 // ==========================================
 const targetTime = new Date('2026-12-12T10:30:00+07:00').getTime();
 
@@ -591,19 +114,19 @@ function updateCountdown() {
 
   if (timeLeft <= 0) {
     ['days', 'hours', 'mins', 'secs'].forEach(id => {
-      const element = $('#' + id);
+      const element = window.__weddingHelpers.$('#' + id);
       if (element) element.textContent = '00';
     });
 
-    const message = $('#countMsg');
+    const message = window.__weddingHelpers.$('#countMsg');
     if (message) message.textContent = 'Ngày hạnh phúc đã đến!';
     return;
   }
 
-  const days = $('#days');
-  const hours = $('#hours');
-  const minutes = $('#mins');
-  const seconds = $('#secs');
+  const days = window.__weddingHelpers.$('#days');
+  const hours = window.__weddingHelpers.$('#hours');
+  const minutes = window.__weddingHelpers.$('#mins');
+  const seconds = window.__weddingHelpers.$('#secs');
 
   if (days) days.textContent = String(Math.floor(timeLeft / 864e5));
   if (hours) {
@@ -621,553 +144,7 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 // ==========================================
-// 4. LỊCH THÁNG & TẠO SỰ KIỆN LỊCH (ICS)
-// ==========================================
-// Render lịch tháng 12/2026 (Ngày 12 được đánh dấu class 'today')
-if ($('#cal')) {
-  const daysHTML =
-    '<span class="muted">30</span>' +
-    Array.from(
-      { length: 31 },
-      (_, i) => i === 11
-        ? '<span class="today" aria-label="Ngày cưới: 12 tháng 12"><img src="assets/images/CD-CR-optimized.jpg" alt="" loading="lazy" decoding="async"><span>12</span></span>'
-        : `<span>${i + 1}</span>`
-    ).join('') +
-    '<span class="muted">1</span><span class="muted">2</span><span class="muted">3</span>';
-  $('#cal').innerHTML = daysHTML;
-}
-
-// Dữ liệu tạo file lịch cá nhân (.ics)
-const calendarEvents = {
-  bride: {
-    title: 'Tiệc nhà gái - Lan & Chung',
-    startUtc: '20261212T033000Z',
-    endUtc: '20261212T053000Z',
-    startLocal: '20261212T103000',
-    endLocal: '20261212T123000',
-    location: 'Ô Số H32, Khu đô thị dịch vụ Hùng Thắng, Phường Bãi Cháy, Hạ Long'
-  },
-  groom: {
-    title: 'Tiệc nhà trai - Lan & Chung',
-    startUtc: '20261212T100000Z',
-    endUtc: '20261212T120000Z',
-    startLocal: '20261212T170000',
-    endLocal: '20261212T190000',
-    location: 'Số 8, ngõ 3, đường Văn Hoá, Khối 8, Sóc Sơn, Hà Nội'
-  }
-};
-
-$$('[data-ics]').forEach(button => {
-  button.onclick = () => {
-    const ev = calendarEvents[button.dataset.ics];
-    if (!ev) return;
-
-    const isIOS =
-      /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (/Android/i.test(navigator.userAgent)) {
-      const calendarUrl = new URL('https://calendar.google.com/calendar/render');
-      calendarUrl.search = new URLSearchParams({
-        action: 'TEMPLATE',
-        text: ev.title,
-        dates: `${ev.startLocal}/${ev.endLocal}`,
-        ctz: 'Asia/Ho_Chi_Minh',
-        location: ev.location
-      }).toString();
-      const calendarWindow = window.open(calendarUrl.toString(), '_blank');
-      if (calendarWindow) {
-        calendarWindow.opener = null;
-      } else {
-        window.location.assign(calendarUrl.toString());
-      }
-      return;
-    }
-
-    const escapeICSText = value =>
-      value.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
-    const blobContent =
-      `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Lan & Chung//Wedding Invitation//VI\r\n` +
-      `CALSCALE:GREGORIAN\r\nBEGIN:VEVENT\r\nUID:${button.dataset.ics}-lan-chung-20261212@liu-chiu.github.io\r\n` +
-      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}\r\n` +
-      `DTSTART:${ev.startUtc}\r\nDTEND:${ev.endUtc}\r\nSUMMARY:${escapeICSText(ev.title)}\r\n` +
-      `LOCATION:${escapeICSText(ev.location)}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
-
-    const blob = new Blob([blobContent], { type: 'text/calendar;charset=utf-8' });
-    const downloadLink = document.createElement('a');
-    downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = `lan-chung-${button.dataset.ics}.ics`;
-    downloadLink.click();
-    setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
-    if (isIOS) notify('Đã tải tệp lịch. Mở tệp vừa tải để thêm sự kiện vào Lịch trên iPhone.');
-  };
-});
-
-// ==========================================
-// 5. CÁC TƯƠNG TÁC TIỆN ÍCH (COPY, RSVP SCROLL, SHARE)
-// ==========================================
-// Sao chép địa chỉ / số tài khoản với hỗ trợ Zalo WebView
-$$('[data-copy]').forEach(button => {
-  button.onclick = async () => {
-    const textToCopy = button.dataset.copy;
-    const success = await copyText(textToCopy);
-    if (success) {
-      notify(button.dataset.copyMessage || 'Đã sao chép vào bộ nhớ tạm');
-    } else {
-      notify('Không thể sao chép tự động. Vui lòng thử sao chép thủ công.');
-    }
-  };
-});
-
-// Nút chọn sự kiện ở phần địa điểm để cuộn thẳng xuống form RSVP
-$$('[data-select]').forEach(button => {
-  button.onclick = () => {
-    const eventInput = $('[name=event]');
-    if (eventInput) eventInput.value = button.dataset.select;
-    $('#rsvp')?.scrollIntoView({ behavior: 'smooth' });
-  };
-});
-
-// Nút chia sẻ trang thiệp cưới
-if ($('#share')) {
-  $('#share').onclick = async () => {
-    const shareData = {
-      title: 'Lan & Chung | 12.12.2026',
-      text: 'Lan và Chung trân trọng mời bạn cùng hiện diện trong ngày cưới 12.12.2026.',
-      url: location.href
-    };
-
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-      try {
-        await navigator.share(shareData);
-        return;
-      } catch (error) {
-        if (error.name === 'AbortError') return;
-      }
-    }
-
-    // Fallback: Tự động sao chép link website để gửi qua Zalo/Facebook
-    const success = await copyText(location.href);
-    if (success) {
-      notify('Đã sao chép liên kết thiệp cưới! Bạn có thể dán và gửi cho bạn bè.');
-    } else {
-      notify('Hãy sao chép liên kết trên thanh địa chỉ để chia sẻ.');
-    }
-  };
-}
-
-// ==========================================
-// 6. ALBUM ẢNH (TOUCH / SWIPE LIGHTBOX PRO)
-// ==========================================
-const lightbox = $('#lightbox');
-const lightImg = $('#lightImg');
-const lightCaption = $('#lightCaption');
-const lightCounter = $('#lightCounter');
-let lightboxTrigger = null;
-let currentPhotoIndex = 0;
-
-// Thu thập danh sách ảnh trong Album
-const photos = $$('.photo').map((btn, index) => {
-  const img = $('img', btn);
-  return {
-    src: btn.dataset.img || (img ? img.src : ''),
-    alt: img ? img.alt : `Khoảnh khắc ngày cưới ${index + 1}`
-  };
-});
-let galleryIgnoreNextClick = false;
-
-function updateLightboxPhoto(index, animate = false) {
-  if (photos.length === 0) return;
-  currentPhotoIndex = (index + photos.length) % photos.length;
-  const current = photos[currentPhotoIndex];
-
-  if (animate && lightImg) {
-    lightImg.style.opacity = '0.35';
-    lightImg.style.transform = 'scale(0.97)';
-  }
-
-  setTimeout(() => {
-    if (lightImg) {
-      lightImg.src = current.src;
-      lightImg.alt = current.alt;
-      lightImg.style.opacity = '1';
-      lightImg.style.transform = 'none';
-    }
-    if (lightCaption) {
-      lightCaption.textContent = current.alt;
-    }
-    if (lightCounter) {
-      lightCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
-    }
-  }, animate ? 150 : 0);
-}
-
-function openLightbox(index, triggerElement) {
-  if (!lightbox) return;
-  stopGalleryAutoplay();
-  lightboxTrigger = triggerElement;
-  updateLightboxPhoto(index, false);
-  lightbox.hidden = false;
-  document.body.classList.add('lightbox-open');
-  $('#close')?.focus();
-}
-
-function closeLightbox() {
-  if (!lightbox || lightbox.hidden) return;
-  lightbox.hidden = true;
-  document.body.classList.remove('lightbox-open');
-  lightboxTrigger?.focus();
-  lightboxTrigger = null;
-  scheduleGalleryAutoplay();
-}
-
-const gallerySlider = $('#gallerySlider');
-const galleryTrack = $('#galleryTrack');
-const galleryCounter = $('#galleryCounter');
-const gallerySlides = $$('.photo');
-const galleryReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const galleryFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-let galleryVisualSlides = gallerySlides;
-let galleryAutoSlideTimeout = null;
-let galleryScrollTimeout = null;
-let galleryPresentationFrame = null;
-let galleryDragStartX = 0;
-let galleryDragStartY = 0;
-let galleryDragStartScrollLeft = 0;
-let galleryDragPointerId = null;
-let galleryIsDragging = false;
-let galleryIsVisible = false;
-
-function getGalleryActiveSlideIndex() {
-  if (!galleryTrack || galleryVisualSlides.length === 0) return 0;
-  const trackCenter = galleryTrack.getBoundingClientRect().left + galleryTrack.clientWidth / 2;
-  return galleryVisualSlides.reduce((closestIndex, slide, index) => {
-    const currentDistance = Math.abs(slide.getBoundingClientRect().left + slide.offsetWidth / 2 - trackCenter);
-    const closestSlide = galleryVisualSlides[closestIndex];
-    const closestDistance = Math.abs(closestSlide.getBoundingClientRect().left + closestSlide.offsetWidth / 2 - trackCenter);
-    return currentDistance < closestDistance ? index : closestIndex;
-  }, 0);
-}
-
-function getGalleryActiveIndex() {
-  return photos.length ? (getGalleryActiveSlideIndex() - 1 + photos.length) % photos.length : 0;
-}
-
-function updateGalleryPresentation() {
-  if (!galleryTrack || galleryVisualSlides.length === 0 || galleryReducedMotion.matches) return;
-  const trackCenter = galleryTrack.scrollLeft + galleryTrack.clientWidth / 2;
-
-  galleryVisualSlides.forEach(slide => {
-    const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
-    const offset = (slideCenter - trackCenter) / Math.max(slide.offsetWidth, galleryTrack.clientWidth * 0.42);
-    const distance = Math.min(Math.abs(offset), 1.25);
-    slide.style.setProperty('--gallery-rotate', `${(-offset * 18).toFixed(2)}deg`);
-    slide.style.setProperty('--gallery-scale', (1 - distance * 0.075).toFixed(3));
-    slide.style.setProperty('--gallery-z', `${(-distance * 34).toFixed(1)}px`);
-    slide.style.setProperty('--gallery-opacity', (1 - distance * 0.16).toFixed(3));
-  });
-}
-
-function updateGalleryCounter() {
-  if (!galleryCounter || photos.length === 0) return;
-  const activeSlideIndex = getGalleryActiveSlideIndex();
-  const activeIndex = (activeSlideIndex - 1 + photos.length) % photos.length;
-  galleryCounter.textContent = `${activeIndex + 1} / ${photos.length}`;
-  galleryVisualSlides.forEach((slide, index) => {
-    const photoIndex = (index - 1 + photos.length) % photos.length;
-    slide.setAttribute('aria-label', `Ảnh ${photoIndex + 1} trên ${photos.length}: ${photos[photoIndex].alt}`);
-    slide.classList.toggle('is-active', index === activeSlideIndex);
-    slide.setAttribute('aria-current', index === activeSlideIndex ? 'true' : 'false');
-
-    let caption = $('.photo-caption', slide);
-    if (!caption) {
-      caption = document.createElement('span');
-      caption.className = 'photo-caption';
-      caption.setAttribute('aria-hidden', 'true');
-      slide.append(caption);
-    }
-    caption.textContent = photos[photoIndex].alt;
-  });
-}
-
-function goToGallerySlide(index) {
-  if (!galleryTrack || gallerySlides.length < 2) return;
-  const activeSlideIndex = getGalleryActiveSlideIndex();
-  const activeIndex = (activeSlideIndex - 1 + photos.length) % photos.length;
-  const step = index - activeIndex;
-  const targetSlideIndex = Math.abs(step) === 1
-    ? activeSlideIndex + step
-    : ((index + photos.length) % photos.length) + 1;
-  const slide = galleryVisualSlides[targetSlideIndex];
-  const left = slide.offsetLeft - (galleryTrack.clientWidth - slide.clientWidth) / 2;
-  galleryTrack.scrollTo({
-    left,
-    behavior: galleryReducedMotion.matches ? 'auto' : 'smooth'
-  });
-  updateGalleryPresentation();
-  updateGalleryCounter();
-}
-
-function normalizeGalleryLoop() {
-  if (!galleryTrack || galleryVisualSlides.length !== photos.length + 2) return;
-  const activeSlideIndex = getGalleryActiveSlideIndex();
-  const targetSlideIndex = activeSlideIndex === 0
-    ? photos.length
-    : activeSlideIndex === photos.length + 1
-      ? 1
-      : activeSlideIndex;
-  if (targetSlideIndex === activeSlideIndex) return;
-
-  const slide = galleryVisualSlides[targetSlideIndex];
-  galleryTrack.style.scrollBehavior = 'auto';
-  galleryTrack.scrollLeft = slide.offsetLeft - (galleryTrack.clientWidth - slide.clientWidth) / 2;
-  requestAnimationFrame(() => {
-    galleryTrack.style.removeProperty('scroll-behavior');
-  });
-}
-
-function stopGalleryAutoplay() {
-  clearTimeout(galleryAutoSlideTimeout);
-  galleryAutoSlideTimeout = null;
-}
-
-function scheduleGalleryAutoplay() {
-  stopGalleryAutoplay();
-  if (
-    !gallerySlider ||
-    galleryReducedMotion.matches ||
-    document.hidden ||
-    (galleryFinePointer.matches && gallerySlider.matches(':hover')) ||
-    (gallerySlider.contains(document.activeElement) && document.activeElement.matches(':focus-visible')) ||
-    (lightbox && !lightbox.hidden) ||
-    !galleryIsVisible ||
-    photos.length < 2
-  ) return;
-
-  galleryAutoSlideTimeout = setTimeout(() => {
-    goToGallerySlide(getGalleryActiveIndex() + 1);
-    scheduleGalleryAutoplay();
-  }, 3000);
-}
-
-if (gallerySlider && galleryTrack) {
-  if (gallerySlides.length > 1) {
-    const firstClone = gallerySlides[0].cloneNode(true);
-    const lastClone = gallerySlides[gallerySlides.length - 1].cloneNode(true);
-    firstClone.setAttribute('aria-hidden', 'true');
-    firstClone.tabIndex = -1;
-    lastClone.setAttribute('aria-hidden', 'true');
-    lastClone.tabIndex = -1;
-    galleryTrack.prepend(lastClone);
-    galleryTrack.append(firstClone);
-    galleryVisualSlides = $$('.photo', galleryTrack);
-  }
-
-  galleryVisualSlides.forEach((slide, index) => {
-    const photoIndex = (index - 1 + photos.length) % photos.length;
-    slide.dataset.galleryIndex = String(photoIndex);
-    slide.setAttribute('aria-label', `Ảnh ${photoIndex + 1} trên ${photos.length}: ${photos[photoIndex].alt}`);
-  });
-
-  galleryTrack.addEventListener('click', event => {
-    const button = event.target.closest('.photo');
-    if (!button || !galleryTrack.contains(button)) return;
-    if (galleryIgnoreNextClick) {
-      galleryIgnoreNextClick = false;
-      return;
-    }
-    openLightbox(Number(button.dataset.galleryIndex), button);
-  });
-
-  $('#galleryPrev')?.addEventListener('click', () => {
-    goToGallerySlide(getGalleryActiveIndex() - 1);
-    scheduleGalleryAutoplay();
-  });
-  $('#galleryNext')?.addEventListener('click', () => {
-    goToGallerySlide(getGalleryActiveIndex() + 1);
-    scheduleGalleryAutoplay();
-  });
-
-  galleryTrack.addEventListener('scroll', () => {
-    stopGalleryAutoplay();
-    if (galleryPresentationFrame === null) {
-      galleryPresentationFrame = requestAnimationFrame(() => {
-        updateGalleryPresentation();
-        galleryPresentationFrame = null;
-      });
-    }
-    clearTimeout(galleryScrollTimeout);
-    galleryScrollTimeout = setTimeout(() => {
-      normalizeGalleryLoop();
-      updateGalleryCounter();
-      scheduleGalleryAutoplay();
-    }, 120);
-  }, { passive: true });
-
-  galleryTrack.addEventListener('pointerdown', event => {
-    if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
-    galleryDragStartX = event.clientX;
-    galleryDragStartY = event.clientY;
-    galleryDragStartScrollLeft = galleryTrack.scrollLeft;
-    galleryDragPointerId = event.pointerId;
-    galleryIsDragging = false;
-    stopGalleryAutoplay();
-  });
-
-  galleryTrack.addEventListener('pointermove', event => {
-    if (event.pointerId !== galleryDragPointerId) return;
-    const deltaX = event.clientX - galleryDragStartX;
-    const deltaY = event.clientY - galleryDragStartY;
-
-    if (!galleryIsDragging) {
-      if (Math.abs(deltaX) < 7 && Math.abs(deltaY) < 7) return;
-      if (Math.abs(deltaX) <= Math.abs(deltaY)) {
-        galleryDragPointerId = null;
-        scheduleGalleryAutoplay();
-        return;
-      }
-
-      galleryIsDragging = true;
-      galleryTrack.classList.add('is-dragging');
-      galleryTrack.setPointerCapture(event.pointerId);
-    }
-
-    event.preventDefault();
-    galleryTrack.scrollLeft = galleryDragStartScrollLeft - deltaX;
-  });
-
-  const finishGalleryDrag = event => {
-    if (event.pointerId !== galleryDragPointerId) return;
-    const wasDragging = galleryIsDragging;
-    galleryDragPointerId = null;
-    galleryIsDragging = false;
-    galleryTrack.classList.remove('is-dragging');
-
-    if (galleryTrack.hasPointerCapture(event.pointerId)) {
-      galleryTrack.releasePointerCapture(event.pointerId);
-    }
-
-    if (wasDragging) {
-      galleryIgnoreNextClick = true;
-      setTimeout(() => { galleryIgnoreNextClick = false; }, 400);
-      updateGalleryCounter();
-    } else {
-      scheduleGalleryAutoplay();
-    }
-  };
-
-  galleryTrack.addEventListener('pointerup', finishGalleryDrag);
-  galleryTrack.addEventListener('pointercancel', finishGalleryDrag);
-
-  gallerySlider.addEventListener('mouseenter', () => {
-    if (galleryFinePointer.matches) stopGalleryAutoplay();
-  });
-  gallerySlider.addEventListener('mouseleave', () => {
-    if (galleryFinePointer.matches) scheduleGalleryAutoplay();
-  });
-  gallerySlider.addEventListener('focusin', event => {
-    if (event.target.matches(':focus-visible')) stopGalleryAutoplay();
-  });
-  gallerySlider.addEventListener('focusout', event => {
-    const nextTarget = event.relatedTarget;
-    if (!gallerySlider.contains(nextTarget) || !(nextTarget instanceof Element && nextTarget.matches(':focus-visible'))) {
-      scheduleGalleryAutoplay();
-    }
-  });
-  gallerySlider.addEventListener('pointerdown', stopGalleryAutoplay);
-  galleryReducedMotion.addEventListener('change', () => {
-    updateGalleryPresentation();
-    scheduleGalleryAutoplay();
-  });
-  document.addEventListener('visibilitychange', scheduleGalleryAutoplay);
-  const galleryVisibilityObserver = new IntersectionObserver(entries => {
-    galleryIsVisible = entries.some(entry => entry.isIntersecting);
-    if (galleryIsVisible) {
-      scheduleGalleryAutoplay();
-    } else {
-      stopGalleryAutoplay();
-    }
-  }, { threshold: 0.1 });
-  galleryVisibilityObserver.observe(gallerySlider);
-  window.addEventListener('resize', () => {
-    updateGalleryPresentation();
-    updateGalleryCounter();
-  });
-
-  const firstSlide = galleryVisualSlides[gallerySlides.length > 1 ? 1 : 0];
-  galleryTrack.style.scrollBehavior = 'auto';
-  galleryTrack.scrollLeft = firstSlide.offsetLeft - (galleryTrack.clientWidth - firstSlide.clientWidth) / 2;
-  galleryTrack.style.removeProperty('scroll-behavior');
-  updateGalleryPresentation();
-  updateGalleryCounter();
-  scheduleGalleryAutoplay();
-}
-
-// Nút Đóng & Nút Next / Prev
-$('#close')?.addEventListener('click', closeLightbox);
-$('#lightPrev')?.addEventListener('click', () => updateLightboxPhoto(currentPhotoIndex - 1, true));
-$('#lightNext')?.addEventListener('click', () => updateLightboxPhoto(currentPhotoIndex + 1, true));
-
-// Click vùng tối ra ngoài ảnh để đóng
-if (lightbox) {
-  lightbox.onclick = event => {
-    if (event.target === lightbox) {
-      closeLightbox();
-    }
-  };
-}
-
-// Phím mũi tên & Escape
-document.addEventListener('keydown', event => {
-  if (lightbox?.hidden) return;
-
-  if (event.key === 'Escape') {
-    closeLightbox();
-  } else if (event.key === 'ArrowLeft') {
-    updateLightboxPhoto(currentPhotoIndex - 1, true);
-  } else if (event.key === 'ArrowRight') {
-    updateLightboxPhoto(currentPhotoIndex + 1, true);
-  }
-});
-
-// Cử chỉ cảm ứng vuốt tay (Swipe Gesture) trên điện thoại
-let touchStartX = 0;
-let touchStartY = 0;
-let touchEndX = 0;
-let touchEndY = 0;
-
-if (lightbox) {
-  lightbox.addEventListener('touchstart', e => {
-    touchStartX = e.changedTouches[0].screenX;
-    touchStartY = e.changedTouches[0].screenY;
-  }, { passive: true });
-
-  lightbox.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
-    touchEndY = e.changedTouches[0].screenY;
-    handleLightboxSwipe();
-  }, { passive: true });
-}
-
-function handleLightboxSwipe() {
-  const diffX = touchEndX - touchStartX;
-  const diffY = touchEndY - touchStartY;
-
-  // Vuốt ngang: chuyển ảnh trước / sau
-  if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
-    if (diffX < 0) {
-      updateLightboxPhoto(currentPhotoIndex + 1, true);
-    } else {
-      updateLightboxPhoto(currentPhotoIndex - 1, true);
-    }
-  }
-  // Vuốt dọc xuống dưới mạnh: đóng lightbox
-  else if (diffY > 90 && Math.abs(diffY) > Math.abs(diffX) * 1.4) {
-    closeLightbox();
-  }
-}
-
-// ==========================================
-// 7. HIỆU ỨNG CÁNH HOA RƠI LÃNG MẠN (CANVAS PETALS)
+// HIỆU ỨNG CÁNH HOA RƠI LÃNG MẠN (CANVAS PETALS)
 // ==========================================
 class FallingPetals {
   constructor(canvasId) {
@@ -1227,8 +204,7 @@ class FallingPetals {
   }
 
   init() {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (reducedMotion.matches) return;
+    if (window.__weddingHelpers.prefersReducedMotion.matches) return;
 
     this.resize();
     window.addEventListener('resize', this.resize);
@@ -1467,7 +443,7 @@ class FallingPetals {
 
 const petalsManager = new FallingPetals('petalsCanvas');
 
-const petalsToggle = $('#petalsToggle');
+const petalsToggle = window.__weddingHelpers.$('#petalsToggle');
 if (petalsToggle) {
   petalsToggle.onclick = () => {
     const active = petalsManager.toggle();
@@ -1478,502 +454,10 @@ if (petalsToggle) {
 }
 
 // ==========================================
-// 8. BACKEND GOOGLE SHEETS: RSVP + LỜI CHÚC
+// TRÌNH PHÁT NHẠC NỀN (AUDIO PLAYER)
 // ==========================================
-const CONFIG = window.WEDDING_CONFIG || {};
-
-function createSubmissionId() {
-  const random = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
-  return `lc_${Date.now().toString(36)}_${random}`;
-}
-
-function jsonp(params, timeout = 10000) {
-  return new Promise((resolve, reject) => {
-    if (!CONFIG.apiUrl) {
-      reject(new Error('Backend Google Sheets chưa được cấu hình'));
-      return;
-    }
-
-    const callback = `lc_callback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const script = document.createElement('script');
-    const timer = setTimeout(
-      () => finish(new Error('Hết thời gian chờ phản hồi từ Google Sheets')),
-      timeout
-    );
-
-    function finish(error, data) {
-      clearTimeout(timer);
-      delete window[callback];
-      if (script.parentNode) script.remove();
-
-      if (error) {
-        reject(error);
-      } else {
-        resolve(data);
-      }
-    }
-
-    window[callback] = data => finish(null, data);
-    script.onerror = () => finish(new Error('Không thể kết nối đến Google Sheets'));
-    script.src = `${CONFIG.apiUrl}?${new URLSearchParams({ ...params, callback })}`;
-    document.head.appendChild(script);
-  });
-}
-
-async function submitAndVerify(payload) {
-  if (!CONFIG.apiUrl) {
-    throw new Error('Backend Google Sheets chưa được cấu hình');
-  }
-
-  const id = createSubmissionId();
-  await fetch(CONFIG.apiUrl, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ ...payload, id })
-  });
-
-  let lastError = null;
-  const retryDelays = [0, 300, 600, 1000];
-  for (let attempt = 0; attempt < 4; attempt++) {
-    if (retryDelays[attempt] > 0) {
-      await new Promise(resolve => setTimeout(resolve, retryDelays[attempt]));
-    }
-    try {
-      const result = await jsonp({ action: 'status', id, type: payload.type }, 2500);
-      if (result && result.saved) return id;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw new Error(
-    'Không xác minh được dữ liệu đã lưu vào Google Sheets. Vui lòng thử lại sau.',
-    { cause: lastError }
-  );
-}
-
-async function checkBackend() {
-  const state = $('#backendState');
-  if (!state) return;
-
-  if (!CONFIG.apiUrl) {
-    state.textContent = 'Biểu mẫu chưa sẵn sàng. Bạn vui lòng thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';
-    return;
-  }
-
-  try {
-    const result = await jsonp({ action: 'health' });
-    state.textContent = result.ok
-      ? 'Biểu mẫu đã sẵn sàng. Cảm ơn bạn đã ghé thăm!'
-      : 'Biểu mẫu đang gặp chút trục trặc. Bạn vui lòng thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';
-  } catch (error) {
-    state.textContent = 'Không kết nối được với biểu mẫu. Bạn vui lòng thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';
-  }
-}
-
-function appendWish(wish, label = 'Đã duyệt') {
-  const wishList = $('#wishList');
-  if (!wishList) return;
-
-  const article = document.createElement('article');
-  article.className = 'wish';
-
-  const small = document.createElement('small');
-  small.textContent = label;
-
-  const quote = document.createElement('blockquote');
-  quote.textContent = wish.wish;
-
-  const author = document.createElement('p');
-  author.textContent = wish.name;
-
-  article.append(small, quote, author);
-  wishList.prepend(article);
-  if (wishBookDialog?.open) renderWishBook();
-}
-
-const wishViewAllButton = $('#wishViewAll');
-const wishBookDialog = $('#wishBookDialog');
-const wishBookEntries = $('#wishBookEntries');
-
-function renderWishBook() {
-  if (!wishBookEntries) return;
-  const wishes = $$('#wishList .wish').filter(wish => $('small', wish)?.textContent?.trim() !== 'Mẫu');
-  wishBookEntries.replaceChildren();
-
-  if (wishes.length === 0) {
-    const emptyMessage = document.createElement('p');
-    emptyMessage.className = 'wish-book-empty';
-    emptyMessage.textContent = 'Chưa có lời chúc nào. Hãy là người gửi lời chúc đầu tiên nhé!';
-    wishBookEntries.append(emptyMessage);
-    return;
-  }
-
-  wishes.forEach(wish => {
-    const quoteText = $('blockquote', wish)?.textContent?.trim() || '';
-    const authorText = $('p', wish)?.textContent?.trim() || '';
-    const entry = document.createElement('article');
-    entry.className = 'wish-book-entry';
-
-    const quote = document.createElement('blockquote');
-    quote.textContent = quoteText;
-    const author = document.createElement('p');
-    author.textContent = authorText;
-    entry.append(quote, author);
-    wishBookEntries.append(entry);
-  });
-}
-
-if (wishViewAllButton && wishBookDialog?.showModal) {
-  wishViewAllButton.addEventListener('click', () => {
-    renderWishBook();
-    wishBookDialog.showModal();
-  });
-
-  $('#wishBookClose')?.addEventListener('click', () => wishBookDialog.close());
-  wishBookDialog.addEventListener('click', event => {
-    if (event.target === wishBookDialog) wishBookDialog.close();
-  });
-}
-
-async function loadApprovedWishes() {
-  if (!CONFIG.apiUrl) return;
-
-  try {
-    const result = await jsonp({ action: 'wishes' });
-    if (!result || !result.ok || !Array.isArray(result.wishes)) {
-      throw new Error('Google Sheets trả về danh sách lời chúc không hợp lệ');
-    }
-
-    if (result.wishes.length > 0) {
-      $$('#wishList .wish').filter(wish => $('small', wish)?.textContent?.trim() === 'Mẫu')
-        .forEach(wish => wish.remove());
-    }
-    [...result.wishes].reverse().forEach(wish => appendWish(wish));
-  } catch (error) {
-    console.warn('Không tải được danh sách lời chúc từ server:', error);
-  }
-}
-
-function deferUntilVisible(selector, callback) {
-  const target = $(selector);
-  if (!target) return;
-
-  let hasRun = false;
-  const checkVisibility = () => {
-    if (hasRun) return;
-    const rect = target.getBoundingClientRect();
-    if (rect.bottom < -250 || rect.top > window.innerHeight + 250) return;
-
-    hasRun = true;
-    window.removeEventListener('scroll', checkVisibility);
-    window.removeEventListener('resize', checkVisibility);
-    callback();
-  };
-
-  window.addEventListener('scroll', checkVisibility, { passive: true });
-  window.addEventListener('resize', checkVisibility, { passive: true });
-  checkVisibility();
-}
-
-deferUntilVisible('#rsvp', checkBackend);
-deferUntilVisible('#wishes', loadApprovedWishes);
-
-// Gửi form lời chúc
-if ($('#wishForm')) {
-  const form = $('#wishForm');
-  const wishTextarea = $('textarea[name="wish"]', form);
-  const resizeWishTextarea = () => {
-    if (!wishTextarea) return;
-    wishTextarea.style.height = 'auto';
-    const minHeight = Number.parseFloat(getComputedStyle(wishTextarea).minHeight) || 0;
-    wishTextarea.style.height = `${Math.max(wishTextarea.scrollHeight, minHeight)}px`;
-  };
-
-  wishTextarea?.addEventListener('input', resizeWishTextarea);
-  resizeWishTextarea();
-
-  form.onsubmit = async event => {
-    event.preventDefault();
-
-    if (!form.reportValidity()) return;
-
-    const data = Object.fromEntries(new FormData(form));
-    const status = $('#wishStatus');
-    const button = $('button[type="submit"]', form) || $('button', form);
-
-    button.disabled = true;
-    if (status) status.textContent = 'Cảm ơn bạn đã gửi lời chúc thật dễ thương! Tụi mình đã nhận được rồi nhé.';
-
-    try {
-      const wish = {
-        name: data.guestName.trim(),
-        wish: data.wish.trim()
-      };
-
-      await submitAndVerify({ type: 'wish', ...wish });
-      appendWish(wish, 'Vừa gửi');
-      $('#wishList .wish')?.classList.add('is-new');
-
-      form.reset();
-      resizeWishTextarea();
-    } catch (error) {
-      console.error('Không gửi được lời chúc:', error);
-      if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';
-    } finally {
-      button.disabled = false;
-    }
-  };
-}
-
-const rsvpTransportOptions = {
-  self: 'Tự di chuyển',
-  bride: 'Đi cùng xe đoàn về nhà gái',
-  groom: 'Đi cùng xe đoàn về nhà trai'
-};
-
-const rsvpTravelDetails = {
-  bride: {
-    title: 'Thông tin di chuyển về nhà gái',
-    items: [
-      ['Thời gian đoàn di chuyển', '7:00 sáng ngày 12/12/2026'],
-      ['Địa điểm đón khách', 'Ngõ 36 Giang Văn Minh, Phường Kim Mã, Hà Nội'],
-      ['Trưởng đoàn', 'Anh A'],
-      ['Số điện thoại trưởng đoàn', '0081028124', 'phone'],
-      ['Cô dâu', 'Ngọc Lan'],
-      ['Số điện thoại cô dâu', '0325022345', 'phone']
-    ]
-  },
-  groom: {
-    title: 'Thông tin di chuyển về nhà trai',
-    items: [
-      ['Thời gian đoàn di chuyển', '15:00 chiều ngày 12/12/2026'],
-      ['Địa điểm đón khách', '11 A Cát Linh, Ô Chợ Dừa, Hà Nội'],
-      ['Trưởng đoàn', 'Anh B'],
-      ['Số điện thoại trưởng đoàn', '0081028124', 'phone'],
-      ['Chú rể', 'Văn Chung'],
-      ['Số điện thoại chú rể', '0376147556', 'phone']
-    ]
-  }
-};
-
-const rsvpConfirmationDialog = $('#rsvpConfirmationDialog');
-const rsvpConfirmationTitle = $('#rsvpConfirmationTitle');
-const rsvpConfirmationContent = $('#rsvpConfirmationContent');
-
-function createRsvpInfoCard(title, items) {
-  const card = document.createElement('section');
-  card.className = 'rsvp-info-card';
-
-  const heading = document.createElement('h3');
-  heading.textContent = title;
-  const list = document.createElement('dl');
-  const copyLines = [];
-
-  items.forEach(([label, value, type]) => {
-    const row = document.createElement('div');
-    row.className = 'rsvp-info-row';
-    const term = document.createElement('dt');
-    term.textContent = label;
-    const description = document.createElement('dd');
-
-    if (type === 'phone') {
-      const link = document.createElement('a');
-      link.href = `tel:${value.replace(/[^\d+]/g, '')}`;
-      link.textContent = value;
-      description.append(link);
-    } else {
-      description.textContent = value;
-    }
-
-    row.append(term, description);
-    list.append(row);
-    copyLines.push(`${label}: ${value}`);
-  });
-
-  const copyButton = document.createElement('button');
-  copyButton.type = 'button';
-  copyButton.className = 'rsvp-copy-info';
-  copyButton.textContent = 'Sao chép thông tin';
-  copyButton.addEventListener('click', async () => {
-    const copied = await copyText(copyLines.join('\n'));
-    copyButton.textContent = copied ? 'Đã sao chép' : 'Không thể sao chép';
-    window.setTimeout(() => {
-      copyButton.textContent = 'Sao chép thông tin';
-    }, 1800);
-  });
-
-  card.append(heading, list, copyButton);
-  return card;
-}
-
-function showRsvpConfirmation(attendance, transportation) {
-  if (!rsvpConfirmationDialog?.showModal || !rsvpConfirmationTitle || !rsvpConfirmationContent) return;
-
-  rsvpConfirmationContent.replaceChildren();
-  const submissionStatus = document.createElement('p');
-  submissionStatus.className = 'rsvp-confirmation-status';
-  submissionStatus.setAttribute('role', 'status');
-  submissionStatus.setAttribute('aria-live', 'polite');
-  submissionStatus.textContent = 'Đang gửi xác nhận…';
-  rsvpConfirmationContent.append(submissionStatus);
-
-  if (attendance === 'Không thể tham dự') {
-    rsvpConfirmationTitle.textContent = 'Cảm ơn bạn đã phản hồi';
-    const message = document.createElement('p');
-    message.textContent = 'Lan & Chung rất tiếc vì chưa thể đón bạn trong ngày vui. Cảm ơn bạn đã gửi lời chúc và luôn yêu thương, đồng hành cùng chúng mình. Hẹn gặp bạn trong dịp gần nhất nhé!';
-    rsvpConfirmationContent.append(message);
-  } else if (transportation === rsvpTransportOptions.bride) {
-    rsvpConfirmationTitle.textContent = 'Cảm ơn bạn sẽ đến chung vui';
-    const details = rsvpTravelDetails.bride;
-    rsvpConfirmationContent.append(createRsvpInfoCard(details.title, details.items));
-  } else if (transportation === rsvpTransportOptions.groom) {
-    rsvpConfirmationTitle.textContent = 'Cảm ơn bạn sẽ đến chung vui';
-    const details = rsvpTravelDetails.groom;
-    rsvpConfirmationContent.append(createRsvpInfoCard(details.title, details.items));
-  } else {
-    rsvpConfirmationTitle.textContent = 'Hẹn gặp bạn trong ngày vui';
-    const message = document.createElement('p');
-    message.textContent = 'Cảm ơn bạn đã xác nhận tham dự. Chúc bạn di chuyển an toàn và hẹn gặp bạn tại buổi tiệc nhé!';
-
-    const brideContacts = [
-      ['Cô dâu', 'Ngọc Lan'],
-      ['Số điện thoại cô dâu', '0325022345', 'phone'],
-      ['Chú rể', 'Văn Chung'],
-      ['Số điện thoại chú rể', '0376147556', 'phone']
-    ];
-    const brideEvent = [
-      ['Thời gian', '10:30, Thứ Bảy 12/12/2026'],
-      ['Địa điểm', 'Tư gia nhà gái'],
-      ['Địa chỉ', 'Ô Số H32, Khu đô thị dịch vụ Hùng Thắng, Phường Bãi Cháy, Hạ Long']
-    ];
-    const groomEvent = [
-      ['Thời gian', '17:00, Thứ Bảy 12/12/2026'],
-      ['Địa điểm', 'Tư gia nhà trai'],
-      ['Địa chỉ', 'Số 8, ngõ 3, đường Văn Hoá, Khối 8 (Xóm Đồng), Sóc Sơn, Hà Nội']
-    ];
-
-    rsvpConfirmationContent.append(
-      message,
-      createRsvpInfoCard('Liên hệ cô dâu & chú rể', brideContacts),
-      createRsvpInfoCard('Tiệc nhà gái', brideEvent),
-      createRsvpInfoCard('Tiệc nhà trai', groomEvent)
-    );
-  }
-
-  rsvpConfirmationDialog.showModal();
-  return submissionStatus;
-}
-
-if (rsvpConfirmationDialog) {
-  $('.rsvp-confirmation-close', rsvpConfirmationDialog)?.addEventListener('click', () => {
-    rsvpConfirmationDialog.close();
-  });
-  rsvpConfirmationDialog.addEventListener('click', event => {
-    if (event.target === rsvpConfirmationDialog) rsvpConfirmationDialog.close();
-  });
-}
-
-// Gửi form RSVP xác nhận tham dự
-if ($('#rsvpForm')) {
-  const form = $('#rsvpForm');
-  const eventSelect = $('[name="event"]', form);
-  const transportationField = $('#rsvpTransportationField');
-  const transportationSelect = $('[name="transportation"]', form);
-  const attendanceInputs = $$('[name="attendance"]', form);
-  const status = $('#rsvpStatus');
-  let isSubmitting = false;
-
-  const clearPreviousStatus = () => {
-    if (!isSubmitting && status) status.textContent = '';
-  };
-  form.addEventListener('input', clearPreviousStatus);
-  form.addEventListener('change', clearPreviousStatus);
-
-  function setDefaultTransportation() {
-    if (!transportationSelect || !eventSelect) return;
-    transportationSelect.value = eventSelect.value === 'Tiệc nhà trai'
-      ? rsvpTransportOptions.groom
-      : rsvpTransportOptions.bride;
-  }
-
-  function updateTransportationVisibility() {
-    const attendance = $('[name="attendance"]:checked', form)?.value;
-    const attending = attendance === 'Sẽ tham dự';
-    if (eventSelect) {
-      eventSelect.required = attendance !== 'Không thể tham dự';
-      if (attendance === 'Không thể tham dự') {
-        eventSelect.value = 'Cả hai buổi tiệc';
-      }
-    }
-    if (!transportationField || !transportationSelect) return;
-    transportationField.hidden = !attending;
-    transportationSelect.required = attending;
-    if (attending) setDefaultTransportation();
-    else transportationSelect.value = '';
-  }
-
-  attendanceInputs.forEach(input => input.addEventListener('change', updateTransportationVisibility));
-  eventSelect?.addEventListener('change', () => {
-    if ($('[name="attendance"]:checked', form)?.value === 'Sẽ tham dự') {
-      setDefaultTransportation();
-    }
-  });
-  updateTransportationVisibility();
-
-  $('#rsvpForm').onsubmit = async event => {
-    event.preventDefault();
-
-    const form = event.currentTarget;
-    if (!form.reportValidity()) return;
-
-    const data = Object.fromEntries(new FormData(form));
-    const button = $('button[type="submit"]', form) || $('button', form);
-
-    isSubmitting = true;
-    button.disabled = true;
-    if (status) status.textContent = 'Cảm ơn bạn, tụi mình đang gửi phản hồi đến Lan & Chung nhé…';
-    const confirmationStatus = showRsvpConfirmation(data.attendance, data.transportation);
-
-    try {
-      const id = await submitAndVerify({
-        type: 'rsvp',
-        name: data.name.trim(),
-        guests: data.guests,
-        event: data.event,
-        attendance: data.attendance,
-        transportation: data.transportation || '',
-        phone: data.phone || '',
-        message: data.message || ''
-      });
-
-      if (status) status.textContent = '';
-      if (confirmationStatus) {
-        confirmationStatus.textContent = 'Đã gửi xác nhận thành công. Cảm ơn bạn!';
-        confirmationStatus.classList.add('is-success');
-      }
-      form.reset();
-      updateTransportationVisibility();
-    } catch (error) {
-      console.error('Không gửi được xác nhận tham dự:', error);
-      if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Lan & Chung nhé.';
-      if (confirmationStatus) {
-        confirmationStatus.textContent = 'Chưa gửi được xác nhận. Vui lòng đóng cửa sổ này và thử gửi lại.';
-        confirmationStatus.classList.add('is-error');
-      }
-    } finally {
-      isSubmitting = false;
-      button.disabled = false;
-    }
-  };
-}
-
-// ==========================================
-// 9. TRÌNH PHÁT NHẠC NỀN (AUDIO PLAYER)
-// ==========================================
-const musicButton = $('#music');
-const musicPlayer = $('#musicPlayer');
+const musicButton = window.__weddingHelpers.$('#music');
+const musicPlayer = window.__weddingHelpers.$('#musicPlayer');
 const backgroundTracks = [
   { title: 'Beautiful In White', src: 'assets/audio/Beautiful In White.mp3' },
   { title: 'Hoa và Váy (RnB ver)', src: 'assets/audio/Hoa và Váy (RnB ver).mp3' },
@@ -2026,7 +510,7 @@ function getOrCreateAudio() {
         musicButton.classList.add('is-open');
         musicButton.setAttribute('aria-pressed', 'true');
         musicButton.setAttribute('aria-label', 'Tắt nhạc nền');
-        const label = $('.music-label', musicButton);
+        const label = window.__weddingHelpers.$('.music-label', musicButton);
         if (label) label.textContent = 'Tắt nhạc';
       }
     });
@@ -2036,7 +520,7 @@ function getOrCreateAudio() {
         musicButton.classList.remove('is-open');
         musicButton.setAttribute('aria-pressed', 'false');
         musicButton.setAttribute('aria-label', 'Phát nhạc nền');
-        const label = $('.music-label', musicButton);
+        const label = window.__weddingHelpers.$('.music-label', musicButton);
         if (label) label.textContent = 'Nghe nhạc';
       }
     });
@@ -2046,7 +530,7 @@ function getOrCreateAudio() {
   return globalAudio;
 }
 
-function startBackgroundMusic() {
+function startBackgroundMusicFromMain() {
   getOrCreateAudio();
   if (!currentMusicTrack) {
     playNextRandomTrack();
@@ -2058,11 +542,7 @@ function startBackgroundMusic() {
   });
 }
 
-function stopBackgroundMusic() {
-  if (globalAudio) {
-    globalAudio.pause();
-  }
-}
+window.__weddingEnvelope?.setEnvelopeMusicStarter(startBackgroundMusicFromMain);
 
 if (musicButton) {
   musicButton.onclick = () => {
@@ -2080,7 +560,7 @@ if (musicButton) {
 }
 
 // ==========================================
-// 10. CÁ NHÂN HÓA THIỆP MỜI (?to=... & ?side=...)
+// CÁ NHÂN HÓA THIỆP MỜI (?to=... & ?side=...)
 // ==========================================
 function applyPersonalization() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -2092,39 +572,39 @@ function applyPersonalization() {
     const guestName = guestParam.trim();
 
     // Hiển thị trên lá thiệp bìa phong bì
-    const guestCardBadge = $('#guestCardBadge');
-    const guestCoverName = $('#guestCoverName');
+    const guestCardBadge = window.__weddingHelpers.$('#guestCardBadge');
+    const guestCoverName = window.__weddingHelpers.$('#guestCoverName');
     if (guestCardBadge && guestCoverName) {
       guestCoverName.textContent = guestName;
       guestCardBadge.hidden = false;
     }
 
     // Hiển thị trong Chế độ xem thiệp 3D
-    const guestViewerName = $('#guestViewerName');
+    const guestViewerName = window.__weddingHelpers.$('#guestViewerName');
     if (guestViewerName) {
       guestViewerName.textContent = guestName;
     }
 
     // Hiển thị trên thẻ thiệp 3D ở Hero
-    const heroCardGuestName = $('#heroCardGuestName');
+    const heroCardGuestName = window.__weddingHelpers.$('#heroCardGuestName');
     if (heroCardGuestName) {
       heroCardGuestName.textContent = guestName;
     }
 
     // Hiển thị trong lời mời Hero
-    const guestHeroName = $('#guestHeroName');
+    const guestHeroName = window.__weddingHelpers.$('#guestHeroName');
     if (guestHeroName) {
       guestHeroName.textContent = guestName;
     }
 
     // Điền sẵn vào Form RSVP
-    const rsvpNameInput = $('input[name="name"]');
+    const rsvpNameInput = window.__weddingHelpers.$('input[name="name"]');
     if (rsvpNameInput) {
       rsvpNameInput.value = guestName;
     }
 
     // Điền sẵn vào Form Gửi lời chúc
-    const wishNameInput = $('input[name="guestName"]');
+    const wishNameInput = window.__weddingHelpers.$('input[name="guestName"]');
     if (wishNameInput) {
       wishNameInput.value = guestName;
     }
@@ -2132,7 +612,7 @@ function applyPersonalization() {
 
   // 2. Nếu có chỉ định buổi tiệc (nhà trai / nhà gái)
   if (sideParam) {
-    const eventSelect = $('select[name="event"]');
+    const eventSelect = window.__weddingHelpers.$('select[name="event"]');
     if (eventSelect) {
       if (sideParam === 'bride' || sideParam.includes('gai') || sideParam.includes('nha-gai')) {
         eventSelect.value = 'Tiệc nhà gái';
@@ -2148,18 +628,18 @@ function applyPersonalization() {
 applyPersonalization();
 
 // ==========================================
-// 11. CÔNG CỤ TẠO LINK GỬI KHÁCH (LINK GENERATOR)
+// CÔNG CỤ TẠO LINK GỬI KHÁCH (LINK GENERATOR)
 // ==========================================
-const linkModal = $('#linkModal');
-const openLinkModalBtn = $('#openLinkModalBtn');
-const closeLinkModalBtn = $('#closeLinkModal');
-const genGuestName = $('#genGuestName');
-const genGuestSide = $('#genGuestSide');
-const genLinkPreview = $('#genLinkPreview');
-const btnCopyGenLink = $('#btnCopyGenLink');
+const linkModal = window.__weddingHelpers.$('#linkModal');
+const openLinkModalBtn = window.__weddingHelpers.$('#openLinkModalBtn');
+const closeLinkModalBtn = window.__weddingHelpers.$('#closeLinkModal');
+const genGuestName = window.__weddingHelpers.$('#genGuestName');
+const genGuestSide = window.__weddingHelpers.$('#genGuestSide');
+const genLinkPreview = window.__weddingHelpers.$('#genLinkPreview');
+const btnCopyGenLink = window.__weddingHelpers.$('#btnCopyGenLink');
 
 function updateGeneratedLink() {
-  const base = CONFIG.siteUrl || (window.location.origin + window.location.pathname);
+  const base = window.WEDDING_CONFIG?.siteUrl || (window.location.origin + window.location.pathname);
   const nameVal = genGuestName ? genGuestName.value.trim() : '';
   const sideVal = genGuestSide ? genGuestSide.value : '';
 
@@ -2213,16 +693,16 @@ if (btnCopyGenLink) {
 }
 
 // ==========================================
-// 12. XỬ LÝ HỘP QUÀ MỪNG CƯỚI LẮC LƯ (GIFT BOX INTERACTION)
+// XỬ LÝ HỘP QUÀ MỪNG CƯỚI LẮC LƯ (GIFT BOX INTERACTION)
 // ==========================================
-const giftTabs = $$('.gift-tab');
+const giftTabs = window.__weddingHelpers.$$('.gift-tab');
 const giftTabsMobile = window.matchMedia('(max-width: 768px)');
-let activeGiftTab = $('#giftBrideTab');
+let activeGiftTab = window.__weddingHelpers.$('#giftBrideTab');
 
 function updateGiftTabs() {
   giftTabs.forEach(tab => {
     const isActive = tab === activeGiftTab;
-    const panel = $('#' + tab.getAttribute('aria-controls'));
+    const panel = window.__weddingHelpers.$('#' + tab.getAttribute('aria-controls'));
     tab.classList.toggle('is-active', isActive);
     tab.setAttribute('aria-selected', String(isActive));
     tab.tabIndex = isActive ? 0 : -1;
@@ -2275,7 +755,7 @@ function spawnGiftSparkles(element) {
   }
 }
 
-$$('.gift-box-btn').forEach(button => {
+window.__weddingHelpers.$$('.gift-box-btn').forEach(button => {
   button.onclick = () => {
     if (navigator.vibrate) {
       try { navigator.vibrate([18, 30]); } catch (e) {}
@@ -2296,10 +776,10 @@ $$('.gift-box-btn').forEach(button => {
   };
 });
 
-$$('.gift-close-btn').forEach(btn => {
+window.__weddingHelpers.$$('.gift-close-btn').forEach(btn => {
   btn.onclick = () => {
     const targetId = btn.dataset.closeTarget;
-    const card = targetId ? $('#' + targetId) : btn.closest('.gift-box-card');
+    const card = targetId ? window.__weddingHelpers.$('#' + targetId) : btn.closest('.gift-box-card');
     if (!card) return;
     const content = card.querySelector('.gift-content');
     const trigger = card.querySelector('.gift-box-btn');

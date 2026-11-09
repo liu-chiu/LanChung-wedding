@@ -1,8 +1,10 @@
+'use strict';
+
 let currentSlideIndex = 0;
 let autoSlideInterval = null;
 const activeWishPointers = new Set();
 let isMouseHoveringWishSlider = false;
-const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+const reducedMotionQuery = window.__weddingHelpers.prefersReducedMotion;
 
 // Hiển thị 3 lời chúc trên desktop, 2 trên tablet và 1 trên điện thoại.
 function getItemsPerPage() {
