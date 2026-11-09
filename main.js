@@ -201,13 +201,8 @@ if (envelopeScene && coverElem) {
   const maxZoom = 2.4;
   let rotationX = envelopeRotationX;
   let rotationY = envelopeRotationY;
-  let didDrag = false;
-  let didPinch = false;
   let suppressClick = false;
-  let pinchStartDistance = 0;
-  let pinchStartZoom = 1;
   let lastTapTime = 0;
-  const activePointers = new Map();
 
   const clampZoom = value => Math.min(maxZoom, Math.max(minZoom, value));
 
@@ -234,7 +229,7 @@ if (envelopeScene && coverElem) {
       if (
         envelopeScene.classList.contains('is-open') ||
         envelopeScene.classList.contains('is-dragging') ||
-        activePointers.size > 0
+        envelopeGestures.activePointers.size > 0
       ) return;
       const rect = coverElem.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -249,87 +244,6 @@ if (envelopeScene && coverElem) {
     });
   }
 
-  // 3. Pointer Events: Kéo xoay 3D (1 ngón) & Pinch-to-zoom (2 ngón trên điện thoại)
-  const getPointersDistance = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
-
-  let singlePointerStartX = 0;
-  let singlePointerStartY = 0;
-  let lastPointerX = 0;
-  let lastPointerY = 0;
-
-  coverElem.addEventListener('pointerdown', event => {
-    if (event.button !== 0 && event.pointerType === 'mouse') return;
-    if (envelopeScene.classList.contains('is-open') || coverElem.classList.contains('open')) return;
-
-    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-
-    // Double-tap để zoom nhanh 1.5x / 1.0x
-    const now = Date.now();
-    if (activePointers.size === 1 && now - lastTapTime < 300) {
-      zoom = zoom > 1.15 ? 1.0 : 1.55;
-      rotationX = 0;
-      rotationY = 0;
-      applyEnvelopeTransform(true);
-      suppressClick = true;
-      setTimeout(() => { suppressClick = false; }, 250);
-      lastTapTime = 0;
-      return;
-    }
-    lastTapTime = now;
-
-    if (activePointers.size === 1) {
-      singlePointerStartX = lastPointerX = event.clientX;
-      singlePointerStartY = lastPointerY = event.clientY;
-      didDrag = false;
-      didPinch = false;
-    } else if (activePointers.size === 2) {
-      didPinch = true;
-      suppressClick = true;
-      envelopeScene.classList.add('is-dragging');
-      const [p1, p2] = [...activePointers.values()];
-      pinchStartDistance = getPointersDistance(p1, p2);
-      pinchStartZoom = zoom;
-    }
-  });
-
-  coverElem.addEventListener('pointermove', event => {
-    if (!activePointers.has(event.pointerId)) return;
-    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-
-    // Khi có 2 ngón tay -> Pinch Zoom
-    if (activePointers.size >= 2) {
-      const [p1, p2] = [...activePointers.values()];
-      const currentDistance = getPointersDistance(p1, p2);
-      if (pinchStartDistance > 0) {
-        zoom = clampZoom(pinchStartZoom * (currentDistance / pinchStartDistance));
-        applyEnvelopeTransform(false);
-      }
-      return;
-    }
-
-    // Khi có 1 ngón tay -> Kéo xoay 3D
-    if (activePointers.size === 1 && !didPinch) {
-      const deltaX = event.clientX - lastPointerX;
-      const deltaY = event.clientY - lastPointerY;
-      lastPointerX = event.clientX;
-      lastPointerY = event.clientY;
-
-      if (!didDrag && Math.hypot(event.clientX - singlePointerStartX, event.clientY - singlePointerStartY) < 7) {
-        return;
-      }
-
-      if (!didDrag) {
-        didDrag = true;
-        envelopeScene.classList.add('is-dragging');
-      }
-
-      rotationY += deltaX * 360 / (envelopeScene.clientWidth || 360);
-      rotationX -= deltaY * 360 / (envelopeScene.clientHeight || 220);
-      rotationX = Math.max(-45, Math.min(45, rotationX));
-      applyEnvelopeTransform(false);
-    }
-  });
-
   const coverFlipBtn = $('#coverFlipBtn');
   // isEnvelopeFlipped đã khai báo ở outer scope (var)
   if (coverFlipBtn) {
@@ -340,48 +254,71 @@ if (envelopeScene && coverElem) {
       rotationY = isEnvelopeFlipped ? 180 : 0;
       rotationX = 0;
       applyEnvelopeTransform(true);
-      const textSpan = coverFlipBtn.querySelector('.cover-flip-text');
-      if (textSpan) {
-        textSpan.textContent = isEnvelopeFlipped ? 'Quay lại mặt trước phong bì' : 'Lật xem lịch trình sự kiện';
-      }
-      coverFlipBtn.classList.toggle('is-flipped', isEnvelopeFlipped);
+      updateCoverFlipLabel();
     });
   }
 
-  const finishPointer = event => {
-    if (!activePointers.has(event.pointerId)) return;
-    activePointers.delete(event.pointerId);
-
-    if (didPinch || didDrag) {
-      suppressClick = true;
-      setTimeout(() => {
-        suppressClick = false;
-        didPinch = false;
-        didDrag = false;
-      }, 200);
+  function updateCoverFlipLabel() {
+    const textSpan = coverFlipBtn?.querySelector('.cover-flip-text');
+    if (textSpan) {
+      textSpan.textContent = isEnvelopeFlipped ? 'Quay lại mặt trước phong bì' : 'Lật xem lịch trình sự kiện';
     }
+    coverFlipBtn?.classList.toggle('is-flipped', isEnvelopeFlipped);
+  }
 
-    if (activePointers.size === 0) {
+  // 3. Pointer Events: Kéo xoay 3D (1 ngón) & Pinch-to-zoom (2 ngón trên điện thoại)
+  // Dùng bộ điều khiển chung trong pinch-zoom.js
+  const envelopeGestures = createPinchZoomController(coverElem, {
+    dragSlop: 7,
+    draggingClass: '',
+    canStart: () => !envelopeScene.classList.contains('is-open') && !coverElem.classList.contains('open'),
+    onStart: (_event, pointerCount) => {
+      // Double-tap để zoom nhanh 1.5x / 1.0x
+      const now = Date.now();
+      if (pointerCount === 1 && now - lastTapTime < 300) {
+        zoom = zoom > 1.15 ? 1.0 : 1.55;
+        rotationX = 0;
+        rotationY = 0;
+        applyEnvelopeTransform(true);
+        suppressClick = true;
+        setTimeout(() => { suppressClick = false; }, 250);
+        lastTapTime = 0;
+        // Hủy cú chạm này khỏi bộ điều khiển để không bị xử lý thành kéo
+        envelopeGestures.activePointers.clear();
+        envelopeScene.classList.remove('is-dragging');
+        return;
+      }
+      lastTapTime = now;
+
+      if (pointerCount === 2) {
+        suppressClick = true;
+        envelopeScene.classList.add('is-dragging');
+      }
+    },
+    getZoom: () => zoom,
+    onPinch: scale => {
+      zoom = clampZoom(envelopeGestures.getPinchStartZoom() * scale);
+      applyEnvelopeTransform(false);
+    },
+    onDrag: (deltaX, deltaY) => {
+      envelopeScene.classList.add('is-dragging');
+      rotationY += deltaX * 360 / (envelopeScene.clientWidth || 360);
+      rotationX -= deltaY * 360 / (envelopeScene.clientHeight || 220);
+      rotationX = Math.max(-45, Math.min(45, rotationX));
+      applyEnvelopeTransform(false);
+    },
+    onSettle: ({ dragged }) => {
+      if (dragged) suppressClick = true;
+      setTimeout(() => { suppressClick = false; }, 200);
       envelopeScene.classList.remove('is-dragging');
       const modY = ((rotationY % 360) + 360) % 360;
       isEnvelopeFlipped = modY > 90 && modY < 270;
       rotationY = isEnvelopeFlipped ? 180 : 0;
       rotationX = 0;
       applyEnvelopeTransform(true);
-      const textSpan = coverFlipBtn?.querySelector('.cover-flip-text');
-      if (textSpan) {
-        textSpan.textContent = isEnvelopeFlipped ? 'Quay lại mặt trước phong bì' : 'Lật xem lịch trình sự kiện';
-      }
-      coverFlipBtn?.classList.toggle('is-flipped', isEnvelopeFlipped);
-    } else if (activePointers.size === 1) {
-      const remaining = [...activePointers.values()][0];
-      lastPointerX = remaining.x;
-      lastPointerY = remaining.y;
+      updateCoverFlipLabel();
     }
-  };
-
-  coverElem.addEventListener('pointerup', finishPointer);
-  coverElem.addEventListener('pointercancel', finishPointer);
+  });
 
   envelopeScene.addEventListener('click', event => {
     if (!suppressClick) return;
@@ -415,10 +352,6 @@ if (
   let rotationX = -7;
   let rotationY = -10;
   let zoom = 1;
-  let lastPointer = null;
-  let pinchStartDistance = 0;
-  let pinchStartZoom = 1;
-  const activePointers = new Map();
 
   const clampZoom = value => Math.min(maxZoom, Math.max(minZoom, value));
   const updateCardViewer = () => {
@@ -450,7 +383,7 @@ if (
     updateCardViewer();
   };
 
-  const getPointerDistance = (first, second) => Math.hypot(first.x - second.x, first.y - second.y);
+
 
   cardViewerTrigger.addEventListener('click', () => {
     resetCardViewer();
@@ -477,9 +410,7 @@ if (
     if (event.target === cardViewer) cardViewer.close();
   });
   cardViewer.addEventListener('close', () => {
-    activePointers.clear();
-    lastPointer = null;
-    cardViewerCard.classList.remove('is-dragging');
+    cardViewerGestures.reset();
     resetCardViewer();
   });
 
@@ -498,70 +429,26 @@ if (
     setZoom(zoom + (event.deltaY < 0 ? 0.08 : -0.08));
   }, { passive: false });
 
-  cardViewerStage.addEventListener('pointerdown', event => {
-    if ((event.pointerType === 'mouse' && event.button !== 0) || activePointers.size >= 2) return;
-    const point = { x: event.clientX, y: event.clientY };
-    activePointers.set(event.pointerId, point);
-    cardViewerStage.setPointerCapture(event.pointerId);
-    cardViewerCard.classList.add('is-dragging');
-
-    if (activePointers.size === 1) {
-      lastPointer = point;
-    } else {
-      const [first, second] = activePointers.values();
-      pinchStartDistance = getPointerDistance(first, second);
-      pinchStartZoom = zoom;
-      lastPointer = null;
-    }
-    event.preventDefault();
+  // Kéo xoay & pinch-zoom thiệp dùng bộ điều khiển chung trong pinch-zoom.js
+  const cardViewerGestures = createPinchZoomController(cardViewerStage, {
+    draggingClass: '',
+    preventDefaultOnStart: true,
+    canStart: () => cardViewer.open,
+    onStart: event => {
+      cardViewerStage.setPointerCapture(event.pointerId);
+      cardViewerCard.classList.add('is-dragging');
+    },
+    getZoom: () => zoom,
+    onPinch: scale => setZoom(zoom * scale),
+    onDrag: (deltaX, deltaY) => {
+      const cardRect = cardViewerCard.getBoundingClientRect();
+      rotationY += deltaX * 360 / cardRect.width;
+      rotationX -= deltaY * 360 / cardRect.height;
+      updateCardViewer();
+    },
+    onSettle: () => cardViewerCard.classList.remove('is-dragging')
   });
 
-  cardViewerStage.addEventListener('pointermove', event => {
-    if (!activePointers.has(event.pointerId)) return;
-    const point = { x: event.clientX, y: event.clientY };
-    activePointers.set(event.pointerId, point);
-
-    if (activePointers.size === 2) {
-      const [first, second] = activePointers.values();
-      if (pinchStartDistance > 0) {
-        setZoom(pinchStartZoom * getPointerDistance(first, second) / pinchStartDistance);
-      }
-      return;
-    }
-
-    if (!lastPointer) {
-      lastPointer = point;
-      return;
-    }
-
-    const deltaX = point.x - lastPointer.x;
-    const deltaY = point.y - lastPointer.y;
-    const cardRect = cardViewerCard.getBoundingClientRect();
-    rotationY += deltaX * 360 / cardRect.width;
-    rotationX -= deltaY * 360 / cardRect.height;
-    lastPointer = point;
-    updateCardViewer();
-  });
-
-  const finishCardViewerPointer = event => {
-    if (!activePointers.has(event.pointerId)) return;
-    activePointers.delete(event.pointerId);
-    if (cardViewerStage.hasPointerCapture(event.pointerId)) {
-      cardViewerStage.releasePointerCapture(event.pointerId);
-    }
-
-    if (activePointers.size === 1) {
-      lastPointer = activePointers.values().next().value;
-    } else {
-      lastPointer = null;
-      pinchStartDistance = 0;
-    }
-
-    if (activePointers.size === 0) cardViewerCard.classList.remove('is-dragging');
-  };
-
-  cardViewerStage.addEventListener('pointerup', finishCardViewerPointer);
-  cardViewerStage.addEventListener('pointercancel', finishCardViewerPointer);
   updateCardViewer();
 }
 
