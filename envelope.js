@@ -151,10 +151,18 @@ if (envelopeScene && coverElem) {
     isEnvelopeFlipped = ((((rotationY % 360) + 360) % 360) > 90 && (((rotationY % 360) + 360) % 360) < 270);
   };
 
+  // Tự động xoay đa chiều mượt mà trước khi mở thiệp: bật/tắt khi người dùng tương tác.
+  const setAutoRotate = paused => {
+    if (!envelopeScene) return;
+    if (paused) envelopeScene.classList.add('interacting');
+    else envelopeScene.classList.remove('interacting');
+  };
+
   // 1. Phóng to / thu nhỏ bằng con lăn chuột (Mouse Wheel)
   coverElem.addEventListener('wheel', event => {
     if (envelopeScene.classList.contains('is-open') || coverElem.classList.contains('open')) return;
     event.preventDefault();
+    setAutoRotate(true);
     const delta = event.deltaY < 0 ? 0.09 : -0.09;
     zoom = clampZoom(zoom + delta);
     applyEnvelopeTransform(true);
@@ -186,6 +194,7 @@ if (envelopeScene && coverElem) {
     coverFlipBtn.addEventListener('click', e => {
       e.stopPropagation();
       if (envelopeScene.classList.contains('is-open')) return;
+      setAutoRotate(true);
       isEnvelopeFlipped = !isEnvelopeFlipped;
       rotationY = isEnvelopeFlipped ? 180 : 0;
       rotationX = 0;
@@ -210,6 +219,7 @@ if (envelopeScene && coverElem) {
     draggingClass: '',
     canStart: () => !envelopeScene.classList.contains('is-open') && !coverElem.classList.contains('open'),
     onStart: (_event, pointerCount) => {
+      setAutoRotate(true);
       // Double-tap để zoom nhanh 1.5x / 1.0x
       const now = Date.now();
       if (pointerCount === 1 && now - lastTapTime < 300) {
@@ -254,6 +264,7 @@ if (envelopeScene && coverElem) {
       rotationX = 0;
       applyEnvelopeTransform(true);
       updateCoverFlipLabel();
+      setAutoRotate(false);
     }
   });
 

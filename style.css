@@ -468,6 +468,42 @@ a {
   border: 1px solid rgba(212, 168, 83, 0.45);
 }
 
+/* ==========================================
+   3. HIỆU ỨNG XOAY ĐA CHIỀU MƯỢT MÀ TRƯỚC KHI MỞ THIỆP
+   ========================================== */
+
+/* Lá phong bì tự động xoay đa chiều (X + Y + Z) mượt mà, lặp vô hạn khi chưa mở.
+   Đặt trên .envelope (con của .envelope-scene) để không xung đột với transform JS
+   đang điều khiển cha (kéo/pinch/parallax). */
+.envelope-scene .envelope {
+  animation: envelopeAutoRotate 10s ease-in-out infinite;
+  animation-play-state: running;
+  will-change: transform;
+}
+
+/* Tạm dừng tự động xoay khi người dùng tương tác (kéo, lật, cuộn chuột). */
+.envelope-scene .envelope.is-paused,
+.envelope-scene.interacting .envelope {
+  animation-play-state: paused !important;
+}
+
+@keyframes envelopeAutoRotate {
+  0%   { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+  20%  { transform: rotateX(6deg) rotateY(10deg) rotateZ(1deg); }
+  40%  { transform: rotateX(-5deg) rotateY(-12deg) rotateZ(-2deg); }
+  60%  { transform: rotateX(8deg) rotateY(14deg) rotateZ(2deg); }
+  80%  { transform: rotateX(-3deg) rotateY(-8deg) rotateZ(1deg); }
+  100% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+}
+
+/* Giảm chuyển động: không xoay tự động nếu người dùng chọn giảm chuyển động. */
+@media (prefers-reduced-motion: reduce) {
+  .envelope-scene .envelope {
+    animation: none;
+    transform: none;
+  }
+}
+
 .envelope-card,
 .envelope-pocket,
 .envelope-flap,
