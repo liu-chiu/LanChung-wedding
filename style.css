@@ -1325,7 +1325,7 @@ a {
 .card-viewer-card {
   position: relative;
   width: min(100%, 600px);
-  aspect-ratio: 1.68;
+  aspect-ratio: 1.5;
   border: 1px solid rgba(177, 144, 99, 0.45);
   border-radius: 12px;
   background: #e9dfd0;
@@ -1366,9 +1366,20 @@ a {
 
 .card-viewer-face--back {
   transform: rotateY(180deg) translateZ(1px);
-  background:
-    url("assets/images/invitation-emboss-inside.svg") center / 100% 100% no-repeat,
-    radial-gradient(ellipse at 50% 42%, #fffefa, #f5ecdf 82%);
+  padding: 0 !important;
+  background: #fdfaf5;
+  box-shadow: none;
+}
+
+.card-viewer-back-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 11px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .card-viewer-face > * {
