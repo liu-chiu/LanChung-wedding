@@ -610,7 +610,7 @@ function applyPersonalization() {
     // Cập nhật mã VietQR động với lời chúc cá nhân hóa
     const qrBride = window.__weddingHelpers.$('#giftContentBride img.qr');
     if (qrBride) {
-      const brideQRUrl = `https://img.vietqr.io/image/TCB-19037213961014-compact2.png?addInfo=${encodeURIComponent(`Mung cuoi Lan Chung - ${guestName}`)}&accountName=BUI%20NGOC%20LAN`;
+      const brideQRUrl = `https://img.vietqr.io/image/TCB-19037213961014-compact2.png?addInfo=${encodeURIComponent(`${guestName} - Mung cuoi Lan Chung`)}&accountName=BUI%20NGOC%20LAN`;
       const fallbackBride = qrBride.src;
       qrBride.onerror = () => { qrBride.src = fallbackBride; };
       qrBride.src = brideQRUrl;
@@ -618,7 +618,7 @@ function applyPersonalization() {
 
     const qrGroom = window.__weddingHelpers.$('#giftContentGroom img.qr');
     if (qrGroom) {
-      const groomQRUrl = `https://img.vietqr.io/image/TCB-19031119300014-compact2.png?addInfo=${encodeURIComponent(`Mung cuoi Lan Chung - ${guestName}`)}&accountName=NGUYEN%20VAN%20CHUNG`;
+      const groomQRUrl = `https://img.vietqr.io/image/TCB-19031119300014-compact2.png?addInfo=${encodeURIComponent(`${guestName} - Mung cuoi Lan Chung`)}&accountName=NGUYEN%20VAN%20CHUNG`;
       const fallbackGroom = qrGroom.src;
       qrGroom.onerror = () => { qrGroom.src = fallbackGroom; };
       qrGroom.src = groomQRUrl;
