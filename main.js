@@ -551,13 +551,9 @@ if (musicButton) {
 // ==========================================
 function cleanGuestName(raw) {
   if (!raw) return '';
-  // Giải mã URI và thay thế dấu gạch ngang/dưới bằng khoảng trắng
-  let name = decodeURIComponent(raw).replace(/[-_]+/g, ' ').trim();
-  // Viết hoa chữ cái đầu của mỗi từ (dùng split khoảng trắng để bảo toàn 100% ký tự tiếng Việt có dấu như Phương)
-  return name.split(/\s+/).map(word => {
-    if (!word) return '';
-    return word.charAt(0).toUpperCase() + word.slice(1);
-  }).join(' ');
+  // Giữ nguyên 100% cách viết hoa/thường và chính tả ban đầu của người tạo link
+  // Chỉ giải mã URI và thay thế dấu gạch ngang/dưới thành khoảng trắng (nếu link truyền dạng slug)
+  return decodeURIComponent(raw).replace(/[-_]+/g, ' ').trim();
 }
 
 function applyPersonalization() {
