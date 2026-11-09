@@ -191,6 +191,7 @@ if (envelopeScene && coverElem) {
       rotationX = 0;
       applyEnvelopeTransform(true);
       updateCoverFlipLabel();
+      window.__weddingHelpers.playPaperSound?.('flip');
     });
   }
 
@@ -283,7 +284,8 @@ function openEnvelopeInvitation() {
     try { navigator.vibrate([25, 45, 25]); } catch (e) { }
   }
 
-  // 1. Kích hoạt bùng nổ pháo hoa cánh hoa & bụi vàng
+  // 1. Kích hoạt âm thanh mở giấy mỹ thực tế & pháo hoa cánh hoa bụi vàng
+  window.__weddingHelpers.playPaperSound?.('open');
   const burstOrigin = openBtn || envelopeScene || coverElem;
   triggerOpeningBurst(burstOrigin);
 

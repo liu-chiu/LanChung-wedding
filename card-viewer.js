@@ -95,6 +95,7 @@ function initCardViewer() {
     rotationX = 0;
     rotationY = frontFacing ? 180 : 0;
     updateCardViewer();
+    window.__weddingHelpers.playPaperSound?.('flip');
   });
   cardResetView.addEventListener('click', resetCardViewer);
 

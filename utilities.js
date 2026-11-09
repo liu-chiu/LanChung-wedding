@@ -13,15 +13,28 @@ function initUtilities() {
     };
   });
 
-  // Sao chép địa chỉ / số tài khoản với hỗ trợ Zalo WebView
+  // Tối ưu liên kết chỉ đường thông minh (Apple Maps trên iOS, Google Maps trên các thiết bị khác)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  $$('.route-link').forEach(link => {
+    if (isIOS && link.dataset.destination) {
+      link.href = `https://maps.apple.com/?daddr=${encodeURIComponent(link.dataset.destination)}`;
+    }
+  });
+
+  // Sao chép địa chỉ / số tài khoản với hỗ trợ Zalo WebView & hiệu ứng phản hồi sinh động
   $$('[data-copy]').forEach(button => {
     button.onclick = async () => {
       const textToCopy = button.dataset.copy;
       const success = await copyText(textToCopy);
       if (success) {
-        notify(button.dataset.copyMessage || 'Đã sao chép vào bộ nhớ tạm');
+        if (navigator.vibrate) {
+          try { navigator.vibrate([20, 35]); } catch (e) {}
+        }
+        notify(button.dataset.copyMessage || 'Đã sao chép vào bộ nhớ tạm ✨');
+        button.classList.add('is-copied');
+        setTimeout(() => button.classList.remove('is-copied'), 1800);
       } else {
-        notify('Không thể sao chép tự động. Vui lòng thử sao chép thủ công.');
+        notify('Không thể sao chép tự động. Vui lòng sao chép thủ công.');
       }
     };
   });

@@ -48,8 +48,82 @@ async function copyText(text) {
   }
 }
 
+// Hiệu ứng âm thanh mở giấy mỹ thuật & lật thiệp chân thực (Micro-interaction SFX qua Web Audio API)
+let sharedAudioCtx = null;
+function getSharedAudioContext() {
+  if (!sharedAudioCtx && (window.AudioContext || window.webkitAudioContext)) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    sharedAudioCtx = new AudioContextClass();
+  }
+  if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+    sharedAudioCtx.resume().catch(() => {});
+  }
+  return sharedAudioCtx;
+}
+
+function playPaperSound(type = 'open') {
+  try {
+    const ctx = getSharedAudioContext();
+    if (!ctx) return;
+
+    if (type === 'open') {
+      // Tiếng mở phong bì: Giấy mỹ thuật trượt nhẹ kết hợp nhấc con dấu sáp
+      const duration = 0.22;
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const decay = Math.exp(-i / (ctx.sampleRate * 0.06));
+        data[i] = (Math.random() * 2 - 1) * decay;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(2200, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + duration);
+      filter.Q.value = 1.4;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.14, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start();
+    } else if (type === 'flip') {
+      // Tiếng lật trang thiệp êm ái
+      const duration = 0.16;
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const decay = Math.exp(-i / (ctx.sampleRate * 0.04));
+        data[i] = (Math.random() * 2 - 1) * decay;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1400, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + duration);
+      filter.Q.value = 2.0;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start();
+    }
+  } catch (err) {
+    // Không làm gián đoạn tương tác người dùng nếu Web Audio bị chặn
+  }
+}
+
 // Truy vấn dùng chung cho chế độ giảm chuyển động (MediaQueryList, dùng .matches và .addEventListener)
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // Scripts được tải bằng <script defer> (không phải ES modules), nên xuất global để các file khác dùng
-window.__weddingHelpers = { $, $$, notify, copyText, prefersReducedMotion };
+window.__weddingHelpers = { $, $$, notify, copyText, prefersReducedMotion, playPaperSound };
