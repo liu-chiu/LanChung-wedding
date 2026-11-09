@@ -806,35 +806,10 @@
   <button aria-label="Bật hoặc tắt cánh hoa rơi" aria-pressed="true" class="petals-toggle" id="petalsToggle" type="button">
     <span aria-hidden="true">🌸</span>
   </button>
-  <div class="music-widget" id="musicWidget">
-    <button aria-label="Phát hoặc tạm dừng nhạc nền" aria-pressed="false" class="music" id="music" type="button">
-      <span class="music-soundwave" aria-hidden="true">
-        <span></span><span></span><span></span><span></span>
-      </span>
-      <span class="music-icon" aria-hidden="true">♫</span>
-      <span class="music-label" id="musicLabel">Phát nhạc</span>
-    </button>
-    <button aria-label="Mở danh sách bài hát" class="music-toggle-drawer" id="musicToggleDrawer" type="button" title="Danh sách bài hát">
-      <span aria-hidden="true">☰</span>
-    </button>
-  </div>
-
-  <!-- Trình phát nhạc nền Mini Drawer -->
-  <div class="music-drawer" id="musicDrawer" hidden="" aria-label="Trình phát nhạc nền">
-    <div class="music-drawer-header">
-      <div class="music-drawer-now">
-        <span class="music-drawer-eyebrow">Đang phát</span>
-        <strong class="music-drawer-title" id="musicTrackTitle">Beautiful In White</strong>
-      </div>
-      <button class="music-drawer-close" id="musicDrawerClose" type="button" aria-label="Đóng bảng nhạc">✕</button>
-    </div>
-    <div class="music-drawer-controls">
-      <button class="music-ctrl-btn" id="musicPrev" type="button" aria-label="Bài trước">⏮</button>
-      <button class="music-ctrl-btn music-ctrl-play" id="musicPlayPause" type="button" aria-label="Phát hoặc tạm dừng">▶</button>
-      <button class="music-ctrl-btn" id="musicNext" type="button" aria-label="Bài tiếp theo">⏭</button>
-    </div>
-    <ul class="music-playlist" id="musicPlaylist"></ul>
-  </div>
+  <button aria-label="Phát nhạc nền" aria-pressed="false" class="music" id="music" type="button">
+    <span aria-hidden="true">♫</span>
+    <span class="music-label">Nghe nhạc</span>
+  </button>
   <div aria-hidden="true" class="music-audio-player" id="musicPlayer"></div>
   <div class="toast" id="toast"></div>
 

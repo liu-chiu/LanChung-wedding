@@ -454,59 +454,27 @@ if (petalsToggle) {
 }
 
 // ==========================================
-// TRÌNH PHÁT NHẠC NỀN & MINI DRAWER
+// TRÌNH PHÁT NHẠC NỀN (AUDIO PLAYER)
 // ==========================================
 const musicButton = window.__weddingHelpers.$('#music');
 const musicPlayer = window.__weddingHelpers.$('#musicPlayer');
-const musicLabel = window.__weddingHelpers.$('#musicLabel');
-const musicDrawer = window.__weddingHelpers.$('#musicDrawer');
-const musicToggleDrawer = window.__weddingHelpers.$('#musicToggleDrawer');
-const musicDrawerClose = window.__weddingHelpers.$('#musicDrawerClose');
-const musicTrackTitle = window.__weddingHelpers.$('#musicTrackTitle');
-const musicPlayPause = window.__weddingHelpers.$('#musicPlayPause');
-const musicPrev = window.__weddingHelpers.$('#musicPrev');
-const musicNext = window.__weddingHelpers.$('#musicNext');
-const musicPlaylist = window.__weddingHelpers.$('#musicPlaylist');
-
 const backgroundTracks = [
-  { title: 'Beautiful In White', src: 'assets/audio/Beautiful In White.mp3', artist: 'Shane Filan' },
-  { title: 'Hoa và Váy (RnB ver)', src: 'assets/audio/Hoa và Váy (RnB ver).mp3', artist: 'Vũ' },
-  { title: 'Hơn Cả Yêu', src: 'assets/audio/Hon-Ca-Yeu-Duc-Phuc.mp3', artist: 'Đức Phúc' },
-  { title: 'Thế Giới Của Anh', src: 'assets/audio/THẾ GIỚI CỦA ANH.mp3', artist: 'HuyR' }
+  { title: 'Beautiful In White', src: 'assets/audio/Beautiful In White.mp3' },
+  { title: 'Hoa và Váy (RnB ver)', src: 'assets/audio/Hoa và Váy (RnB ver).mp3' },
+  { title: 'Hơn Cả Yêu', src: 'assets/audio/Hon-Ca-Yeu-Duc-Phuc.mp3' },
+  { title: 'Thế Giới Của Anh', src: 'assets/audio/THẾ GIỚI CỦA ANH.mp3' }
 ];
 
 let globalAudio = null;
 let currentTrackIndex = 0;
 
-function updateMusicUI(isPlaying) {
-  if (musicButton) {
-    musicButton.classList.toggle('is-playing', isPlaying);
-    musicButton.setAttribute('aria-pressed', String(isPlaying));
-    musicButton.setAttribute('aria-label', isPlaying ? 'Tạm dừng nhạc nền' : 'Phát nhạc nền');
-    if (musicLabel) musicLabel.textContent = isPlaying ? 'Tắt nhạc' : 'Phát nhạc';
-  }
-
-  const currentTrack = backgroundTracks[currentTrackIndex];
-  if (musicTrackTitle && currentTrack) {
-    musicTrackTitle.textContent = currentTrack.title;
-  }
-
-  if (musicPlayPause) {
-    musicPlayPause.textContent = isPlaying ? '⏸' : '▶';
-    musicPlayPause.setAttribute('aria-label', isPlaying ? 'Tạm dừng' : 'Phát');
-  }
-
-  // Cập nhật class active trong playlist
-  if (musicPlaylist) {
-    const items = musicPlaylist.querySelectorAll('.music-playlist-item');
-    items.forEach((item, idx) => {
-      item.classList.toggle('is-active', idx === currentTrackIndex);
-      const stateIcon = item.querySelector('.track-state-icon');
-      if (stateIcon) {
-        stateIcon.textContent = idx === currentTrackIndex && isPlaying ? '♫' : '';
-      }
-    });
-  }
+function updateMusicButtonState(isPlaying) {
+  if (!musicButton) return;
+  musicButton.classList.toggle('is-open', isPlaying);
+  musicButton.setAttribute('aria-pressed', String(isPlaying));
+  musicButton.setAttribute('aria-label', isPlaying ? 'Tắt nhạc nền' : 'Phát nhạc nền');
+  const label = window.__weddingHelpers.$('.music-label', musicButton);
+  if (label) label.textContent = isPlaying ? 'Tắt nhạc' : 'Nghe nhạc';
 }
 
 function playTrackAtIndex(index) {
@@ -521,38 +489,15 @@ function playTrackAtIndex(index) {
   audio.src = track.src;
   audio.load();
   audio.play().then(() => {
-    updateMusicUI(true);
+    updateMusicButtonState(true);
   }).catch(err => {
     console.warn(`Không thể phát bài "${track.title}":`, err);
-    updateMusicUI(false);
+    updateMusicButtonState(false);
   });
 }
 
 function playNextTrack() {
   playTrackAtIndex(currentTrackIndex + 1);
-}
-
-function playPrevTrack() {
-  playTrackAtIndex(currentTrackIndex - 1);
-}
-
-function renderMusicPlaylist() {
-  if (!musicPlaylist) return;
-  musicPlaylist.innerHTML = '';
-  backgroundTracks.forEach((track, idx) => {
-    const li = document.createElement('li');
-    li.className = `music-playlist-item ${idx === currentTrackIndex ? 'is-active' : ''}`;
-    li.innerHTML = `
-      <span class="track-number">${idx + 1}</span>
-      <div class="track-info">
-        <strong class="track-title">${track.title}</strong>
-        <small class="track-artist">${track.artist || 'Wedding Love Song'}</small>
-      </div>
-      <span class="track-state-icon">${idx === currentTrackIndex && globalAudio && !globalAudio.paused ? '♫' : ''}</span>
-    `;
-    li.onclick = () => playTrackAtIndex(idx);
-    musicPlaylist.appendChild(li);
-  });
 }
 
 function getOrCreateAudio() {
@@ -561,11 +506,11 @@ function getOrCreateAudio() {
     globalAudio.preload = 'none';
     globalAudio.setAttribute('aria-hidden', 'true');
     globalAudio.addEventListener('ended', playNextTrack);
-    globalAudio.addEventListener('play', () => updateMusicUI(true));
-    globalAudio.addEventListener('pause', () => updateMusicUI(false));
+    globalAudio.addEventListener('play', () => updateMusicButtonState(true));
+    globalAudio.addEventListener('pause', () => updateMusicButtonState(false));
     globalAudio.addEventListener('error', () => {
       console.error(`Không thể tải bài nhạc: ${backgroundTracks[currentTrackIndex]?.title}`);
-      updateMusicUI(false);
+      updateMusicButtonState(false);
     });
 
     if (musicPlayer) musicPlayer.appendChild(globalAudio);
@@ -579,14 +524,13 @@ function startBackgroundMusicFromMain() {
     if (!audio.src) {
       playTrackAtIndex(0);
     } else {
-      audio.play().then(() => updateMusicUI(true)).catch(() => {});
+      audio.play().then(() => updateMusicButtonState(true)).catch(() => {});
     }
   }
 }
 
 window.__weddingEnvelope?.setEnvelopeMusicStarter(startBackgroundMusicFromMain);
 
-// Bật/tắt phát nhạc chính
 if (musicButton) {
   musicButton.onclick = () => {
     const audio = getOrCreateAudio();
@@ -594,61 +538,13 @@ if (musicButton) {
       if (!audio.src) {
         playTrackAtIndex(0);
       } else {
-        audio.play().then(() => updateMusicUI(true)).catch(err => console.warn('Không thể phát nhạc:', err));
+        audio.play().then(() => updateMusicButtonState(true)).catch(err => console.warn('Không thể phát nhạc:', err));
       }
     } else {
       audio.pause();
     }
   };
 }
-
-// Bật/tắt Drawer danh sách nhạc
-if (musicToggleDrawer && musicDrawer) {
-  musicToggleDrawer.onclick = e => {
-    e.stopPropagation();
-    const isHidden = musicDrawer.hidden;
-    musicDrawer.hidden = !isHidden;
-    if (!musicDrawer.hidden) {
-      renderMusicPlaylist();
-    }
-  };
-}
-
-if (musicDrawerClose && musicDrawer) {
-  musicDrawerClose.onclick = () => {
-    musicDrawer.hidden = true;
-  };
-}
-
-if (musicPlayPause) {
-  musicPlayPause.onclick = () => {
-    const audio = getOrCreateAudio();
-    if (audio.paused) {
-      if (!audio.src) {
-        playTrackAtIndex(currentTrackIndex);
-      } else {
-        audio.play().catch(() => {});
-      }
-    } else {
-      audio.pause();
-    }
-  };
-}
-
-if (musicNext) musicNext.onclick = playNextTrack;
-if (musicPrev) musicPrev.onclick = playPrevTrack;
-
-// Đóng drawer khi click ra ngoài
-document.addEventListener('click', e => {
-  if (musicDrawer && !musicDrawer.hidden) {
-    if (!musicDrawer.contains(e.target) && !musicToggleDrawer.contains(e.target)) {
-      musicDrawer.hidden = true;
-    }
-  }
-});
-
-// Render danh sách ban đầu
-renderMusicPlaylist();
 
 // ==========================================
 // CÁ NHÂN HÓA THIỆP MỜI & VIETQR THÔNG MINH (?to=... & ?side=...)
@@ -657,8 +553,11 @@ function cleanGuestName(raw) {
   if (!raw) return '';
   // Giải mã URI và thay thế dấu gạch ngang/dưới bằng khoảng trắng
   let name = decodeURIComponent(raw).replace(/[-_]+/g, ' ').trim();
-  // Viết hoa chữ cái đầu của mỗi từ nếu là dạng viết thường
-  return name.replace(/\b\w/g, l => l.toUpperCase());
+  // Viết hoa chữ cái đầu của mỗi từ (dùng split khoảng trắng để bảo toàn 100% ký tự tiếng Việt có dấu như Phương)
+  return name.split(/\s+/).map(word => {
+    if (!word) return '';
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
 }
 
 function applyPersonalization() {
