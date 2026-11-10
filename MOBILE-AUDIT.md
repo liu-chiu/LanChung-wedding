@@ -20,6 +20,9 @@ Also test a phone in landscape orientation and an iPhone with a home-indicator/n
 - [ ] No horizontal page overflow at 320 px and at wider phone sizes.
 - [ ] Navigation opens and closes on mobile; links remain reachable.
 - [ ] Cover and hero content fit without clipping in portrait and short landscape viewports.
+- [ ] The personalized guest name in the hero invitation stays clear of the following text at narrow widths.
+- [ ] The 3D card flips to the postcard back; names, event times, venues, and full addresses remain legible without clipping.
+- [ ] The envelope back and 3D card back retain the cover-floral.svg floral design.
 - [ ] Countdown and calendar remain readable at narrow widths.
 - [ ] Forms are usable with the on-screen keyboard; labels, validation messages, and submit status remain visible.
 - [ ] Buttons and links have comfortable touch targets.
