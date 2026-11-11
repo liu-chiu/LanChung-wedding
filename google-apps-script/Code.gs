@@ -210,7 +210,7 @@ function doGet(e) {
       ok: true,
       wishes: approvedWishes_()
     };
-  } else if (action === 'logVisit') {
+  } else if (action === 'logvisit') {
     output = logVisit_(parameters);
   } else if (action === 'visitstats') {
     output = visitStats_();
