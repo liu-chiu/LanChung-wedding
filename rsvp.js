@@ -145,12 +145,18 @@ function initRsvpAndWishes() {
         };
 
         await submitAndVerify({ type: 'wish', ...wish });
+        if (window.trackWeddingEvent) {
+          window.trackWeddingEvent('wish_success', { length: wish.wish.length });
+        }
         appendWish(wish, 'Vừa gửi');
         $('#wishList .wish')?.classList.add('is-new');
 
         form.reset();
         resizeWishTextarea();
       } catch (error) {
+        if (window.trackWeddingEvent) {
+          window.trackWeddingEvent('wish_error', { message: String(error && error.message || error).slice(0, 100) });
+        }
         console.error('Không gửi được lời chúc:', error);
         if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';
       } finally {
@@ -380,6 +386,13 @@ function initRsvpAndWishes() {
           message: data.message || ''
         });
 
+        if (window.trackWeddingEvent) {
+          window.trackWeddingEvent('rsvp_success', {
+            event_slot: data.event,
+            attendance: data.attendance,
+            guests: Number(data.guests) || 0
+          });
+        }
         if (status) status.textContent = '';
         if (confirmationStatus) {
           confirmationStatus.textContent = 'Đã gửi xác nhận thành công. Cảm ơn bạn!';
@@ -388,6 +401,9 @@ function initRsvpAndWishes() {
         currentForm.reset();
         updateTransportationVisibility();
       } catch (error) {
+        if (window.trackWeddingEvent) {
+          window.trackWeddingEvent('rsvp_error', { message: String(error && error.message || error).slice(0, 100) });
+        }
         console.error('Không gửi được xác nhận tham dự:', error);
         if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Lan & Chung nhé.';
         if (confirmationStatus) {

@@ -278,10 +278,14 @@ function logVisit_(parameters) {
     }
   }
 
+  /* Không có tên khách trên link (?to=...) → ghi là khách vãng lai */
+  const guestName =
+    clean_(parameters.name, 120) || 'Khách vãng lai';
+
   sheet.appendRow([
     visitId,
     new Date(),
-    clean_(parameters.name, 120),
+    guestName,
     clean_(parameters.ref, 300),
     clean_(parameters.url, 300),
     clean_(parameters.ua, 250),
