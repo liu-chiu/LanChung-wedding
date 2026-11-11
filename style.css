@@ -4057,6 +4057,7 @@ button[data-copy].is-copied {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   touch-action: pan-y;
 }
 
@@ -4067,6 +4068,77 @@ button[data-copy].is-copied {
   border-radius: 6px;
   box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6);
   transition: opacity 0.25s ease, transform 0.25s ease;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Trạng thái ảnh đang được phép kéo (pan) khi zoom lớn hơn 1:1 */
+.lightbox img.is-dragging,
+.lightbox img.is-zoomable {
+  cursor: grab;
+}
+
+.lightbox img.is-dragging:active {
+  cursor: grabbing;
+}
+
+/* Toolbar công cụ zoom trong lightbox */
+.lightbox-zoom-toolbar {
+  position: absolute;
+  top: max(1.25rem, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(14, 14, 12, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  z-index: 15;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.lightbox-zoom-btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lightbox-zoom-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.lightbox-zoom-btn:active {
+  transform: scale(0.92);
+}
+
+.lightbox-zoom-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lightbox-zoom-level {
+  min-width: 44px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.05em;
+  user-select: none;
 }
 
 .lightbox-caption {

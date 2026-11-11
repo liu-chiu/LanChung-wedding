@@ -820,6 +820,12 @@
   <div aria-label="Album ảnh cưới" aria-modal="true" class="lightbox" hidden="" id="lightbox" role="dialog">
     <button aria-label="Đóng xem ảnh" class="lightbox-close" id="close" type="button">×</button>
     <button aria-label="Ảnh trước" class="lightbox-nav lightbox-prev" id="lightPrev" type="button">‹</button>
+    <div class="lightbox-zoom-toolbar" role="group" aria-label="Công cụ zoom ảnh">
+      <button aria-label="Thu nhỏ ảnh" class="lightbox-zoom-btn lightbox-zoom-out" id="lightZoomOut" type="button">−</button>
+      <output aria-live="off" class="lightbox-zoom-level" id="lightZoomLevel">100%</output>
+      <button aria-label="Phóng to ảnh" class="lightbox-zoom-btn lightbox-zoom-in" id="lightZoomIn" type="button">+</button>
+      <button aria-label="Đặt lại kích thước" class="lightbox-zoom-btn lightbox-zoom-reset" id="lightZoomReset" type="button">↺</button>
+    </div>
     <div class="lightbox-wrapper" id="lightWrapper">
       <img alt="Ảnh phóng lớn" id="lightImg"/>
       <p class="lightbox-caption" id="lightCaption"></p>
