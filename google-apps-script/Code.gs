@@ -1,5 +1,9 @@
 const RSVP_SHEET = 'RSVP';
 const WISH_SHEET = 'Wishes';
+const VISIT_SHEET = 'Visits';
+
+/* TTL dedupe truy cập: 1 phiên ít hơn 1 lần ghi trong TTL này */
+const VISIT_DEDUPE_TTL = 1800;
 
 
 /**
@@ -35,6 +39,21 @@ function setupWeddingSheets() {
       'Name',
       'Wish',
       'Status'
+    ]
+  );
+
+  ensureSheet_(
+    spreadsheet,
+    VISIT_SHEET,
+    [
+      'Visit ID',
+      'Timestamp',
+      'Guest Name',
+      'Referrer',
+      'Page URL',
+      'User Agent',
+      'Language',
+      'Screen'
     ]
   );
 }
@@ -191,6 +210,8 @@ function doGet(e) {
       ok: true,
       wishes: approvedWishes_()
     };
+  } else if (action === 'logVisit') {
+    output = logVisit_(parameters);
   } else {
     output = {
       ok: true,
@@ -208,6 +229,68 @@ function doGet(e) {
     .setMimeType(
       ContentService.MimeType.JAVASCRIPT
     );
+}
+
+
+/**
+ * Ghi một lượt truy cập thiệp online vào sheet Visits.
+ * Dedupe theo Visit ID (phiên trình duyệt) để F5/quay lại tab không ghi trùng
+ * trong vòng VISIT_DEDUPE_TTL giây.
+ */
+function logVisit_(parameters) {
+  const visitId =
+    clean_(parameters.vid, 80);
+
+  if (
+    !visitId ||
+    !/^[A-Za-z0-9_-]{8,80}$/.test(visitId)
+  ) {
+    return { ok: false, error: 'invalid_visit_id' };
+  }
+
+  const cache = CacheService.getScriptCache();
+  const dedupeKey = `visited-${visitId}`;
+  if (cache.get(dedupeKey) === '1') {
+    return { ok: true, logged: false, duplicate: true };
+  }
+
+  const spreadsheet =
+    SpreadsheetApp.getActiveSpreadsheet();
+  const sheet =
+    spreadsheet.getSheetByName(VISIT_SHEET);
+
+  if (!sheet) {
+    return { ok: false, error: 'sheet_not_initialized' };
+  }
+
+  /* Kiểm tra trùng Visit ID trong sheet (trường hợp cache hết hạn sau khi đã ghi) */
+  if (sheet.getLastRow() > 1) {
+    const found = sheet
+      .getRange(2, 1, sheet.getLastRow() - 1, 1)
+      .createTextFinder(visitId)
+      .matchEntireCell(true)
+      .findNext();
+    if (found) {
+      cache.put(dedupeKey, '1', VISIT_DEDUPE_TTL);
+      return { ok: true, logged: false, duplicate: true };
+    }
+  }
+
+  sheet.appendRow([
+    visitId,
+    new Date(),
+    clean_(parameters.name, 120),
+    clean_(parameters.ref, 300),
+    clean_(parameters.url, 300),
+    clean_(parameters.ua, 250),
+    clean_(parameters.lang, 20),
+    clean_(parameters.screen, 30)
+  ]);
+  SpreadsheetApp.flush();
+
+  cache.put(dedupeKey, '1', VISIT_DEDUPE_TTL);
+
+  return { ok: true, logged: true };
 }
 
 

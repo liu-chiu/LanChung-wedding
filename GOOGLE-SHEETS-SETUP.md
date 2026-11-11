@@ -8,7 +8,7 @@ Backend dùng Google Apps Script để ghi phản hồi vào Google Sheets. Th�
 2. Chọn **Extensions > Apps Script**.
 3. Thay mã mặc định bằng toàn bộ nội dung trong `google-apps-script/Code.gs`.
 4. Trong **Project Settings**, đặt múi giờ `Asia/Ho_Chi_Minh`.
-5. Chạy `setupWeddingSheets` một lần và cấp quyền. Script tạo hai sheet với tiêu đề:
+5. Chạy `setupWeddingSheets` một lần và cấp quyền. Script tạo ba sheet với tiêu đề:
 
    - `RSVP`: `Submission ID`, `Timestamp`, `Name`, `Guests`, `Event`, `Attendance`, `Phone`, `Message`, `Transportation`.
    - `Wishes`: `Submission ID`, `Timestamp`, `Name`, `Wish`, `Status`.
