@@ -3533,6 +3533,25 @@ form {
   color: inherit;
 }
 
+.rsvp-travel-trigger {
+  justify-self: start;
+  min-height: 48px;
+  margin-top: 0.5rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--rose);
+  background: transparent;
+  color: white;
+  font: 500 0.95rem var(--sans);
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.rsvp-travel-trigger:hover,
+.rsvp-travel-trigger:focus-visible {
+  background: var(--rose);
+  color: var(--ink);
+}
+
 form label, fieldset {
   display: grid;
   gap: 0.35rem;

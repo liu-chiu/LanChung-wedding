@@ -246,6 +246,19 @@ function initRsvpAndWishes() {
     return card;
   }
 
+  function showRsvpTravelInfo() {
+    if (!rsvpConfirmationDialog?.showModal || !rsvpConfirmationTitle || !rsvpConfirmationContent) return;
+
+    rsvpConfirmationTitle.textContent = 'Lịch trình di chuyển';
+    rsvpConfirmationContent.replaceChildren(
+      createRsvpInfoCard(rsvpTravelDetails.bride.title, rsvpTravelDetails.bride.items),
+      createRsvpInfoCard(rsvpTravelDetails.groom.title, rsvpTravelDetails.groom.items)
+    );
+    rsvpConfirmationDialog.showModal();
+  }
+
+  $('#rsvpTravelInfoButton')?.addEventListener('click', showRsvpTravelInfo);
+
   function showRsvpConfirmation(attendance, transportation) {
     if (!rsvpConfirmationDialog?.showModal || !rsvpConfirmationTitle || !rsvpConfirmationContent) return;
 
