@@ -212,6 +212,8 @@ function doGet(e) {
     };
   } else if (action === 'logVisit') {
     output = logVisit_(parameters);
+  } else if (action === 'visitstats') {
+    output = visitStats_();
   } else {
     output = {
       ok: true,
@@ -291,6 +293,56 @@ function logVisit_(parameters) {
   cache.put(dedupeKey, '1', VISIT_DEDUPE_TTL);
 
   return { ok: true, logged: true };
+}
+
+
+/**
+ * Thống kê lượt truy cập: dùng để kiểm tra log có đổ vào sheet không.
+ * Gọi: ?action=visitStats&callback=...
+ */
+function visitStats_() {
+  const spreadsheet =
+    SpreadsheetApp.getActiveSpreadsheet();
+  const sheet =
+    spreadsheet.getSheetByName(VISIT_SHEET);
+
+  if (!sheet) {
+    return {
+      ok: true,
+      initialized: false,
+      total: 0,
+      visits: []
+    };
+  }
+
+  const lastRow = sheet.getLastRow();
+  const lastRows = [];
+
+  if (lastRow > 1) {
+    const startRow = Math.max(2, lastRow - 9);
+    const rows = sheet
+      .getRange(startRow, 1, lastRow - startRow + 1, 3)
+      .getValues();
+
+    for (let index = rows.length - 1; index >= 0; index--) {
+      const row = rows[index];
+      lastRows.push({
+        id: String(row[0] || ''),
+        timestamp:
+          row[1] instanceof Date
+            ? row[1].toISOString()
+            : String(row[1] || ''),
+        name: String(row[2] || '')
+      });
+    }
+  }
+
+  return {
+    ok: true,
+    initialized: lastRow > 0,
+    total: Math.max(0, lastRow - 1),
+    visits: lastRows
+  };
 }
 
 

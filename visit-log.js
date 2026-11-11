@@ -48,7 +48,22 @@
       if (script.parentNode) script.remove();
     }
 
-    window[callback] = cleanup; // Chỉ cần fire-and-forget, không cần đọc kết quả
+    window[callback] = function (result) {
+      cleanup();
+      // Ghi kết quả ra console để kiểm tra
+      if (result && result.logged) {
+        console.log('[VisitLog] Đã ghi lượt truy cập vào Google Sheets (Visits).');
+      } else if (result && result.duplicate) {
+        console.log('[VisitLog] Phiên này đã được ghi trước đó (tránh trùng).');
+      } else if (result && result.error) {
+        console.warn('[VisitLog] Apps Script từ chối:', result.error);
+      } else {
+        console.warn('[VisitLog] Phản hồi không xác định:', result);
+      }
+      if (isDebug()) {
+        console.log('[VisitLog] Visit ID:', visitId, '| Guest:', guestName || '(không có ?to=)');
+      }
+    };
 
     const query = new URLSearchParams({
       action: 'logVisit',
@@ -63,7 +78,53 @@
     });
 
     script.src = window.WEDDING_CONFIG.apiUrl + '?' + query.toString();
-    script.onerror = cleanup;
+    script.onerror = function () {
+      cleanup();
+      console.error('[VisitLog] Không gửi được request — kiểm tra apiUrl trong config.js và trạng thái Deploy của Apps Script.');
+    };
+    document.head.appendChild(script);
+
+    // Chế độ ?debug=1 — hỏi ngược Apps Script xem sheet Visits có bao nhiêu dòng
+    if (isDebug()) {
+      checkVisitStats();
+    }
+  }
+
+  function isDebug() {
+    return /[?&]debug=1/.test(window.location.search);
+  }
+
+  function checkVisitStats() {
+    const callback = 'lc_stats_' + Date.now().toString(36);
+    const script = document.createElement('script');
+    const timer = setTimeout(function () { cleanup(); }, 8000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[callback];
+      if (script.parentNode) script.remove();
+    }
+
+    window[callback] = function (result) {
+      cleanup();
+      if (result && result.ok) {
+        console.log(
+          '[VisitLog] Sheet Visits — tổng dòng:', result.total,
+          '| đã tạo sheet:', result.initialized
+        );
+        if (result.visits && result.visits.length) {
+          console.table(result.visits);
+        }
+      } else {
+        console.warn('[VisitLog] Không đọc được visitStats:', result);
+      }
+    };
+
+    script.src = window.WEDDING_CONFIG.apiUrl + '?action=visitStats&callback=' + callback;
+    script.onerror = function () {
+      cleanup();
+      console.error('[VisitLog] Không gọi được action=visitStats.');
+    };
     document.head.appendChild(script);
   }
 
