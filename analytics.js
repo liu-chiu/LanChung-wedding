@@ -21,6 +21,9 @@
 (function initAnalytics() {
   const GA_ID = (window.WEDDING_CONFIG && window.WEDDING_CONFIG.gaMeasurementId) || '';
 
+  /* ?debug=1 → hit được đánh dấu debug_mode để hiện trong GA4 DebugView */
+  const IS_DEBUG = /[?&]debug=1/.test(window.location.search);
+
   // ---------- Nền tảng: nạp gtag.js ----------
   if (GA_ID) {
     const script = document.createElement('script');
@@ -32,10 +35,14 @@
     window.gtag = function () { window.dataLayer.push(arguments); };
 
     gtag('js', new Date());
-    gtag('config', GA_ID, {
+    const configParams = {
       send_page_view: true,
       anonymize_ip: true
-    });
+    };
+    if (IS_DEBUG) {
+      configParams.debug_mode = true;
+    }
+    gtag('config', GA_ID, configParams);
   }
 
   /**
@@ -51,7 +58,7 @@
     } catch (error) {
       /* Không bao giờ để analytics làm lỗi trang */
     }
-    if (/[?&]debug=1/.test(window.location.search)) {
+    if (IS_DEBUG) {
       console.log('[Analytics]', event, params || {});
     }
   }
