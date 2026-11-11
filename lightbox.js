@@ -7,6 +7,12 @@ const lightbox = $('#lightbox');
 const lightImg = $('#lightImg');
 const lightCaption = $('#lightCaption');
 const lightCounter = $('#lightCounter');
+const lightPreviewLeft = $('#lightPreviewLeft');
+const lightPreviewLeftImg = $('#lightPreviewLeftImg');
+const lightPreviewRight = $('#lightPreviewRight');
+const lightPreviewRightImg = $('#lightPreviewRightImg');
+const lightThumbList = $('#lightThumbList');
+const lightThumbTrack = $('#lightThumbTrack');
 let lightboxTrigger = null;
 let currentPhotoIndex = 0;
 let photos = [];
@@ -28,6 +34,9 @@ function setLightboxAutoplayControls(controls) {
 
 function setLightboxPhotos(photoList) {
   photos = photoList;
+  // Render lại danh sách thumbnail khi danh sách ảnh được cập nhật (từ gallery.js)
+  if (typeof renderLightboxThumbnails === 'function') renderLightboxThumbnails();
+  if (typeof updateLightboxPreviews === 'function') updateLightboxPreviews();
 }
 
 window.__weddingLightbox = {
@@ -87,6 +96,85 @@ function clampPan() {
   panY = Math.min(maxPanY, Math.max(-maxPanY, panY));
 }
 
+// ==========================================
+// HIỂN DANH SÁCH ẢNH & ẢNH MÔ (Thumbnails & Previews)
+// ==========================================
+
+function renderLightboxThumbnails() {
+  if (!lightThumbTrack || photos.length === 0) return;
+  lightThumbTrack.innerHTML = '';
+  photos.forEach((photo, index) => {
+    const thumb = document.createElement('button');
+    thumb.type = 'button';
+    thumb.className = 'lightbox-thumb' + (index === currentPhotoIndex ? ' active' : '');
+    thumb.setAttribute('aria-label', `Xem ảnh ${index + 1} trên ${photos.length}`);
+    thumb.innerHTML = `<img src="${photo.src}" alt="${photo.alt}"/>`;
+    thumb.addEventListener('click', () => {
+      if (index !== currentPhotoIndex) {
+        updateLightboxPhoto(index, true);
+      }
+    });
+    lightThumbTrack.appendChild(thumb);
+  });
+  // Ẩn danh sách nếu chỉ có 1 ảnh
+  if (lightThumbList) lightThumbList.style.display = photos.length <= 1 ? 'none' : 'flex';
+}
+
+function updateLightboxThumbnails() {
+  if (!lightThumbTrack) return;
+  const thumbs = lightThumbTrack.querySelectorAll('.lightbox-thumb');
+  thumbs.forEach((thumb, index) => {
+    thumb.classList.toggle('active', index === currentPhotoIndex);
+  });
+  const activeThumb = thumbs[currentPhotoIndex];
+  if (activeThumb) {
+    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
+function updateLightboxPreviews() {
+  if (photos.length <= 1) {
+    if (lightPreviewLeft) lightPreviewLeft.style.display = 'none';
+    if (lightPreviewRight) lightPreviewRight.style.display = 'none';
+    return;
+  }
+  if (lightPreviewLeft) lightPreviewLeft.style.display = 'flex';
+  if (lightPreviewRight) lightPreviewRight.style.display = 'flex';
+
+  const prevIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+  const nextIndex = (currentPhotoIndex + 1) % photos.length;
+
+  if (lightPreviewLeftImg) lightPreviewLeftImg.src = photos[prevIndex].src;
+  if (lightPreviewRightImg) lightPreviewRightImg.src = photos[nextIndex].src;
+
+  // Click preview để chuyển ảnh
+  if (lightPreviewLeft) {
+    lightPreviewLeft.onclick = (e) => {
+      e.stopPropagation();
+      updateLightboxPhoto(currentPhotoIndex - 1, true);
+    };
+  }
+  if (lightPreviewRight) {
+    lightPreviewRight.onclick = (e) => {
+      e.stopPropagation();
+      updateLightboxPhoto(currentPhotoIndex + 1, true);
+    };
+  }
+  // Phím Enter/Space trên preview (accessibility)
+  const handlePreviewKey = (e, direction) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      updateLightboxPhoto(currentPhotoIndex + direction, true);
+    }
+  };
+  if (lightPreviewLeft) {
+    lightPreviewLeft.onkeydown = (e) => handlePreviewKey(e, -1);
+  }
+  if (lightPreviewRight) {
+    lightPreviewRight.onkeydown = (e) => handlePreviewKey(e, +1);
+  }
+}
+
 function updateLightboxPhoto(index, animate = false) {
   if (photos.length === 0) return;
   currentPhotoIndex = (index + photos.length) % photos.length;
@@ -114,6 +202,9 @@ function updateLightboxPhoto(index, animate = false) {
     if (lightCounter) {
       lightCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
     }
+    // Cập nhật ảnh mô & danh sách thumbnail sau khi chuyển ảnh
+    updateLightboxPreviews();
+    updateLightboxThumbnails();
   }, animate ? 150 : 0);
 }
 
@@ -220,6 +311,12 @@ function initLightbox() {
       setZoom(zoomLevel - 0.2);
     } else if (event.key === '0') {
       resetLightboxView();
+    } else {
+      // Phím số 1-9: nhảy đến ảnh tương ứng trong danh sách thumbnail
+      const num = parseInt(event.key, 10);
+      if (!isNaN(num) && num >= 1 && num <= photos.length) {
+        updateLightboxPhoto(num - 1, true);
+      }
     }
   });
 
@@ -262,4 +359,8 @@ function initLightbox() {
 
   // Khởi tạo gestures pinch-zoom & kéo khi lightbox sẵn sàng
   initLightboxGestures();
+
+  // Render danh sách thumbnail lần đầu
+  renderLightboxThumbnails();
+  updateLightboxPreviews();
 }

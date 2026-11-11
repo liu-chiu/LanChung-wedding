@@ -4239,6 +4239,192 @@ button[data-copy].is-copied {
   transform: translateY(-50%) scale(0.92);
 }
 
+/* ==========================================
+   ẢNH MÔ BÊN TRÁI / BÊN PHẢI (Preview panels)
+   ========================================== */
+.lightbox-preview {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28vw;
+  height: 62vh;
+  min-width: 120px;
+  min-height: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  z-index: 6;
+  touch-action: none;
+}
+
+.lightbox-preview:hover {
+  opacity: 0.85;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-50%) scale(1.02);
+}
+
+.lightbox-preview-left {
+  left: max(1rem, env(safe-area-inset-left));
+}
+
+.lightbox-preview-right {
+  right: max(1rem, env(safe-area-inset-right));
+}
+
+.lightbox-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  display: block;
+}
+
+.lightbox-preview-nav {
+  position: absolute;
+  inset: 0;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 2.5rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lightbox-preview:hover .lightbox-preview-nav {
+  opacity: 1;
+}
+
+.lightbox-preview-nav:hover {
+  color: #fff;
+}
+
+/* ==========================================
+   HIỂN DANH SÁCH ẢNH (Thumbnail strip)
+   ========================================== */
+.lightbox-thumb-list {
+  position: absolute;
+  bottom: max(3.2rem, env(safe-area-inset-bottom) + 1.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 720px);
+  height: 72px;
+  background: rgba(14, 14, 12, 0.62);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 15;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  touch-action: pan-x;
+}
+
+.lightbox-thumb-track {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 0.15rem 0;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lightbox-thumb-track::-webkit-scrollbar {
+  height: 5px;
+}
+
+.lightbox-thumb-track::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lightbox-thumb-track::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+}
+
+.lightbox-thumb-track::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.lightbox-thumb {
+  width: 64px;
+  height: 64px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lightbox-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0.85;
+}
+
+.lightbox-thumb:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lightbox-thumb.active {
+  border-color: var(--gold, #e9ad32);
+  box-shadow: 0 0 0 3px rgba(233, 173, 50, 0.35);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.lightbox-thumb.active img {
+  opacity: 1;
+}
+
+.lightbox-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 8px;
+}
+
+.lightbox-thumb.active::after,
+.lightbox-thumb:hover::after {
+  opacity: 0.5;
+}
+
+/* Ẩn preview khi chỉ có 1 ảnh */
+.lightbox-preview.single-photo {
+  display: none !important;
+}
+
 /* Hiệu ứng Reveal khi cuộn trang */
 .reveal {
   opacity: 0;

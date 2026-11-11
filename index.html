@@ -820,6 +820,19 @@
   <div aria-label="Album ảnh cưới" aria-modal="true" class="lightbox" hidden="" id="lightbox" role="dialog">
     <button aria-label="Đóng xem ảnh" class="lightbox-close" id="close" type="button">×</button>
     <button aria-label="Ảnh trước" class="lightbox-nav lightbox-prev" id="lightPrev" type="button">‹</button>
+
+    <!-- Ảnh mô bên trái (preview ảnh trước) -->
+    <div class="lightbox-preview lightbox-preview-left" id="lightPreviewLeft" role="button" aria-label="Xem ảnh trước" tabindex="0">
+      <img id="lightPreviewLeftImg" alt="Ảnh trước"/>
+      <span class="lightbox-preview-nav">‹</span>
+    </div>
+
+    <!-- Ảnh mô bên phải (preview ảnh sau) -->
+    <div class="lightbox-preview lightbox-preview-right" id="lightPreviewRight" role="button" aria-label="Xem ảnh sau" tabindex="0">
+      <img id="lightPreviewRightImg" alt="Ảnh sau"/>
+      <span class="lightbox-preview-nav">›</span>
+    </div>
+
     <div class="lightbox-zoom-toolbar" role="group" aria-label="Công cụ zoom ảnh">
       <button aria-label="Thu nhỏ ảnh" class="lightbox-zoom-btn lightbox-zoom-out" id="lightZoomOut" type="button">−</button>
       <output aria-live="off" class="lightbox-zoom-level" id="lightZoomLevel">100%</output>
@@ -832,6 +845,11 @@
     </div>
     <button aria-label="Ảnh tiếp theo" class="lightbox-nav lightbox-next" id="lightNext" type="button">›</button>
     <div class="lightbox-counter" id="lightCounter">1 / 9</div>
+
+    <!-- Hiển danh sách ảnh (thumbnail strip dưới cùng) -->
+    <div class="lightbox-thumb-list" id="lightThumbList">
+      <div class="lightbox-thumb-track" id="lightThumbTrack"></div>
+    </div>
   </div>
 
   <!-- Modal Công cụ tạo link mời khách (Dành cho Cô dâu & Chú rể) -->
