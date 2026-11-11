@@ -68,7 +68,7 @@ function initCalendarIcs() {
       Array.from(
         { length: 31 },
         (_, i) => i === 11
-          ? '<span class="today" aria-label="Ngày cưới: 12 tháng 12"><img src="assets/images/CD-CR-optimized.jpg" alt="" loading="lazy" decoding="async"><span>12</span></span>'
+          ? '<span class="today" aria-label="Ngày cưới: 12 tháng 12"><img src="assets/images/CD-CR.webp" alt="" loading="lazy" decoding="async"><span>12</span></span>'
           : `<span>${i + 1}</span>`
       ).join('') +
       '<span class="muted">1</span><span class="muted">2</span><span class="muted">3</span>';

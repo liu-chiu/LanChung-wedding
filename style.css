@@ -156,7 +156,7 @@ a {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: url("assets/images/khung-thiep.png") center / 100% 100% no-repeat;
+  background: url("assets/images/khung-thiep.webp") center / 100% 100% no-repeat;
   opacity: 0.52;
   pointer-events: none;
 }
