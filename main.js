@@ -57,7 +57,7 @@ window.__weddingHelpers.$$('nav a').forEach(link => {
 const siteHeader = window.__weddingHelpers.$('.site-header');
 let previousScrollY = window.scrollY;
 let headerIdleTimeout = null;
-const headerIdleDelay = 5000;
+const headerIdleDelay = 3000;
 
 function scheduleHeaderAutoHide() {
   clearTimeout(headerIdleTimeout);
