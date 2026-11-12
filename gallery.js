@@ -19,6 +19,7 @@ const galleryTrack = $('#galleryTrack');
 const galleryCounter = $('#galleryCounter');
 const gallerySlides = $$('.photo');
 const galleryReducedMotion = window.__weddingHelpers.prefersReducedMotion;
+const galleryMobile = window.matchMedia('(max-width: 768px)');
 const galleryFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
 let galleryVisualSlides = gallerySlides;
 let galleryAutoSlideTimeout = null;
@@ -35,7 +36,7 @@ let galleryLastActivePhotoIndex = null;
 let galleryTransitionVariant = 0;
 let galleryTransitionCleanup = null;
 let galleryTransitionSlide = null;
-const galleryTransitionNames = ['soft', 'lift', 'focus'];
+const galleryTransitionNames = ['soft', 'lift', 'focus', 'film'];
 
 function animateGallerySlide(slide) {
   if (!slide || galleryReducedMotion.matches) return;
@@ -218,6 +219,11 @@ function initGallery() {
     // Lấy index từ danh sách slide trực tiếp để tránh NaN nếu thiếu dataset
     const slideIndex = galleryVisualSlides.indexOf(button);
     if (slideIndex === -1) return;
+    if (galleryMobile.matches && slideIndex !== getGalleryActiveSlideIndex()) {
+      goToGallerySlide(toPhotoIndex(slideIndex));
+      scheduleGalleryAutoplay();
+      return;
+    }
     openLightbox(toPhotoIndex(slideIndex), button);
   });
 
@@ -291,7 +297,7 @@ function initGallery() {
 
     if (wasDragging) {
       galleryIgnoreNextClick = true;
-      setTimeout(() => { galleryIgnoreNextClick = false; }, 400);
+      setTimeout(() => { galleryIgnoreNextClick = false; }, 80);
       updateGalleryCounter();
     } else {
       scheduleGalleryAutoplay();

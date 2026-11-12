@@ -2578,7 +2578,8 @@ nav a:hover {
     rotateY(var(--gallery-rotate, 0deg))
     scale(var(--gallery-scale, 1));
   opacity: var(--gallery-opacity, 1);
-  transition: transform 0.18s ease-out, opacity 0.18s ease-out;
+  /* Keep perspective in sync with scroll frames instead of easing behind them. */
+  transition: opacity 0.12s linear, box-shadow 0.3s ease;
 }
 
 .photo::before,
@@ -2669,6 +2670,12 @@ nav a:hover {
   animation: galleryEnterFocus 780ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
 }
 
+.photo.is-entering[data-transition="film"] img {
+  animation: galleryFilmRoll 820ms cubic-bezier(0.22, 0.72, 0.2, 1) both;
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
+
 @keyframes galleryEnterSoft {
   from { opacity: 0.72; transform: scale(0.975); }
   to { opacity: 1; transform: scale(1); }
@@ -2682,6 +2689,24 @@ nav a:hover {
 @keyframes galleryEnterFocus {
   from { opacity: 0.78; filter: blur(3px); transform: scale(1.015); }
   to { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+@keyframes galleryFilmRoll {
+  0% {
+    opacity: 0.68;
+    filter: blur(2px);
+    transform: perspective(900px) rotateX(-9deg) translateY(10px) scale(0.985);
+  }
+  55% {
+    opacity: 0.94;
+    filter: blur(0.5px);
+    transform: perspective(900px) rotateX(2deg) translateY(-2px) scale(1.008);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: perspective(900px) rotateX(0) translateY(0) scale(1);
+  }
 }
 
 .photo:hover img {
