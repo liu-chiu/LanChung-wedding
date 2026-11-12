@@ -403,42 +403,100 @@ a {
   50% { text-shadow: 0 0 9px rgba(212, 168, 83, 0.42), 0 1px 0 rgba(255, 255, 255, 0.9); }
 }
 
-/* Hiệu ứng chào mừng: thiệp bay lượn từ xa về phía người xem, đậu tầm mắt rồi đáp về vị trí cũ */
+/* Hiệu ứng chào mừng: thiệp bay lượn từ xa về phía người xem, đậu tầm mắt rồi đáp về vị trí cũ.
+   Lưu ý: KHÔNG dùng filter/blur ở đây vì phần tử đang dùng transform-style: preserve-3d —
+   filter sẽ ép phẳng 3D context và gây giật lúc kết thúc animation. */
 @keyframes envelopeArrival {
   0% {
     opacity: 0;
-    filter: blur(3px);
-    transform: translateY(4vh) translateX(18vw) scale(0.35) rotateZ(6deg) rotateY(-24deg);
+    transform: translate3d(16vw, 4vh, -900px) scale(0.4) rotateZ(6deg);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
   }
-  22% {
+  20% {
     opacity: 1;
-    filter: blur(0);
-    transform: translateY(-2vh) translateX(10vw) scale(0.62) rotateZ(-3deg) rotateY(14deg);
+    transform: translate3d(9vw, -2.5vh, -520px) scale(0.62) rotateZ(-4deg);
+    animation-timing-function: cubic-bezier(0.35, 0.1, 0.5, 1);
   }
-  45% {
-    transform: translateY(1.5vh) translateX(-8vw) scale(0.88) rotateZ(2.5deg) rotateY(-10deg);
+  42% {
+    transform: translate3d(-7vw, 2vh, -300px) scale(0.86) rotateZ(3.5deg);
+    animation-timing-function: cubic-bezier(0.35, 0, 0.55, 1);
   }
-  66% {
-    transform: translateY(-1vh) translateX(4vw) scale(1.12) rotateZ(-1.2deg) rotateY(6deg);
+  62% {
+    transform: translate3d(3vw, -1vh, -140px) scale(1.08) rotateZ(-1.6deg);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1);
   }
-  82% {
-    transform: translateY(0.4vh) translateX(-1.5vw) scale(1.03) rotateZ(0.5deg) rotateY(-2deg);
+  /* Lượt phóng sát mặt: lao thật gần về phía người xem */
+  76% {
+    transform: translate3d(-1.5vw, 0.8vh, 260px) scale(1.5) rotateZ(1.6deg);
+    animation-timing-function: cubic-bezier(0.35, 0, 0.5, 1);
+  }
+  87% {
+    transform: translate3d(0.6vw, 0.2vh, -30px) scale(1.08) rotateZ(-0.7deg);
+    animation-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
   }
   100% {
     opacity: 1;
-    filter: blur(0);
-    transform: translateY(0) translateX(0) scale(1) rotateZ(0deg) rotateY(0deg);
+    transform: translate3d(0, 0, 0) scale(1) rotateZ(0deg);
   }
 }
 
 .envelope-scene.envelope-arrival {
-  animation: envelopeArrival 3.2s cubic-bezier(0.33, 0.08, 0.24, 1) 0.35s backwards;
+  animation: envelopeArrival 3.4s cubic-bezier(0.33, 0.08, 0.24, 1) 0.35s backwards;
   will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.envelope-scene.envelope-arrival .envelope {
+  /* Khoá xoay 3D tự động trong lúc bay lượn để không xung đột chuyển động */
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .envelope-scene.envelope-arrival {
     animation: none;
+  }
+}
+
+/* Bản đơn giản hoá cho màn hình nhỏ: chỉ dùng transform 2D.
+   Trên mobile (Zalo/WebView iOS), translateZ dương lớn kết hợp preserve-3d + perspective
+   làm các lớp con của phong bì (nắp tam giác) bị chiếu tràn ra khỏi khung —
+   nên ở đây chỉ scale/dịch chuyển phẳng để giữ đúng bố cục. */
+@media (max-width: 768px) {
+  @keyframes envelopeArrivalMobile {
+    0% {
+      opacity: 0;
+      transform: translate(14vw, 4vh) scale(0.4) rotate(6deg);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    20% {
+      opacity: 1;
+      transform: translate(8vw, -2.5vh) scale(0.62) rotate(-4deg);
+      animation-timing-function: cubic-bezier(0.35, 0.1, 0.5, 1);
+    }
+    42% {
+      transform: translate(-6vw, 2vh) scale(0.86) rotate(3.5deg);
+      animation-timing-function: cubic-bezier(0.35, 0, 0.55, 1);
+    }
+    62% {
+      transform: translate(2.5vw, -1vh) scale(1.08) rotate(-1.6deg);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1);
+    }
+    76% {
+      transform: translate(-1.2vw, 0.8vh) scale(1.42) rotate(1.6deg);
+      animation-timing-function: cubic-bezier(0.35, 0, 0.5, 1);
+    }
+    87% {
+      transform: translate(0.5vw, 0.2vh) scale(1.08) rotate(-0.7deg);
+      animation-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+  }
+
+  .envelope-scene.envelope-arrival {
+    animation: envelopeArrivalMobile 3.4s cubic-bezier(0.33, 0.08, 0.24, 1) 0.35s backwards;
   }
 }
 
