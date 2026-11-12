@@ -306,12 +306,13 @@ class FallingPetals {
   toggle() {
     if (this.animationId) {
       this.stop();
+      this.isRunning = false;
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       return false;
-    } else {
-      this.start();
-      return true;
     }
+
+    this.start();
+    return true;
   }
 
   drawSinglePetal(length, width, color) {

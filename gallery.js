@@ -20,7 +20,6 @@ const galleryCounter = $('#galleryCounter');
 const gallerySlides = $$('.photo');
 const galleryReducedMotion = window.__weddingHelpers.prefersReducedMotion;
 const galleryFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-const lightboxElement = $('#lightbox');
 let galleryVisualSlides = gallerySlides;
 let galleryAutoSlideTimeout = null;
 let galleryScrollTimeout = null;
@@ -136,6 +135,7 @@ function scheduleGalleryAutoplay() {
   stopGalleryAutoplay();
   if (
     !gallerySlider ||
+    !galleryIsVisible ||
     galleryReducedMotion.matches ||
     document.hidden ||
     (galleryFinePointer.matches && gallerySlider.matches(':hover')) ||
