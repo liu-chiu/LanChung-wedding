@@ -253,7 +253,7 @@ if (envelopeScene && coverElem) {
   function updateCoverFlipLabel() {
     const textSpan = coverFlipBtn?.querySelector('.cover-flip-text');
     if (textSpan) {
-      textSpan.textContent = isEnvelopeFlipped ? 'Quay lại mặt trước phong bì' : 'Lật xem lịch trình sự kiện';
+      textSpan.textContent = isEnvelopeFlipped ? 'Quay lại mặt trước thiệp' : 'Lật xem lịch trình sự kiện';
     }
     coverFlipBtn?.classList.toggle('is-flipped', isEnvelopeFlipped);
   }
