@@ -4997,7 +4997,7 @@ button[data-copy].is-copied {
   .section { padding: 4.5rem 1.1rem; }
   .heading h2, .family h2 { font-size: clamp(2.8rem, 16vw, 4.2rem); }
   .photo { flex-basis: 90vw; width: 90vw; }
-  .photo img { height: clamp(260px, 68vw, 420px); }
+  .photo img { height: clamp(320px, 52svh, 460px); }
   .gallery-slider { margin-top: 2rem; }
 
   .count { padding-inline: 0.55rem; }
@@ -5050,6 +5050,10 @@ button[data-copy].is-copied {
     font-size: 1.8rem;
   }
   .hero figure { min-height: 90svh; }
+}
+
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 768px) {
+  .photo img { height: min(68svh, 340px); }
 }
 
 /* Giảm chuyển động cho người dùng nhạy cảm */
