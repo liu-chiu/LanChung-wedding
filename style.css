@@ -4839,9 +4839,11 @@ button[data-copy].is-copied {
   }
 
   /* Ẩn panel ảnh mô 2 bên trên mobile: viewport dọc không đủ chỗ,
-     tránh bị đè lên ảnh chính (đã có nút ‹ › và vuốt chạm để chuyển ảnh) */
+     tránh bị đè lên ảnh chính (đã có nút ‹ › và vuốt chạm để chuyển ảnh).
+     Dùng !important vì lightbox.js đặt style.display='flex' dạng inline
+     qua updateLightboxPreviews(), inline style sẽ ghi đè rule thường. */
   .lightbox-preview {
-    display: none;
+    display: none !important;
   }
 
   /* Ảnh chính chiếm rộng hơn vì không còn panel 2 bên */
