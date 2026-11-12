@@ -8,15 +8,47 @@ const coverElem = $('#cover');
 const envelopeScene = $('#envelopeScene');
 // Use prefersReducedMotion from window.__weddingHelpers (declared in helpers.js)
 
-// Hiệu ứng thiệp bay lên vượt khung hình rồi hạ về vị trí cũ ngay khi mở link
+// Hiệu ứng thiệp bay lượn từ xa về phía người xem + đường bay sao băng & vành sáng đáp
 (function playEnvelopeArrival() {
   if (window.__weddingHelpers.prefersReducedMotion.matches) return;
   const scene = document.getElementById('envelopeScene');
   if (!scene) return;
   scene.classList.add('envelope-arrival');
+
+  // Danh sách hạt sáng lượn theo sau thiệp (vị trí & độ trễ trải dần để bám theo nhịp bay)
+  const seeds = [
+    [-150, 95, 0.05], [-105, -70, 0.12], [-60, 120, 0.2], [-185, 30, 0.28],
+    [-80, -110, 0.36], [-130, 65, 0.44], [-45, -40, 0.52], [-165, -85, 0.6]
+  ];
+  const trail = document.createElement('div');
+  trail.className = 'arrival-trail';
+  trail.setAttribute('aria-hidden', 'true');
+  for (const [sx, sy, delay] of seeds) {
+    const spark = document.createElement('i');
+    spark.style.setProperty('--sx', sx + 'px');
+    spark.style.setProperty('--sy', sy + 'px');
+    spark.style.animationDelay = (0.35 + delay) + 's';
+    trail.appendChild(spark);
+  }
+  scene.appendChild(trail);
+
+  // Vành đai sáng bung ra khi thiệp đáp xuống (delay khớp thời điểm 100% của đường bay)
+  const ring = document.createElement('div');
+  ring.className = 'arrival-ring';
+  ring.setAttribute('aria-hidden', 'true');
+  ring.style.animationDelay = '3.45s';
+  scene.appendChild(ring);
+
+  // Dọn dẹp khi toàn bộ chuỗi hiệu ứng kết thúc
   scene.addEventListener('animationend', function handler(e) {
-    if (e.animationName === 'envelopeArrival') {
+    if (e.animationName === 'landingRing') {
+      trail.remove();
+      ring.remove();
+    }
+    if (e.animationName === 'envelopeArrival' || e.animationName === 'envelopeArrivalMobile') {
       scene.classList.remove('envelope-arrival');
+    }
+    if (e.animationName === 'landingRing') {
       scene.removeEventListener('animationend', handler);
     }
   });
