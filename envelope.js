@@ -8,6 +8,20 @@ const coverElem = $('#cover');
 const envelopeScene = $('#envelopeScene');
 // Use prefersReducedMotion from window.__weddingHelpers (declared in helpers.js)
 
+// Hiệu ứng thiệp bay lên vượt khung hình rồi hạ về vị trí cũ ngay khi mở link
+(function playEnvelopeArrival() {
+  if (window.__weddingHelpers.prefersReducedMotion.matches) return;
+  const scene = document.getElementById('envelopeScene');
+  if (!scene) return;
+  scene.classList.add('envelope-arrival');
+  scene.addEventListener('animationend', function handler(e) {
+    if (e.animationName === 'envelopeArrival') {
+      scene.classList.remove('envelope-arrival');
+      scene.removeEventListener('animationend', handler);
+    }
+  });
+})();
+
 // Hiệu ứng pháo hoa bụi vàng & cánh hoa bùng nổ khi mở thiệp
 function triggerOpeningBurst(originEl) {
   if (window.__weddingHelpers.prefersReducedMotion.matches) return;

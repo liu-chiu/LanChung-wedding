@@ -403,6 +403,45 @@ a {
   50% { text-shadow: 0 0 9px rgba(212, 168, 83, 0.42), 0 1px 0 rgba(255, 255, 255, 0.9); }
 }
 
+/* Hiệu ứng chào mừng: thiệp bay lượn từ xa về phía người xem, đậu tầm mắt rồi đáp về vị trí cũ */
+@keyframes envelopeArrival {
+  0% {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(4vh) translateX(18vw) scale(0.35) rotateZ(6deg) rotateY(-24deg);
+  }
+  22% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(-2vh) translateX(10vw) scale(0.62) rotateZ(-3deg) rotateY(14deg);
+  }
+  45% {
+    transform: translateY(1.5vh) translateX(-8vw) scale(0.88) rotateZ(2.5deg) rotateY(-10deg);
+  }
+  66% {
+    transform: translateY(-1vh) translateX(4vw) scale(1.12) rotateZ(-1.2deg) rotateY(6deg);
+  }
+  82% {
+    transform: translateY(0.4vh) translateX(-1.5vw) scale(1.03) rotateZ(0.5deg) rotateY(-2deg);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) translateX(0) scale(1) rotateZ(0deg) rotateY(0deg);
+  }
+}
+
+.envelope-scene.envelope-arrival {
+  animation: envelopeArrival 3.2s cubic-bezier(0.33, 0.08, 0.24, 1) 0.35s backwards;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .envelope-scene.envelope-arrival {
+    animation: none;
+  }
+}
+
 /* Vùng hiển thị phong bì hoàng gia có hiệu ứng 3D Parallax Tilt */
 .envelope-scene {
   position: relative;
