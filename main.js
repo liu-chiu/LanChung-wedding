@@ -32,6 +32,7 @@ window.addEventListener('pageshow', () => {
 const menuButton = window.__weddingHelpers.$('#menu');
 const navigation = window.__weddingHelpers.$('#nav');
 const mobileNavigation = window.matchMedia('(max-width: 768px)');
+const desktopNavigation = window.matchMedia('(min-width: 769px)');
 
 function setNavigationOpen(isOpen) {
   if (!navigation || !menuButton) return;
@@ -55,6 +56,40 @@ window.__weddingHelpers.$$('nav a').forEach(link => {
 
 const siteHeader = window.__weddingHelpers.$('.site-header');
 let previousScrollY = window.scrollY;
+let headerIdleTimeout = null;
+const headerIdleDelay = 5000;
+
+function scheduleHeaderAutoHide() {
+  clearTimeout(headerIdleTimeout);
+  if (!siteHeader || !desktopNavigation.matches || navigation?.classList.contains('open')) return;
+  headerIdleTimeout = setTimeout(() => {
+    if (!siteHeader.matches(':focus-within')) {
+      siteHeader.classList.add('is-hidden');
+    }
+  }, headerIdleDelay);
+}
+
+function revealHeaderFromInteraction() {
+  if (!siteHeader || !desktopNavigation.matches) return;
+  siteHeader.classList.remove('is-hidden');
+  scheduleHeaderAutoHide();
+}
+
+scheduleHeaderAutoHide();
+
+window.addEventListener('pointermove', event => {
+  if (desktopNavigation.matches && event.clientY <= 24) {
+    revealHeaderFromInteraction();
+  }
+}, { passive: true });
+
+siteHeader?.addEventListener('pointermove', scheduleHeaderAutoHide, { passive: true });
+siteHeader?.addEventListener('pointerdown', scheduleHeaderAutoHide, { passive: true });
+siteHeader?.addEventListener('keydown', revealHeaderFromInteraction);
+siteHeader?.addEventListener('focusin', revealHeaderFromInteraction);
+siteHeader?.addEventListener('focusout', () => {
+  requestAnimationFrame(scheduleHeaderAutoHide);
+});
 
 window.addEventListener('scroll', () => {
   if (!siteHeader) return;
@@ -73,10 +108,16 @@ window.addEventListener('scroll', () => {
   }
 
   previousScrollY = currentScrollY;
+  if (currentScrollY <= siteHeader.offsetHeight || scrollDelta < 0) {
+    scheduleHeaderAutoHide();
+  }
 }, { passive: true });
 
 mobileNavigation.addEventListener('change', () => {
   setNavigationOpen(false);
+  clearTimeout(headerIdleTimeout);
+  siteHeader?.classList.remove('is-hidden');
+  scheduleHeaderAutoHide();
 });
 
 // Hiệu ứng cuộn trang hiện dần (Scroll Reveal)
