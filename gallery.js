@@ -31,6 +31,29 @@ let galleryDragPointerId = null;
 let galleryIsDragging = false;
 let galleryIsVisible = false;
 let galleryIgnoreNextClick = false;
+let galleryLastActivePhotoIndex = null;
+let galleryTransitionVariant = 0;
+let galleryTransitionCleanup = null;
+let galleryTransitionSlide = null;
+const galleryTransitionNames = ['soft', 'lift', 'focus'];
+
+function animateGallerySlide(slide) {
+  if (!slide || galleryReducedMotion.matches) return;
+  const variant = galleryTransitionNames[galleryTransitionVariant % galleryTransitionNames.length];
+  galleryTransitionVariant += 1;
+  clearTimeout(galleryTransitionCleanup);
+  galleryTransitionSlide?.classList.remove('is-entering');
+  galleryTransitionSlide = slide;
+  slide.dataset.transition = variant;
+  slide.classList.remove('is-entering');
+  // Restart the short entrance animation when a slide becomes active again.
+  void slide.offsetWidth;
+  slide.classList.add('is-entering');
+  galleryTransitionCleanup = setTimeout(() => {
+    slide.classList.remove('is-entering');
+    if (galleryTransitionSlide === slide) galleryTransitionSlide = null;
+  }, 850);
+}
 
 function getGalleryActiveSlideIndex() {
   if (!galleryTrack || galleryVisualSlides.length === 0) return 0;
@@ -72,6 +95,10 @@ function updateGalleryCounter() {
   if (!galleryCounter || galleryPhotos.length === 0) return;
   const activeSlideIndex = getGalleryActiveSlideIndex();
   const activeIndex = toPhotoIndex(activeSlideIndex);
+  if (galleryLastActivePhotoIndex !== null && activeIndex !== galleryLastActivePhotoIndex) {
+    animateGallerySlide(galleryVisualSlides[activeSlideIndex]);
+  }
+  galleryLastActivePhotoIndex = activeIndex;
   galleryCounter.textContent = `${activeIndex + 1} / ${galleryPhotos.length}`;
   galleryVisualSlides.forEach((slide, index) => {
     const photoIndex = toPhotoIndex(index);

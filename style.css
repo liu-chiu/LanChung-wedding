@@ -2657,6 +2657,33 @@ nav a:hover {
   transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
 }
 
+.photo.is-entering[data-transition="soft"] img {
+  animation: galleryEnterSoft 720ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.photo.is-entering[data-transition="lift"] img {
+  animation: galleryEnterLift 760ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.photo.is-entering[data-transition="focus"] img {
+  animation: galleryEnterFocus 780ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+@keyframes galleryEnterSoft {
+  from { opacity: 0.72; transform: scale(0.975); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes galleryEnterLift {
+  from { opacity: 0.78; transform: translateY(12px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes galleryEnterFocus {
+  from { opacity: 0.78; filter: blur(3px); transform: scale(1.015); }
+  to { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
 .photo:hover img {
   transform: scale(1.035);
 }
