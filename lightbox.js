@@ -4,6 +4,7 @@
 // ALBUM ẢNH — LIGHTBOX (XEM ẢNH TOÀN MÀN HÌNH)
 // ==========================================
 const lightbox = $('#lightbox');
+const lightboxMobile = window.matchMedia('(max-width: 768px)');
 const lightImg = $('#lightImg');
 const lightCaption = $('#lightCaption');
 const lightCounter = $('#lightCounter');
@@ -87,11 +88,18 @@ function clampPan() {
   const wrapper = $('#lightWrapper');
   if (!wrapper) return;
   const wrapperRect = wrapper.getBoundingClientRect();
-  const imgRect = lightImg.getBoundingClientRect();
-  const displayWidth = imgRect.width * zoomLevel;
-  const displayHeight = imgRect.height * zoomLevel;
-  const maxPanX = Math.max(0, (displayWidth - wrapperRect.width) / 2);
-  const maxPanY = Math.max(0, (displayHeight - wrapperRect.height) / 2);
+  let maxPanX;
+  let maxPanY;
+  if (lightboxMobile.matches) {
+    // Convert visible overflow to transform-space units because scale() is
+    // applied before translate().
+    maxPanX = Math.max(0, (lightImg.offsetWidth * zoomLevel - wrapperRect.width) / (2 * zoomLevel));
+    maxPanY = Math.max(0, (lightImg.offsetHeight * zoomLevel - wrapperRect.height) / (2 * zoomLevel));
+  } else {
+    const imgRect = lightImg.getBoundingClientRect();
+    maxPanX = Math.max(0, (imgRect.width * zoomLevel - wrapperRect.width) / 2);
+    maxPanY = Math.max(0, (imgRect.height * zoomLevel - wrapperRect.height) / 2);
+  }
   panX = Math.min(maxPanX, Math.max(-maxPanX, panX));
   panY = Math.min(maxPanY, Math.max(-maxPanY, panY));
 }
@@ -249,8 +257,8 @@ function initLightboxGestures() {
       lightImg.classList.add('is-dragging');
     },
     getZoom: () => zoomLevel,
-    onPinch: scale => {
-      setZoom(zoomLevel * scale, false);
+    onPinch: (scale, startZoom) => {
+      setZoom(lightboxMobile.matches ? startZoom * scale : zoomLevel * scale, false);
     },
     onDrag: (deltaX, deltaY) => {
       if (zoomLevel <= minZoom) return;
@@ -326,13 +334,23 @@ function initLightbox() {
   let touchStartY = 0;
   let touchEndX = 0;
   let touchEndY = 0;
+  let multiTouchGesture = false;
 
   lightbox.addEventListener('touchstart', e => {
+    if (lightboxMobile.matches && e.touches.length > 1) {
+      multiTouchGesture = true;
+      return;
+    }
+    if (lightboxMobile.matches && multiTouchGesture) return;
     touchStartX = e.changedTouches[0].screenX;
     touchStartY = e.changedTouches[0].screenY;
   }, { passive: true });
 
   lightbox.addEventListener('touchend', e => {
+    if (lightboxMobile.matches && multiTouchGesture) {
+      if (e.touches.length === 0) multiTouchGesture = false;
+      return;
+    }
     if (zoomLevel > minZoom) return;
     touchEndX = e.changedTouches[0].screenX;
     touchEndY = e.changedTouches[0].screenY;
