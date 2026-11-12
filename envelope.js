@@ -328,6 +328,14 @@ function openEnvelopeInvitation() {
   coverElem.setAttribute('aria-hidden', 'true');
   coverElem.inert = true;
 
+  // Nếu khách mở thiệp khi phong bì còn đang bay vào, dừng animation trước
+  // để transform của CSS không ghi đè trạng thái mở do JavaScript đặt.
+  if (envelopeScene?.classList.contains('envelope-arrival')) {
+    envelopeScene.classList.remove('envelope-arrival');
+    envelopeScene.querySelectorAll('.arrival-trail, .arrival-ring').forEach(effect => effect.remove());
+    envelopeScene.style.transform = 'none';
+  }
+
   if (isEnvelopeFlipped) {
     isEnvelopeFlipped = false;
     // Reset transform trực tiếp (các biến rotationX/Y là block-scoped)
@@ -349,6 +357,7 @@ function openEnvelopeInvitation() {
   // 2. Mở nắp phong bì và nhô lá thiệp mời lên
   if (envelopeScene) {
     envelopeScene.style.transform = 'none';
+    envelopeScene.classList.add('interacting');
     envelopeScene.classList.add('is-open');
   }
 

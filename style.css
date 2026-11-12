@@ -443,7 +443,6 @@ a {
 .envelope-scene.envelope-arrival {
   animation: envelopeArrival 3.4s cubic-bezier(0.33, 0.08, 0.24, 1) 0.35s backwards;
   will-change: transform, opacity;
-  pointer-events: none;
 }
 
 .envelope-scene.envelope-arrival .envelope {
