@@ -91,14 +91,21 @@ function updateGalleryCounter() {
 }
 
 function goToGallerySlide(index) {
-  if (!galleryTrack || gallerySlides.length < 2) return;
+  if (!galleryTrack || gallerySlides.length < 2 || galleryPhotos.length < 2 || !Number.isFinite(index)) return;
   const activeSlideIndex = getGalleryActiveSlideIndex();
   const activeIndex = toPhotoIndex(activeSlideIndex);
   const step = index - activeIndex;
-  const targetSlideIndex = Math.abs(step) === 1
-    ? activeSlideIndex + step
-    : ((index + galleryPhotos.length) % galleryPhotos.length) + 1;
+  const targetPhotoIndex = ((Math.trunc(index) % galleryPhotos.length) + galleryPhotos.length) % galleryPhotos.length;
+  let targetSlideIndex = targetPhotoIndex + 1;
+
+  if (step === 1 && activeSlideIndex === galleryPhotos.length) {
+    targetSlideIndex = galleryPhotos.length + 1;
+  } else if (step === -1 && activeSlideIndex === 1) {
+    targetSlideIndex = 0;
+  }
+
   const slide = galleryVisualSlides[targetSlideIndex];
+  if (!slide) return;
   const left = slide.offsetLeft - (galleryTrack.clientWidth - slide.clientWidth) / 2;
   galleryTrack.scrollTo({
     left,
