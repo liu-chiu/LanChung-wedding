@@ -968,6 +968,10 @@ a {
   transform: rotate(180deg);
 }
 
+@media (max-width: 640px) {
+  .cover-flip-btn { display: none; }
+}
+
 /* Lá thiệp mời sang trọng bên trong lòng phong bì */
 .envelope-card {
   position: absolute;
