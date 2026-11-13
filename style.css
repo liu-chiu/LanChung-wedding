@@ -4401,28 +4401,6 @@ button[data-copy].is-copied {
   user-select: none;
 }
 
-.lightbox-caption {
-  margin: 0.85rem 0 0;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.85rem;
-  font-style: italic;
-  text-align: center;
-  max-width: 80vw;
-  line-height: 1.4;
-}
-
-.lightbox-caption::before {
-  display: block;
-  margin-bottom: 0.35rem;
-  color: #f0d8a6;
-  content: "A MOMENT TO KEEP";
-  font-family: "Manrope", sans-serif;
-  font-size: 0.55rem;
-  font-style: normal;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-}
-
 .lightbox-counter {
   position: absolute;
   bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 0.75rem));
