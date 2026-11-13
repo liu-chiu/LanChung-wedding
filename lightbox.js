@@ -116,7 +116,9 @@ function renderLightboxThumbnails() {
     thumb.type = 'button';
     thumb.className = 'lightbox-thumb' + (index === currentPhotoIndex ? ' active' : '');
     thumb.setAttribute('aria-label', `Xem ảnh ${index + 1} trên ${photos.length}`);
-    thumb.innerHTML = `<img src="${photo.src}" alt="${photo.alt}"/>`;
+    // Thumbnail dùng bản nén nhỏ (*-sm.webp) + lazy load để dải thumbnail tải nhanh, không chặn mở lightbox.
+    const thumbSrc = photo.src.replace('-lg.webp', '-sm.webp');
+    thumb.innerHTML = `<img src="${thumbSrc}" alt="${photo.alt}" loading="lazy" decoding="async"/>`;
     thumb.addEventListener('click', () => {
       if (index !== currentPhotoIndex) {
         updateLightboxPhoto(index, true);
@@ -152,8 +154,9 @@ function updateLightboxPreviews() {
   const prevIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
   const nextIndex = (currentPhotoIndex + 1) % photos.length;
 
-  if (lightPreviewLeftImg) lightPreviewLeftImg.src = photos[prevIndex].src;
-  if (lightPreviewRightImg) lightPreviewRightImg.src = photos[nextIndex].src;
+  // Preview cạnh dùng bản nén nhỏ để chuyển ảnh tức thì, không phải chờ tải bản full.
+  if (lightPreviewLeftImg) lightPreviewLeftImg.src = photos[prevIndex].src.replace('-lg.webp', '-sm.webp');
+  if (lightPreviewRightImg) lightPreviewRightImg.src = photos[nextIndex].src.replace('-lg.webp', '-sm.webp');
 
   // Click preview để chuyển ảnh
   if (lightPreviewLeft) {
@@ -198,11 +201,34 @@ function updateLightboxPhoto(index, animate = false) {
 
   setTimeout(() => {
     if (lightImg) {
-      lightImg.src = current.src;
-      lightImg.alt = current.alt;
-      lightImg.style.opacity = '1';
-      // Áp dụng lại transform (scale & pan) sau khi ảnh mới đã tải
-      applyTransform(animate);
+      // Progressive loading: hiển thị bản nén nhỏ (*-sm.webp, đã có sẵn trong cache
+      // nhờ slider) NGAY LẬP TỨC để không có khung trống, sau đó nâng lên bản
+      // full-size (*-lg.webp) khi tải xong — chuyển ảnh cảm giác gần như tức thì.
+      const largeSrc = current.src;
+      const smallSrc = largeSrc.replace('-lg.webp', '-sm.webp');
+      if (smallSrc !== largeSrc) {
+        // Chỉ progressive khi ảnh có cặp bản nhỏ (tránh ảnh ngoài gallery)
+        lightImg.src = smallSrc;
+        lightImg.alt = current.alt;
+        lightImg.style.opacity = '1';
+        applyTransform(animate);
+        const expectedSmallUrl = new URL(smallSrc, location.href).href;
+        const preload = new Image();
+        preload.decoding = 'async';
+        preload.onload = () => {
+          // Nếu user đã chuyển sang ảnh khác thì không ghi đè (so sánh URL tuyệt đối)
+          const displayUrl = new URL(lightImg.getAttribute('src') || '', location.href).href;
+          if (displayUrl === expectedSmallUrl) {
+            lightImg.src = largeSrc;
+          }
+        };
+        preload.src = largeSrc;
+      } else {
+        lightImg.src = largeSrc;
+        lightImg.alt = current.alt;
+        lightImg.style.opacity = '1';
+        applyTransform(animate);
+      }
     }
     if (lightCaption) {
       lightCaption.textContent = current.alt;

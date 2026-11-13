@@ -6,6 +6,8 @@
 
 // Use $ and $$ from window.__weddingHelpers (declared in helpers.js)
 // Thu thập danh sách ảnh trong Album
+// `src` giữ bản full-size (data-img = *-lg.webp) cho lightbox; các thumbnail/preview
+// trong lightbox tự suy ra bản nén nhỏ *-sm.webp từ src (xem lightbox.js).
 const galleryPhotos = $$('.photo').map((btn, index) => {
   const img = $('img', btn);
   return {
@@ -37,6 +39,26 @@ let galleryTransitionVariant = 0;
 let galleryTransitionCleanup = null;
 let galleryTransitionSlide = null;
 const galleryTransitionNames = ['soft', 'lift', 'focus', 'film'];
+
+// Đánh dấu ảnh đã tải xong để CSS tắt hiệu ứng shimmer placeholder.
+// Gắn ngay từ đầu vì ảnh có thể đã load từ cache trước khi script chạy.
+function markGalleryImgLoaded(img) {
+  if (!img || img.dataset.loaded === 'true') return;
+  if (img.complete && img.naturalWidth > 0) {
+    img.dataset.loaded = 'true';
+  } else {
+    img.addEventListener('load', () => { img.dataset.loaded = 'true'; }, { once: true });
+    img.addEventListener('error', () => { img.dataset.loaded = 'error'; }, { once: true });
+  }
+}
+$$('.photo img').forEach(markGalleryImgLoaded);
+new MutationObserver(mutations => {
+  mutations.forEach(m => m.addedNodes.forEach(node => {
+    if (node.nodeType !== 1) return;
+    if (node.matches?.('.photo img')) markGalleryImgLoaded(node);
+    node.querySelectorAll?.('.photo img').forEach(markGalleryImgLoaded);
+  }));
+}).observe(document.body, { childList: true, subtree: true });
 
 function animateGallerySlide(slide) {
   if (!slide || galleryReducedMotion.matches) return;
@@ -187,6 +209,25 @@ galleryPhotos.length < 2
 setLightboxAutoplayControls({ stop: stopGalleryAutoplay, schedule: scheduleGalleryAutoplay });
 // Đồng bộ danh sách ảnh cho lightbox (lightbox.js giữ mảng photos riêng của nó)
 window.__weddingLightbox.setLightboxPhotos(galleryPhotos);
+
+// Prefetch ảnh full-size theo trình tự sau khi trang đã ổn định (3s sau load),
+// giúp khi khách bấm vào ảnh thì lightbox hiển thị gần như tức thì, không phải chờ tải.
+(function prefetchGalleryFullImages() {
+  const runPrefetch = () => {
+    const queue = galleryPhotos.slice();
+    const next = () => {
+      const p = queue.shift();
+      if (!p) return;
+      const im = new Image();
+      im.decoding = 'async';
+      im.onload = im.onerror = () => setTimeout(next, 250);
+      im.src = p.src;
+    };
+    next();
+  };
+  if (document.readyState === 'complete') setTimeout(runPrefetch, 3000);
+  else window.addEventListener('load', () => setTimeout(runPrefetch, 3000), { once: true });
+})();
 
 function initGallery() {
   if (!gallerySlider || !galleryTrack) return;

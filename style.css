@@ -2655,7 +2655,22 @@ nav a:hover {
   height: clamp(240px, 52vw, 520px);
   display: block;
   object-fit: cover;
+  /* Nền placeholder trong lúc ảnh chưa tải xong, tránh khối xám trống */
+  background: linear-gradient(135deg, #efe6dc 25%, #e6d9ca 50%, #efe6dc 75%);
+  background-size: 200% 100%;
+  animation: galleryShimmer 1.6s linear infinite;
   transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
+}
+
+@keyframes galleryShimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Khi ảnh đã tải xong thì tắt shimmer */
+.photo img[data-loaded="true"] {
+  animation: none;
+  background: none;
 }
 
 .photo.is-entering[data-transition="soft"] img {
