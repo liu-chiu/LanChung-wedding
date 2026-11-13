@@ -62,8 +62,12 @@ const headerIdleDelay = 3000;
 function scheduleHeaderAutoHide() {
   clearTimeout(headerIdleTimeout);
   if (!siteHeader || !desktopNavigation.matches || navigation?.classList.contains('open')) return;
+  if (window.scrollY <= siteHeader.offsetHeight) {
+    siteHeader.classList.remove('is-hidden');
+    return;
+  }
   headerIdleTimeout = setTimeout(() => {
-    if (!siteHeader.matches(':focus-within')) {
+    if (window.scrollY > siteHeader.offsetHeight && !siteHeader.matches(':focus-within')) {
       siteHeader.classList.add('is-hidden');
     }
   }, headerIdleDelay);
