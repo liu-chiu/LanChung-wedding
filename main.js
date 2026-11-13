@@ -740,10 +740,13 @@ function updateGeneratedLink() {
   const base = window.WEDDING_CONFIG?.siteUrl || (window.location.origin + window.location.pathname);
   const nameVal = genGuestName ? genGuestName.value.trim() : '';
   const sideVal = genGuestSide ? genGuestSide.value : '';
+  const currentParams = new URLSearchParams(window.location.search);
+  const inviterName = currentParams.get('to') || currentParams.get('guest') || currentParams.get('name') || '';
 
   const params = new URLSearchParams();
   if (nameVal) params.set('to', nameVal);
   if (sideVal) params.set('side', sideVal);
+  if (inviterName.trim()) params.set('from', inviterName.trim());
 
   const qs = params.toString();
   const finalUrl = qs ? `${base}?${qs}` : base;

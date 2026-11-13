@@ -55,7 +55,8 @@ function setupWeddingSheets() {
       'Page URL',
       'User Agent',
       'Language',
-      'Screen'
+      'Screen',
+      'Invited By'
     ]
   );
 }
@@ -302,7 +303,8 @@ function logVisit_(parameters) {
     clean_(parameters.url, 300),
     clean_(parameters.ua, 250),
     clean_(parameters.lang, 20),
-    clean_(parameters.screen, 30)
+    clean_(parameters.screen, 30),
+    clean_(parameters.invitedBy, 120)
   ]);
   SpreadsheetApp.flush();
 

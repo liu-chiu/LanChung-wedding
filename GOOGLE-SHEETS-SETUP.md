@@ -12,10 +12,13 @@ Backend dùng Google Apps Script để ghi phản hồi vào Google Sheets. Th�
 
    - `RSVP`: `Submission ID`, `Timestamp`, `Name`, `Guests`, `Event`, `Attendance`, `Phone`, `Message`, `Transportation`.
    - `Wishes`: `Submission ID`, `Timestamp`, `Name`, `Wish`, `Status`.
+   - `Visits`: `Visit ID`, `Timestamp`, `Guest Name`, `Referrer`, `Page URL`, `User Agent`, `Language`, `Screen`, `Invited By`.
 
 Không đổi tên sheet hoặc thứ tự cột. `setupWeddingSheets` sẽ thêm tiêu đề `Transportation` ở cột cuối của sheet RSVP hiện có. Khi sửa Apps Script, hãy triển khai phiên bản mới để website dùng mã mới.
 
 Các request của website không tự chạy `setupWeddingSheets`; việc tạo sheet và định dạng tiêu đề chỉ thực hiện khi bạn chủ động chạy hàm này. Điều đó tránh ghi/định dạng lại bảng tính cho mỗi khách truy cập.
+
+Nếu sheet `Visits` đã được tạo trước đây, hãy chạy lại `setupWeddingSheets` một lần để thêm tiêu đề cột `Invited By`.
 
 ## 2. Triển khai Web App và cấu hình website
 
@@ -27,7 +30,7 @@ Các request của website không tự chạy `setupWeddingSheets`; việc tạo
 
 ## 3. Cách gửi và xác minh dữ liệu
 
-Frontend gửi dữ liệu kèm `Submission ID`, sau đó truy vấn trạng thái nhiều lần. Trang chỉ báo lưu thành công khi Apps Script tìm thấy ID trong một trong hai sheet. Nếu không xác minh được, biểu mẫu báo lỗi thay vì hiển thị thành công.
+Frontend gửi dữ liệu kèm `Submission ID`, sau đó truy vấn trạng thái nhiều lần. Trang chỉ báo lưu thành công khi Apps Script tìm thấy ID trong một trong hai sheet. Nếu không xác minh được, biểu mẫu báo lỗi thay vì hiển thị thành công. Với Visits, `Referrer` là URL do trình duyệt gửi và có thể trống khi khách mở link trực tiếp từ ứng dụng nhắn tin; `Invited By` lưu tên người tạo link kế tiếp qua tham số `from`.
 
 Các trường RSVP được lưu gồm tên, số khách, sự kiện, trạng thái tham dự, phương tiện di chuyển, số điện thoại và lời nhắn. Apps Script giới hạn độ dài các trường và số khách trong phạm vi 1–20.
 

@@ -28,11 +28,14 @@
 
     // 2. Tên khách mời từ link cá nhân hóa
     let guestName = '';
+    let invitedBy = '';
     try {
       const params = new URLSearchParams(window.location.search);
       guestName = String(
         params.get('to') || params.get('guest') || params.get('name') || ''
       ).replace(/[-_]+/g, ' ').trim().slice(0, 120);
+      invitedBy = String(params.get('from') || '')
+        .replace(/[-_]+/g, ' ').trim().slice(0, 120);
     } catch (error) {
       guestName = '';
     }
@@ -69,6 +72,7 @@
       action: 'logVisit',
       vid: visitId,
       name: guestName,
+      invitedBy: invitedBy,
       ref: document.referrer || '',
       url: window.location.href,
       ua: navigator.userAgent,
