@@ -34,6 +34,7 @@ let galleryDragPointerId = null;
 let galleryIsDragging = false;
 let galleryRingIndex = 0;
 let galleryRingDragOffset = 0;
+let galleryRingRequestId = 0;
 let galleryIsVisible = false;
 let galleryIgnoreNextClick = false;
 let galleryLastActivePhotoIndex = null;
@@ -53,6 +54,53 @@ function markGalleryImgLoaded(img) {
     img.addEventListener('error', () => { img.dataset.loaded = 'error'; }, { once: true });
   }
 }
+
+function warmGalleryImages(centerIndex = galleryRingIndex) {
+  const count = gallerySlides.length;
+  if (!count) return;
+
+  gallerySlides.forEach((slide, index) => {
+    const img = $('img', slide);
+    if (!img) return;
+
+    const rawDistance = Math.abs(index - centerIndex);
+    const distance = Math.min(rawDistance, count - rawDistance);
+    // Ring items are transformed off-screen, so native lazy loading may not
+    // start until after a transition. Use only the small thumbnails here.
+    img.loading = 'eager';
+    if ('fetchPriority' in img) img.fetchPriority = distance <= 1 ? 'high' : 'low';
+    markGalleryImgLoaded(img);
+    if (distance > 2) return;
+
+    if (typeof img.decode === 'function' && img.dataset.decodeReady !== 'true' && img.dataset.decodePending !== 'true') {
+      img.dataset.decodePending = 'true';
+      img.decode().then(() => {
+        img.dataset.decodeReady = 'true';
+        delete img.dataset.decodePending;
+        markGalleryImgLoaded(img);
+      }).catch(() => {
+        delete img.dataset.decodePending;
+      });
+    }
+  });
+}
+
+function waitForGalleryImage(index) {
+  const img = $('img', gallerySlides[index]);
+  if (!img) return Promise.resolve();
+  img.loading = 'eager';
+
+  if (img.complete) {
+    if (img.naturalWidth > 0 && typeof img.decode === 'function') return img.decode().catch(() => {});
+    return Promise.resolve();
+  }
+  if (typeof img.decode === 'function') return img.decode().catch(() => {});
+  return new Promise(resolve => {
+    img.addEventListener('load', resolve, { once: true });
+    img.addEventListener('error', resolve, { once: true });
+  });
+}
+
 $$('.photo img').forEach(markGalleryImgLoaded);
 new MutationObserver(mutations => {
   mutations.forEach(m => m.addedNodes.forEach(node => {
@@ -186,10 +234,16 @@ function updateGalleryCounter() {
 function goToGallerySlide(index) {
   if (!galleryTrack || gallerySlides.length < 2 || galleryPhotos.length < 2 || !Number.isFinite(index)) return;
   if (galleryTrack.classList.contains('is-ring')) {
-    galleryRingIndex = ((Math.round(index) % gallerySlides.length) + gallerySlides.length) % gallerySlides.length;
-    galleryRingDragOffset = 0;
-    updateGalleryPresentation();
-    updateGalleryCounter();
+    const targetIndex = ((Math.round(index) % gallerySlides.length) + gallerySlides.length) % gallerySlides.length;
+    const requestId = ++galleryRingRequestId;
+    warmGalleryImages(targetIndex);
+    waitForGalleryImage(targetIndex).then(() => {
+      if (requestId !== galleryRingRequestId) return;
+      galleryRingIndex = targetIndex;
+      galleryRingDragOffset = 0;
+      updateGalleryPresentation();
+      updateGalleryCounter();
+    });
     return;
   }
   const activeSlideIndex = getGalleryActiveSlideIndex();
@@ -278,6 +332,8 @@ window.__weddingLightbox.setLightboxPhotos(galleryPhotos);
 // giúp khi khách bấm vào ảnh thì lightbox hiển thị gần như tức thì, không phải chờ tải.
 (function prefetchGalleryFullImages() {
   const runPrefetch = () => {
+    // Giữ băng thông trên mobile WebView cho thumbnail của ring.
+    if (galleryMobile.matches) return;
     const queue = galleryPhotos.slice();
     const next = () => {
       const p = queue.shift();
@@ -297,6 +353,7 @@ function initGallery() {
   if (!gallerySlider || !galleryTrack) return;
 
   galleryTrack.classList.add('is-ring');
+  warmGalleryImages(galleryRingIndex);
 
   galleryVisualSlides.forEach((slide, index) => {
     const photoIndex = toPhotoIndex(index);
@@ -421,11 +478,11 @@ function initGallery() {
       setTimeout(() => { galleryIgnoreNextClick = false; }, 80);
       if (galleryTrack.classList.contains('is-ring')) {
         const offset = galleryRingDragOffset;
-        galleryRingDragOffset = 0;
         if (Math.abs(offset) >= 0.2) {
           const steps = Math.max(1, Math.round(Math.abs(offset))) * Math.sign(offset);
           goToGallerySlide(galleryRingIndex + steps);
         } else {
+          galleryRingDragOffset = 0;
           updateGalleryPresentation();
         }
       }
