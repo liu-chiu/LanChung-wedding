@@ -346,9 +346,9 @@ a {
 
 .cover-guest-prefix {
   font-size: 0.82rem;
-  color: #7f7467;
+  color: #65584e;
   letter-spacing: 0.06em;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -356,13 +356,13 @@ a {
   position: relative;
   display: inline-block;
   padding-bottom: 0.12em;
-  color: #76554c;
+  color: #60423d;
   font-family: var(--guest-font);
   font-size: 1.5rem;
   font-style: normal;
   font-weight: 400;
   line-height: 1.1;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 1px rgba(255, 253, 249, 0.72);
   white-space: nowrap;
   animation: guestNameReveal 0.85s cubic-bezier(0.2, 0.75, 0.25, 1) both,
     guestNameGlow 2.4s ease-in-out 0.85s 2;
