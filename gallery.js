@@ -166,19 +166,33 @@ function goToGallerySlide(index) {
 }
 
 function normalizeGalleryLoop() {
-  if (!galleryTrack || galleryVisualSlides.length !== galleryPhotos.length + 2) return;
+  if (!galleryTrack || galleryVisualSlides.length === 0) return;
+
   const activeSlideIndex = getGalleryActiveSlideIndex();
-  const targetSlideIndex = activeSlideIndex === 0
-    ? galleryPhotos.length
-    : activeSlideIndex === galleryPhotos.length + 1
-      ? 1
-      : activeSlideIndex;
-  if (targetSlideIndex === activeSlideIndex) return;
+  let targetSlideIndex = activeSlideIndex;
+  if (galleryVisualSlides.length === galleryPhotos.length + 2) {
+    targetSlideIndex = activeSlideIndex === 0
+      ? galleryPhotos.length
+      : activeSlideIndex === galleryPhotos.length + 1
+        ? 1
+        : activeSlideIndex;
+  }
 
   const slide = galleryVisualSlides[targetSlideIndex];
+  if (!slide) return;
+
+  // Bù sai lệch thực tế sau smooth scroll + scroll-snap để tâm không trôi dần.
+  const trackRect = galleryTrack.getBoundingClientRect();
+  const slideRect = slide.getBoundingClientRect();
+  const delta = (slideRect.left + slideRect.width / 2) - (trackRect.left + trackRect.width / 2);
+  const isLoopClone = targetSlideIndex !== activeSlideIndex;
+  if (!isLoopClone && Math.abs(delta) < 0.5) return;
+
   galleryTrack.style.scrollBehavior = 'auto';
-  galleryTrack.scrollLeft = slide.offsetLeft - (galleryTrack.clientWidth - slide.clientWidth) / 2;
+  galleryTrack.style.scrollSnapType = 'none';
+  galleryTrack.scrollLeft += delta;
   requestAnimationFrame(() => {
+    galleryTrack.style.removeProperty('scroll-snap-type');
     galleryTrack.style.removeProperty('scroll-behavior');
   });
 }
