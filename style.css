@@ -1277,38 +1277,51 @@ a {
   overflow: visible;
 }
 
-.wax-seal-logo {
+.wax-seal-monogram {
   position: absolute;
-  top: 50%;
+  top: 48%;
   left: 50%;
   z-index: 1;
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  display: flex;
+  align-items: center;
+  color: #d9b768;
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.015em;
+  -webkit-text-stroke: 0.35px rgba(118, 76, 36, 0.8);
+  text-shadow: 1px 1px 0 rgba(255, 232, 166, 0.85),
+    -1px -1px 0 rgba(91, 35, 42, 0.78),
+    0 2px 3px rgba(53, 13, 22, 0.7);
   transform: translate(-50%, -50%);
-  filter: drop-shadow(0 0 3px rgba(255, 226, 153, 0.7));
-  animation: sealLogoGleam 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 2px rgba(255, 226, 153, 0.5));
+  animation: sealMonogramGleam 3s ease-in-out infinite;
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
-.wax-seal:hover .wax-seal-logo,
-.wax-seal:focus-visible .wax-seal-logo {
-  transform: translate(-50%, -50%) scale(1.14);
-  filter: drop-shadow(0 0 6px rgba(255, 226, 153, 0.95));
+.wax-seal-ampersand {
+  margin: 1px 1px 0 0;
+  font-family: 'Great Vibes', cursive;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0;
+  transform: rotate(-8deg);
 }
 
-.wax-seal:active .wax-seal-logo {
+.wax-seal:hover .wax-seal-monogram,
+.wax-seal:focus-visible .wax-seal-monogram {
+  transform: translate(-50%, -50%) scale(1.14);
+  filter: drop-shadow(0 0 5px rgba(255, 226, 153, 0.9));
+}
+
+.wax-seal:active .wax-seal-monogram {
   transform: translate(-50%, -50%) scale(1.04);
 }
 
-@keyframes sealLogoGleam {
-  0%, 100% { opacity: 0.9; filter: drop-shadow(0 0 3px rgba(255, 226, 153, 0.7)); }
-  50% { opacity: 1; filter: drop-shadow(0 0 7px rgba(255, 226, 153, 0.95)); }
+@keyframes sealMonogramGleam {
+  0%, 100% { opacity: 0.94; filter: drop-shadow(0 0 2px rgba(255, 226, 153, 0.5)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 5px rgba(255, 226, 153, 0.85)); }
 }
 
 /* Lời mời chạm mở thiệp dạng pill hoàng gia */
