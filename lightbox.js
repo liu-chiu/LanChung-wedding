@@ -5,7 +5,9 @@
 // ==========================================
 const lightbox = $('#lightbox');
 const lightboxMobile = window.matchMedia('(max-width: 768px)');
+const lightboxReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const lightImg = $('#lightImg');
+const lightWrapper = $('#lightWrapper');
 const lightCaption = $('#lightCaption');
 const lightCounter = $('#lightCounter');
 const lightPreviewLeft = $('#lightPreviewLeft');
@@ -28,6 +30,9 @@ const maxZoom = 3;
 let panX = 0;
 let panY = 0;
 let pinchZoomCtrl = null;
+let lightboxPhotoTimer = null;
+let lightboxMotionTimer = null;
+let lightboxPhotoUpdateId = 0;
 
 function setLightboxAutoplayControls(controls) {
   autoplayControls = controls;
@@ -186,20 +191,42 @@ function updateLightboxPreviews() {
   }
 }
 
+function animateLightboxCarousel(direction) {
+  if (!lightWrapper || lightboxReducedMotion.matches) return;
+
+  clearTimeout(lightboxMotionTimer);
+  lightWrapper.classList.remove('is-carousel-next', 'is-carousel-prev');
+  void lightWrapper.offsetWidth;
+  lightWrapper.classList.add(direction > 0 ? 'is-carousel-next' : 'is-carousel-prev');
+  lightboxMotionTimer = setTimeout(() => {
+    lightWrapper.classList.remove('is-carousel-next', 'is-carousel-prev');
+  }, 780);
+}
+
 function updateLightboxPhoto(index, animate = false) {
   if (photos.length === 0) return;
+  const previousIndex = currentPhotoIndex;
   currentPhotoIndex = (index + photos.length) % photos.length;
   const current = photos[currentPhotoIndex];
+  const forwardDistance = (currentPhotoIndex - previousIndex + photos.length) % photos.length;
+  const backwardDistance = (previousIndex - currentPhotoIndex + photos.length) % photos.length;
+  const direction = forwardDistance <= backwardDistance ? 1 : -1;
+  const shouldAnimate = animate && !lightboxReducedMotion.matches;
+  const updateId = ++lightboxPhotoUpdateId;
 
   // Reset zoom & pan khi chuyển ảnh
   resetLightboxView();
 
-  if (animate && lightImg) {
-    lightImg.style.opacity = '0.35';
-    lightImg.style.transform = 'scale(0.97)';
+  clearTimeout(lightboxPhotoTimer);
+  if (shouldAnimate) {
+    animateLightboxCarousel(direction);
+  } else {
+    clearTimeout(lightboxMotionTimer);
+    lightWrapper?.classList.remove('is-carousel-next', 'is-carousel-prev');
   }
 
-  setTimeout(() => {
+  lightboxPhotoTimer = setTimeout(() => {
+    if (updateId !== lightboxPhotoUpdateId) return;
     if (lightImg) {
       // Progressive loading: hiển thị bản nén nhỏ (*-sm.webp, đã có sẵn trong cache
       // nhờ slider) NGAY LẬP TỨC để không có khung trống, sau đó nâng lên bản
@@ -211,7 +238,7 @@ function updateLightboxPhoto(index, animate = false) {
         lightImg.src = smallSrc;
         lightImg.alt = current.alt;
         lightImg.style.opacity = '1';
-        applyTransform(animate);
+        applyTransform(shouldAnimate);
         const expectedSmallUrl = new URL(smallSrc, location.href).href;
         const preload = new Image();
         preload.decoding = 'async';
@@ -227,7 +254,7 @@ function updateLightboxPhoto(index, animate = false) {
         lightImg.src = largeSrc;
         lightImg.alt = current.alt;
         lightImg.style.opacity = '1';
-        applyTransform(animate);
+        applyTransform(shouldAnimate);
       }
     }
     if (lightCaption) {
@@ -239,7 +266,7 @@ function updateLightboxPhoto(index, animate = false) {
     // Cập nhật ảnh mô & danh sách thumbnail sau khi chuyển ảnh
     updateLightboxPreviews();
     updateLightboxThumbnails();
-  }, animate ? 150 : 0);
+  }, shouldAnimate ? 380 : 0);
 }
 
 function openLightbox(index, triggerElement) {

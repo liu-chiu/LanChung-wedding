@@ -4303,6 +4303,8 @@ button[data-copy].is-copied {
   opacity: 1;
   transition: opacity 0.25s ease;
   user-select: none;
+  perspective: 1800px;
+  perspective-origin: 50% 46%;
 }
 
 .lightbox[hidden] {
@@ -4319,6 +4321,35 @@ button[data-copy].is-copied {
   justify-content: center;
   overflow: hidden;
   touch-action: pan-y;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.lightbox-wrapper.is-carousel-next {
+  animation: lightboxCarouselNext 760ms cubic-bezier(0.22, 0.72, 0.2, 1) both;
+}
+
+.lightbox-wrapper.is-carousel-prev {
+  animation: lightboxCarouselPrev 760ms cubic-bezier(0.22, 0.72, 0.2, 1) both;
+}
+
+@keyframes lightboxCarouselNext {
+  0% { opacity: 1; transform: rotateY(0) translateX(0) scale(1); }
+  42% { opacity: 0.55; transform: rotateY(-58deg) translateX(-2.5rem) scale(0.96); }
+  49% { opacity: 0; transform: rotateY(-88deg) translateX(-3.5rem) scale(0.93); }
+  51% { opacity: 0; transform: rotateY(88deg) translateX(3.5rem) scale(0.93); }
+  60% { opacity: 0.55; transform: rotateY(42deg) translateX(1.75rem) scale(0.97); }
+  100% { opacity: 1; transform: rotateY(0) translateX(0) scale(1); }
+}
+
+@keyframes lightboxCarouselPrev {
+  0% { opacity: 1; transform: rotateY(0) translateX(0) scale(1); }
+  42% { opacity: 0.55; transform: rotateY(58deg) translateX(2.5rem) scale(0.96); }
+  49% { opacity: 0; transform: rotateY(88deg) translateX(3.5rem) scale(0.93); }
+  51% { opacity: 0; transform: rotateY(-88deg) translateX(-3.5rem) scale(0.93); }
+  60% { opacity: 0.55; transform: rotateY(-42deg) translateX(-1.75rem) scale(0.97); }
+  100% { opacity: 1; transform: rotateY(0) translateX(0) scale(1); }
 }
 
 .lightbox img {
@@ -4510,10 +4541,22 @@ button[data-copy].is-copied {
 
 .lightbox-preview-left {
   left: max(1rem, env(safe-area-inset-left));
+  transform: translateY(-50%) rotateY(16deg) scale(0.96);
+  transform-origin: right center;
 }
 
 .lightbox-preview-right {
   right: max(1rem, env(safe-area-inset-right));
+  transform: translateY(-50%) rotateY(-16deg) scale(0.96);
+  transform-origin: left center;
+}
+
+.lightbox-preview-left:hover {
+  transform: translateY(-50%) rotateY(10deg) scale(1.02);
+}
+
+.lightbox-preview-right:hover {
+  transform: translateY(-50%) rotateY(-10deg) scale(1.02);
 }
 
 .lightbox-preview img {
