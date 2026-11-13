@@ -30,7 +30,7 @@
     let guestName = '';
     try {
       const params = new URLSearchParams(window.location.search);
-      guestName = decodeURIComponent(
+      guestName = String(
         params.get('to') || params.get('guest') || params.get('name') || ''
       ).replace(/[-_]+/g, ' ').trim().slice(0, 120);
     } catch (error) {
@@ -112,9 +112,6 @@
           '[VisitLog] Sheet Visits — tổng dòng:', result.total,
           '| đã tạo sheet:', result.initialized
         );
-        if (result.visits && result.visits.length) {
-          console.table(result.visits);
-        }
       } else {
         console.warn('[VisitLog] Không đọc được visitStats:', result);
       }

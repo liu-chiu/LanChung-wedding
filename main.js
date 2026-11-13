@@ -593,9 +593,9 @@ if (musicButton) {
 // ==========================================
 function cleanGuestName(raw) {
   if (!raw) return '';
-  // Giữ nguyên 100% cách viết hoa/thường và chính tả ban đầu của người tạo link
-  // Chỉ giải mã URI và thay thế dấu gạch ngang/dưới thành khoảng trắng (nếu link truyền dạng slug)
-  return decodeURIComponent(raw).replace(/[-_]+/g, ' ').trim();
+  // URLSearchParams đã giải mã URI; không decode lần hai để tránh URIError
+  // với tên có ký tự % hợp lệ.
+  return String(raw).replace(/[-_]+/g, ' ').trim();
 }
 
 function applyPersonalization() {

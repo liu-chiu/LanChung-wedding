@@ -83,7 +83,7 @@
     const params = new URLSearchParams(window.location.search);
     const raw = params.get('to') || params.get('guest') || params.get('name');
     try {
-      return raw ? decodeURIComponent(raw).replace(/[-_]+/g, ' ').trim() : '';
+      return raw ? String(raw).replace(/[-_]+/g, ' ').trim() : '';
     } catch (error) {
       return '';
     }

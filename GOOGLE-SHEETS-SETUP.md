@@ -20,9 +20,9 @@ Các request của website không tự chạy `setupWeddingSheets`; việc tạo
 ## 2. Triển khai Web App và cấu hình website
 
 1. Chọn **Deploy > New deployment > Web app**.
-2. Chọn **Execute as: Me**. Cấu hình quyền truy cập để khách mời có thể gửi yêu cầu; việc cho phép truy cập công khai cũng cho phép người dùng Internet gọi các thao tác API của script.
+2. Chọn **Execute as: Me**. Cấu hình quyền truy cập để khách mời có thể gửi yêu cầu; việc cho phép truy cập công khai cũng cho phép người dùng Internet gọi các thao tác API của script. Endpoint thống kê lượt truy cập chỉ trả tổng số, không trả ID, tên hay thời gian của khách.
 3. Triển khai, cấp quyền theo yêu cầu và sao chép URL `/exec`.
-4. Đặt URL đó làm `apiUrl` trong `config.js`. Có thể thay `siteUrl` bằng URL website thật; hiện thuộc tính này chưa được dùng trong mã ứng dụng.
+4. Đặt URL đó làm `apiUrl` trong `config.js`. Có thể thay `siteUrl` bằng URL website thật để link generator tạo liên kết cá nhân hóa đúng domain.
 5. Triển khai lại website nếu cần để tải cấu hình mới.
 
 ## 3. Cách gửi và xác minh dữ liệu
@@ -44,9 +44,9 @@ Trạng thái submission đã lưu được cache tối đa 6 giờ để xác m
 ## 5. Kiểm tra
 
 - Xác nhận trạng thái backend trên phần RSVP báo đã kết nối.
-- Gửi RSVP thử và kiểm tra dòng mới trong `RSVP` cùng mã xác nhận trên trang.
+- Gửi RSVP thử và kiểm tra dòng mới trong `RSVP` cùng thông báo gửi thành công trên trang.
 - Gửi lời chúc thử, xác nhận trạng thái `Pending`, đổi sang `Approved`, rồi tải lại website để kiểm tra.
 
 Google Apps Script và Sheets có giới hạn quota. Không dùng bảng tính này để lưu mật khẩu, OTP, thông tin thanh toán hoặc dữ liệu nhạy cảm khác.
 
-Web App cho phép khách truy cập công khai gửi dữ liệu. Theo dõi các lần gửi bất thường và cân nhắc bổ sung giới hạn tần suất hoặc CAPTCHA nếu endpoint bị spam.
+Web App cho phép khách truy cập công khai gửi dữ liệu. Mã hiện có honeypot và giới hạn nhẹ 5 lần gửi cho mỗi danh tính chuẩn hóa trong 10 phút. Apps Script Web App không cung cấp IP người gọi cho mã này, nên lớp giới hạn đó không ngăn được bot cố tình đổi danh tính. Nếu endpoint bị spam, hãy bổ sung CAPTCHA được xác minh ở máy chủ hoặc chuyển sang backend có kiểm soát IP.

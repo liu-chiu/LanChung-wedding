@@ -4,6 +4,8 @@ const VISIT_SHEET = 'Visits';
 
 /* TTL dedupe truy cập: 1 phiên ít hơn 1 lần ghi trong TTL này */
 const VISIT_DEDUPE_TTL = 1800;
+const SUBMISSION_RATE_LIMIT = 5;
+const SUBMISSION_RATE_WINDOW_SECONDS = 600;
 
 
 /**
@@ -77,6 +79,11 @@ function doPost(e) {
       clean_(parameters.type, 12)
         .toLowerCase();
 
+    // Honeypot: real form users never see or fill this field.
+    if (clean_(parameters.website, 200)) {
+      return json_({ ok: false, error: 'spam_detected' });
+    }
+
     if (
       !submissionId ||
       !/^[A-Za-z0-9_-]{12,80}$/.test(submissionId)
@@ -123,11 +130,16 @@ function doPost(e) {
       });
     }
 
+    if (!allowSubmission_(submissionType, row)) {
+      return json_({ ok: false, error: 'rate_limited' });
+    }
+
     sheet.appendRow(row);
     SpreadsheetApp.flush();
     CacheService
       .getScriptCache()
       .put(submissionCacheKey_(submissionId), '1', 21600);
+    incrementSubmissionRate_(submissionType, row);
 
     return json_({
       ok: true,
@@ -314,39 +326,50 @@ function visitStats_() {
     return {
       ok: true,
       initialized: false,
-      total: 0,
-      visits: []
+      total: 0
     };
   }
 
   const lastRow = sheet.getLastRow();
-  const lastRows = [];
-
-  if (lastRow > 1) {
-    const startRow = Math.max(2, lastRow - 9);
-    const rows = sheet
-      .getRange(startRow, 1, lastRow - startRow + 1, 3)
-      .getValues();
-
-    for (let index = rows.length - 1; index >= 0; index--) {
-      const row = rows[index];
-      lastRows.push({
-        id: String(row[0] || ''),
-        timestamp:
-          row[1] instanceof Date
-            ? row[1].toISOString()
-            : String(row[1] || ''),
-        name: String(row[2] || '')
-      });
-    }
-  }
-
   return {
     ok: true,
     initialized: lastRow > 0,
-    total: Math.max(0, lastRow - 1),
-    visits: lastRows
+    total: Math.max(0, lastRow - 1)
   };
+}
+
+
+/**
+ * Lightweight abuse guard for the public form endpoint. Apps Script web apps
+ * do not expose the caller IP, so rate limits are keyed by normalized contact
+ * identity and paired with the form honeypot. This is not a CAPTCHA substitute.
+ */
+function submissionRateKey_(type, row) {
+  const hasPhone = type === 'rsvp' && Boolean(row[6]);
+  const identity = hasPhone ? row[6] : row[2];
+  const normalized = hasPhone
+    ? String(identity).replace(/\D/g, '')
+    : String(identity || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    `${type}:${normalized}`,
+    Utilities.Charset.UTF_8
+  );
+  const token = Utilities.base64EncodeWebSafe(digest).replace(/=+$/, '');
+  return `submit-rate-${token}`;
+}
+
+function allowSubmission_(type, row) {
+  const cache = CacheService.getScriptCache();
+  const count = Number(cache.get(submissionRateKey_(type, row)) || 0);
+  return count < SUBMISSION_RATE_LIMIT;
+}
+
+function incrementSubmissionRate_(type, row) {
+  const cache = CacheService.getScriptCache();
+  const key = submissionRateKey_(type, row);
+  const count = Number(cache.get(key) || 0);
+  cache.put(key, String(count + 1), SUBMISSION_RATE_WINDOW_SECONDS);
 }
 
 

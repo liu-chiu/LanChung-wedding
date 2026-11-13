@@ -140,6 +140,7 @@ function initRsvpAndWishes() {
 
       try {
         const wish = {
+          website: data.website || '',
           name: data.guestName.trim(),
           wish: data.wish.trim()
         };
@@ -390,6 +391,7 @@ function initRsvpAndWishes() {
       try {
         await submitAndVerify({
           type: 'rsvp',
+          website: data.website || '',
           name: data.name.trim(),
           guests: data.guests,
           event: data.event,
