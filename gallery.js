@@ -63,7 +63,9 @@ new MutationObserver(mutations => {
 }).observe(document.body, { childList: true, subtree: true });
 
 function animateGallerySlide(slide) {
-  if (!slide || galleryReducedMotion.matches) return;
+  // Ring đã có chuyển động 3D trên từng card; tránh transform animation lồng
+  // trên img vì iOS Safari có thể co ảnh về góc khi chuyển slide.
+  if (!slide || galleryReducedMotion.matches || galleryTrack?.classList.contains('is-ring')) return;
   const variant = galleryTransitionNames[galleryTransitionVariant % galleryTransitionNames.length];
   galleryTransitionVariant += 1;
   clearTimeout(galleryTransitionCleanup);
