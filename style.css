@@ -4971,16 +4971,50 @@ button[data-copy].is-copied {
   }
 
   /* Ảnh chính chiếm rộng hơn vì không còn panel 2 bên */
+  .lightbox {
+    perspective: none;
+  }
+
   .lightbox-wrapper {
     width: calc(100vw - 2rem);
     max-width: calc(100vw - 2rem);
     max-height: 86vh;
     touch-action: none;
+    transform-style: flat;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+  }
+
+  /* Mobile dùng chuyển động 2D để ảnh không bị méo khi vuốt. */
+  .lightbox-wrapper.is-carousel-next {
+    animation: lightboxMobileNext 760ms cubic-bezier(0.22, 0.72, 0.2, 1) both;
+  }
+
+  .lightbox-wrapper.is-carousel-prev {
+    animation: lightboxMobilePrev 760ms cubic-bezier(0.22, 0.72, 0.2, 1) both;
   }
 
   .lightbox img {
     max-height: 78vh;
   }
+}
+
+@keyframes lightboxMobileNext {
+  0% { opacity: 1; transform: translateX(0) scale(1); }
+  42% { opacity: 0.35; transform: translateX(-1.5rem) scale(0.985); }
+  49% { opacity: 0; transform: translateX(-2rem) scale(0.98); }
+  51% { opacity: 0; transform: translateX(2rem) scale(0.98); }
+  60% { opacity: 0.55; transform: translateX(1rem) scale(0.99); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes lightboxMobilePrev {
+  0% { opacity: 1; transform: translateX(0) scale(1); }
+  42% { opacity: 0.35; transform: translateX(1.5rem) scale(0.985); }
+  49% { opacity: 0; transform: translateX(2rem) scale(0.98); }
+  51% { opacity: 0; transform: translateX(-2rem) scale(0.98); }
+  60% { opacity: 0.55; transform: translateX(-1rem) scale(0.99); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 @media (max-width: 480px) {
