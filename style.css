@@ -2544,6 +2544,34 @@ nav a:hover {
   -webkit-user-select: none;
 }
 
+/* Carousel vòng 3D: giữ slide chính ở giữa, lộ nhẹ ảnh trước và sau. */
+.photos.is-ring {
+  display: block;
+  height: clamp(420px, 52vw, 640px);
+  overflow: hidden;
+  padding: 0;
+  perspective: 1600px;
+  perspective-origin: 50% 42%;
+  transform-style: preserve-3d;
+  touch-action: pan-y;
+}
+
+.photos.is-ring .photo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  flex: none;
+  width: min(64vw, 860px);
+  margin: 0;
+  backface-visibility: hidden;
+  transition: transform 560ms cubic-bezier(0.22, 0.72, 0.2, 1), opacity 420ms ease, box-shadow 300ms ease;
+  will-change: transform, opacity;
+}
+
+.photos.is-ring.is-dragging .photo {
+  transition: none;
+}
+
 .photos.is-dragging {
   cursor: grabbing;
   scroll-behavior: auto;
@@ -5035,6 +5063,11 @@ button[data-copy].is-copied {
   .photo { flex-basis: 90vw; width: 90vw; }
   .photo img { height: clamp(320px, 52svh, 460px); }
   .gallery-slider { margin-top: 2rem; }
+  .photos.is-ring {
+    height: clamp(460px, 56svh, 560px);
+    perspective: 1100px;
+  }
+  .photos.is-ring .photo { width: 78vw; }
 
   .count { padding-inline: 0.55rem; }
   .count h2 { font-size: 2.4rem; }
@@ -5118,6 +5151,9 @@ button[data-copy].is-copied {
   .photo {
     transform: none;
     opacity: 1;
+    transition: none;
+  }
+  .photos.is-ring .photo {
     transition: none;
   }
   .photo::after {

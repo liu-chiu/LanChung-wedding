@@ -32,6 +32,8 @@ let galleryDragStartY = 0;
 let galleryDragStartScrollLeft = 0;
 let galleryDragPointerId = null;
 let galleryIsDragging = false;
+let galleryRingIndex = 0;
+let galleryRingDragOffset = 0;
 let galleryIsVisible = false;
 let galleryIgnoreNextClick = false;
 let galleryLastActivePhotoIndex = null;
@@ -80,6 +82,7 @@ function animateGallerySlide(slide) {
 
 function getGalleryActiveSlideIndex() {
   if (!galleryTrack || galleryVisualSlides.length === 0) return 0;
+  if (galleryTrack.classList.contains('is-ring')) return galleryRingIndex;
   const trackCenter = galleryTrack.getBoundingClientRect().left + galleryTrack.clientWidth / 2;
   return galleryVisualSlides.reduce((closestIndex, slide, index) => {
     const currentDistance = Math.abs(slide.getBoundingClientRect().left + slide.offsetWidth / 2 - trackCenter);
@@ -90,6 +93,9 @@ function getGalleryActiveSlideIndex() {
 }
 
 function toPhotoIndex(slideIndex) {
+  if (galleryTrack?.classList.contains('is-ring')) {
+    return ((slideIndex % galleryPhotos.length) + galleryPhotos.length) % galleryPhotos.length;
+  }
   if (slideIndex === 0) return galleryPhotos.length - 1;
   if (slideIndex === galleryPhotos.length + 1) return 0;
   return (slideIndex - 1 + galleryPhotos.length) % galleryPhotos.length;
@@ -99,8 +105,43 @@ function getGalleryActiveIndex() {
   return galleryPhotos.length ? toPhotoIndex(getGalleryActiveSlideIndex()) : 0;
 }
 
+function updateGalleryRingPresentation(dragOffset = 0) {
+  const count = galleryVisualSlides.length;
+  const first = galleryVisualSlides[0];
+  if (!count || !first) return;
+
+  const width = first.offsetWidth || galleryTrack.clientWidth * 0.68;
+  const radius = Math.min(width * 2.35, 1500);
+  const stepAngle = Math.min(360 / count, 40);
+
+  galleryVisualSlides.forEach((slide, index) => {
+    let offset = index - galleryRingIndex - dragOffset;
+    if (offset > count / 2) offset -= count;
+    if (offset < -count / 2) offset += count;
+
+    const distance = Math.abs(offset);
+    const angle = offset * stepAngle;
+    const radians = angle * Math.PI / 180;
+    const x = Math.sin(radians) * radius;
+    const z = (Math.cos(radians) - 1) * radius;
+    const scale = distance < 0.5 ? 1 : Math.max(0.62, 1 - distance * 0.16);
+
+    slide.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, 0, ${z.toFixed(1)}px) rotateY(${(-angle * 0.72).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+    slide.style.opacity = String(Math.max(0, 1 - distance * 0.28));
+    slide.style.zIndex = String(100 - Math.round(distance * 10));
+    slide.style.visibility = distance <= 1.6 ? 'visible' : 'hidden';
+    slide.setAttribute('aria-hidden', distance > 0.5 ? 'true' : 'false');
+    slide.tabIndex = distance <= 0.5 ? 0 : -1;
+  });
+}
+
 function updateGalleryPresentation() {
-  if (!galleryTrack || galleryVisualSlides.length === 0 || galleryReducedMotion.matches) return;
+  if (!galleryTrack || galleryVisualSlides.length === 0) return;
+  if (galleryTrack.classList.contains('is-ring')) {
+    updateGalleryRingPresentation(galleryRingDragOffset);
+    return;
+  }
+  if (galleryReducedMotion.matches) return;
   const trackCenter = galleryTrack.scrollLeft + galleryTrack.clientWidth / 2;
 
   galleryVisualSlides.forEach(slide => {
@@ -142,6 +183,13 @@ function updateGalleryCounter() {
 
 function goToGallerySlide(index) {
   if (!galleryTrack || gallerySlides.length < 2 || galleryPhotos.length < 2 || !Number.isFinite(index)) return;
+  if (galleryTrack.classList.contains('is-ring')) {
+    galleryRingIndex = ((Math.round(index) % gallerySlides.length) + gallerySlides.length) % gallerySlides.length;
+    galleryRingDragOffset = 0;
+    updateGalleryPresentation();
+    updateGalleryCounter();
+    return;
+  }
   const activeSlideIndex = getGalleryActiveSlideIndex();
   const activeIndex = toPhotoIndex(activeSlideIndex);
   const step = index - activeIndex;
@@ -246,17 +294,7 @@ window.__weddingLightbox.setLightboxPhotos(galleryPhotos);
 function initGallery() {
   if (!gallerySlider || !galleryTrack) return;
 
-  if (gallerySlides.length > 1) {
-    const firstClone = gallerySlides[0].cloneNode(true);
-    const lastClone = gallerySlides[gallerySlides.length - 1].cloneNode(true);
-    firstClone.setAttribute('aria-hidden', 'true');
-    firstClone.tabIndex = -1;
-    lastClone.setAttribute('aria-hidden', 'true');
-    lastClone.tabIndex = -1;
-    galleryTrack.prepend(lastClone);
-    galleryTrack.append(firstClone);
-    galleryVisualSlides = $$('.photo', galleryTrack);
-  }
+  galleryTrack.classList.add('is-ring');
 
   galleryVisualSlides.forEach((slide, index) => {
     const photoIndex = toPhotoIndex(index);
@@ -274,12 +312,33 @@ function initGallery() {
     // Lấy index từ danh sách slide trực tiếp để tránh NaN nếu thiếu dataset
     const slideIndex = galleryVisualSlides.indexOf(button);
     if (slideIndex === -1) return;
+    if (galleryTrack.classList.contains('is-ring')) {
+      if (slideIndex !== galleryRingIndex) {
+        goToGallerySlide(slideIndex);
+        scheduleGalleryAutoplay();
+      } else {
+        openLightbox(toPhotoIndex(slideIndex), button);
+      }
+      return;
+    }
     if (galleryMobile.matches && slideIndex !== getGalleryActiveSlideIndex()) {
       goToGallerySlide(toPhotoIndex(slideIndex));
       scheduleGalleryAutoplay();
       return;
     }
     openLightbox(toPhotoIndex(slideIndex), button);
+  });
+
+  galleryTrack.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      goToGallerySlide(getGalleryActiveIndex() - 1);
+      scheduleGalleryAutoplay();
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      goToGallerySlide(getGalleryActiveIndex() + 1);
+      scheduleGalleryAutoplay();
+    }
   });
 
   $('#galleryPrev')?.addEventListener('click', () => {
@@ -336,6 +395,11 @@ function initGallery() {
     }
 
     event.preventDefault();
+    if (galleryTrack.classList.contains('is-ring')) {
+      galleryRingDragOffset = -(deltaX / (galleryTrack.clientWidth || 1)) * 1.2;
+      updateGalleryPresentation();
+      return;
+    }
     galleryTrack.scrollLeft = galleryDragStartScrollLeft - deltaX;
   });
 
@@ -353,7 +417,18 @@ function initGallery() {
     if (wasDragging) {
       galleryIgnoreNextClick = true;
       setTimeout(() => { galleryIgnoreNextClick = false; }, 80);
+      if (galleryTrack.classList.contains('is-ring')) {
+        const offset = galleryRingDragOffset;
+        galleryRingDragOffset = 0;
+        if (Math.abs(offset) >= 0.2) {
+          const steps = Math.max(1, Math.round(Math.abs(offset))) * Math.sign(offset);
+          goToGallerySlide(galleryRingIndex + steps);
+        } else {
+          updateGalleryPresentation();
+        }
+      }
       updateGalleryCounter();
+      scheduleGalleryAutoplay();
     } else {
       scheduleGalleryAutoplay();
     }
@@ -397,10 +472,6 @@ function initGallery() {
     updateGalleryCounter();
   });
 
-  const firstSlide = galleryVisualSlides[gallerySlides.length > 1 ? 1 : 0];
-  galleryTrack.style.scrollBehavior = 'auto';
-  galleryTrack.scrollLeft = firstSlide.offsetLeft - (galleryTrack.clientWidth - firstSlide.clientWidth) / 2;
-  galleryTrack.style.removeProperty('scroll-behavior');
   updateGalleryPresentation();
   updateGalleryCounter();
   scheduleGalleryAutoplay();
