@@ -15,6 +15,7 @@
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
+document.documentElement.classList.add('js-loaded');
 window.addEventListener('pageshow', () => {
   const fragment = window.location.hash.slice(1);
   const target = fragment ? document.getElementById(fragment) : null;

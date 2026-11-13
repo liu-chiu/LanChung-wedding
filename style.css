@@ -4418,6 +4418,34 @@ button[data-copy].is-copied {
   transition: opacity 0.25s ease, transform 0.25s ease;
   transform-origin: center center;
   will-change: transform;
+  /* Tối ưu render cho màn hình retina/high DPI */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+/* Progressive loading – blur-up effect for main image and thumbnails */
+.lightbox img.is-blur-loading {
+  filter: blur(16px) saturate(1.2);
+  transform: scale(1.05);
+  transition: filter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.lightbox img:not(.is-blur-loading) {
+  filter: none;
+  transform: scale(1);
+}
+/* Tối ưu hiển thị nét cho màn hình high DPI (Retina, 2x, 3x) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .lightbox img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: auto;
+  }
+}
+
+/* Đảm bảo ảnh không bị mờ khi zoom */
+.lightbox img {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Trạng thái ảnh đang được phép kéo (pan) khi zoom lớn hơn 1:1 */
@@ -4764,13 +4792,21 @@ button[data-copy].is-copied {
 }
 
 /* Hiệu ứng Reveal khi cuộn trang */
+/* Hiệu ứng Reveal khi cuộn trang */
 .reveal {
-  opacity: 0;
-  transform: translateY(24px);
+  opacity: 1;
+  transform: none;
   transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 .reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Fallback: nếu JS chưa chạy hoặc IntersectionObserver không hỗ trợ, nội dung vẫn hiển thị */
+.no-js .reveal,
+html:not(.js-loaded) .reveal {
   opacity: 1;
   transform: none;
 }

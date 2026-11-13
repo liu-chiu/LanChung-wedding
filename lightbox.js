@@ -121,9 +121,17 @@ function renderLightboxThumbnails() {
     thumb.type = 'button';
     thumb.className = 'lightbox-thumb' + (index === currentPhotoIndex ? ' active' : '');
     thumb.setAttribute('aria-label', `Xem ảnh ${index + 1} trên ${photos.length}`);
-    // Thumbnail dùng bản nén nhỏ (*-sm.webp) + lazy load để dải thumbnail tải nhanh, không chặn mở lightbox.
+    // Thumbnail dùng bản nén nhỏ (*-sm.webp) + eager load để dải thumbnail hiển thị ngay lập tức (mờ trước nét sau).
     const thumbSrc = photo.src.replace('-lg.webp', '-sm.webp');
-    thumb.innerHTML = `<img src="${thumbSrc}" alt="${photo.alt}" loading="lazy" decoding="async"/>`;
+    thumb.innerHTML = `<img src="${thumbSrc}" alt="${photo.alt}" loading="eager" decoding="async" fetchpriority="high" class="is-blur-loading"/>`;
+    const imgEl = thumb.querySelector('img');
+    if (imgEl) {
+      if (imgEl.complete) {
+        imgEl.classList.remove('is-blur-loading');
+      } else {
+        imgEl.addEventListener('load', () => imgEl.classList.remove('is-blur-loading'), { once: true });
+      }
+    }
     thumb.addEventListener('click', () => {
       if (index !== currentPhotoIndex) {
         updateLightboxPhoto(index, true);
@@ -131,7 +139,6 @@ function renderLightboxThumbnails() {
     });
     lightThumbTrack.appendChild(thumb);
   });
-  // Ẩn danh sách nếu chỉ có 1 ảnh
   if (lightThumbList) lightThumbList.style.display = photos.length <= 1 ? 'none' : 'flex';
 }
 
@@ -155,14 +162,24 @@ function updateLightboxPreviews() {
   }
   if (lightPreviewLeft) lightPreviewLeft.style.display = 'flex';
   if (lightPreviewRight) lightPreviewRight.style.display = 'flex';
-
-  const prevIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+const prevIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
   const nextIndex = (currentPhotoIndex + 1) % photos.length;
 
   // Preview cạnh dùng bản nén nhỏ để chuyển ảnh tức thì, không phải chờ tải bản full.
-  if (lightPreviewLeftImg) lightPreviewLeftImg.src = photos[prevIndex].src.replace('-lg.webp', '-sm.webp');
-  if (lightPreviewRightImg) lightPreviewRightImg.src = photos[nextIndex].src.replace('-lg.webp', '-sm.webp');
+  // Thêm hiệu ứng blur-up: hiện mờ trước, nét dần khi tải xong.
+  if (lightPreviewLeftImg) {
+    lightPreviewLeftImg.src = photos[prevIndex].src.replace('-lg.webp', '-sm.webp');
+    lightPreviewLeftImg.classList.add('is-blur-loading');
+    lightPreviewLeftImg.onload = () => lightPreviewLeftImg.classList.remove('is-blur-loading');
+  }
+  if (lightPreviewRightImg) {
+    lightPreviewRightImg.src = photos[nextIndex].src.replace('-lg.webp', '-sm.webp');
+    lightPreviewRightImg.classList.add('is-blur-loading');
+    lightPreviewRightImg.onload = () => lightPreviewRightImg.classList.remove('is-blur-loading');
+  }
 
+  // Preload bản full-size (LG) của ảnh trước/sau trong nền để khi user swipe thì hiển thị tức thì
+  preloadAdjacentLargeImages(prevIndex, nextIndex);
   // Click preview để chuyển ảnh
   if (lightPreviewLeft) {
     lightPreviewLeft.onclick = (e) => {
@@ -189,6 +206,25 @@ function updateLightboxPreviews() {
   if (lightPreviewRight) {
     lightPreviewRight.onkeydown = (e) => handlePreviewKey(e, +1);
   }
+}
+
+// Preload ảnh chất lượng cao (LG) của ảnh trước/sau khi lightbox đang mở
+function preloadAdjacentLargeImages(prevIndex, nextIndex) {
+  [prevIndex, nextIndex].forEach(idx => {
+    const photo = photos[idx];
+    if (!photo) return;
+    const largeSrc = photo.src;
+    const cacheKey = `lg-preload-${largeSrc}`;
+    
+    // Chỉ preload một lần mỗi ảnh
+    if (window[cacheKey]) return;
+    window[cacheKey] = true;
+    
+    const preload = new Image();
+    preload.decoding = 'async';
+    preload.fetchPriority = 'low'; // Ưu tiên thấp để không ảnh hưởng tải ảnh hiện tại
+    preload.src = largeSrc;
+  });
 }
 
 function animateLightboxCarousel(direction) {
@@ -225,7 +261,7 @@ function updateLightboxPhoto(index, animate = false) {
     lightWrapper?.classList.remove('is-carousel-next', 'is-carousel-prev');
   }
 
-  lightboxPhotoTimer = setTimeout(() => {
+lightboxPhotoTimer = setTimeout(() => {
     if (updateId !== lightboxPhotoUpdateId) return;
     if (lightImg) {
       // Progressive loading: hiển thị bản nén nhỏ (*-sm.webp, đã có sẵn trong cache
@@ -237,7 +273,9 @@ function updateLightboxPhoto(index, animate = false) {
         // Chỉ progressive khi ảnh có cặp bản nhỏ (tránh ảnh ngoài gallery)
         lightImg.src = smallSrc;
         lightImg.alt = current.alt;
-        lightImg.style.opacity = '1';
+        lightImg.loading = 'lazy';
+        lightImg.setAttribute('fetchpriority', 'high');
+        lightImg.classList.add('is-blur-loading');
         applyTransform(shouldAnimate);
         const expectedSmallUrl = new URL(smallSrc, location.href).href;
         const preload = new Image();
@@ -247,13 +285,24 @@ function updateLightboxPhoto(index, animate = false) {
           const displayUrl = new URL(lightImg.getAttribute('src') || '', location.href).href;
           if (displayUrl === expectedSmallUrl) {
             lightImg.src = largeSrc;
+            lightImg.loading = 'eager';
+            lightImg.setAttribute('fetchpriority', 'high');
+            lightImg.classList.remove('is-blur-loading');
           }
         };
         preload.src = largeSrc;
       } else {
         lightImg.src = largeSrc;
         lightImg.alt = current.alt;
-        lightImg.style.opacity = '1';
+        lightImg.classList.add('is-blur-loading');
+        lightImg.setAttribute('fetchpriority', 'high');
+        lightImg.loading = 'eager';
+        // Nếu không có bản nhỏ thì load xong ngay sẽ gỡ class
+        if (lightImg.complete) {
+          lightImg.classList.remove('is-blur-loading');
+        } else {
+          lightImg.addEventListener('load', () => lightImg.classList.remove('is-blur-loading'), { once: true });
+        }
         applyTransform(shouldAnimate);
       }
     }
