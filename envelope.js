@@ -1,9 +1,9 @@
 'use strict';
 
 // ==========================================
-// MỞ PHONG BÌ THƯ HOÀNG GIA & CON DẤU SÁP L & C
+// MỞ THIỆP CƯỚI — PHIÊN BẢN BÌA MỚI (nền sao đêm + nút Mở thiệp)
 // ==========================================
-const openBtn = $('#open');
+const openBtn = $('#open') || $('#openBtn');
 const coverElem = $('#cover');
 const envelopeScene = $('#envelopeScene');
 // Use prefersReducedMotion from window.__weddingHelpers (declared in helpers.js)
@@ -391,6 +391,71 @@ function initEnvelope() {
       }
     };
   }
+  initAutoOpenCover();
+}
+
+// ==========================================
+// TỰ MỞ THIỆP SAU 3–5s NẾU KHÁCH MỜI KHÔNG BẤM
+// - Thời gian chờ ngẫu nhiên 3000–5000ms, bắt đầu đếm sau khi animation
+//   chào mừng hiện xong (~2s).
+// - Hiển thị dòng thông báo "Thiệp sẽ tự mở sau Ns".
+// - Huỷ ngay khi khách tương tác bất kỳ (chạm, bấm, cuộn, phím).
+// ==========================================
+function initAutoOpenCover() {
+  if (!coverElem || coverElem.dataset.autoOpenBound) return;
+  coverElem.dataset.autoOpenBound = '1';
+
+  const AUTO_OPEN_MIN = 3000;
+  const AUTO_OPEN_MAX = 5000;
+  const AUTO_OPEN_START_DELAY = 2000;
+
+  const autoOpenNote = document.getElementById('autoOpenNote');
+  const autoOpenSeconds = document.getElementById('autoOpenSeconds');
+  if (!autoOpenNote) return;
+
+  const autoOpenDelay = Math.floor(AUTO_OPEN_MIN + Math.random() * (AUTO_OPEN_MAX - AUTO_OPEN_MIN));
+  let autoOpenTimer = null;
+  let tickTimer = null;
+  let cancelled = false;
+  let opened = false;
+
+  function cancelAutoOpen() {
+    if (cancelled) return;
+    cancelled = true;
+    if (autoOpenTimer) { clearTimeout(autoOpenTimer); autoOpenTimer = null; }
+    if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+    autoOpenNote.classList.remove('is-visible');
+    setTimeout(() => {
+      if (cancelled && !opened) autoOpenNote.style.display = 'none';
+    }, 600);
+  }
+
+  function runAutoOpenCountdown() {
+    if (cancelled) return;
+    const endAt = Date.now() + autoOpenDelay;
+    autoOpenNote.classList.add('is-visible');
+    if (autoOpenSeconds) autoOpenSeconds.textContent = String(Math.ceil(autoOpenDelay / 1000));
+
+    tickTimer = setInterval(() => {
+      const remain = endAt - Date.now();
+      if (autoOpenSeconds) {
+        autoOpenSeconds.textContent = remain <= 0 ? '0' : String(Math.ceil(remain / 1000));
+      }
+    }, 250);
+
+    autoOpenTimer = setTimeout(() => {
+      if (cancelled) return;
+      opened = true;
+      openEnvelopeInvitation();
+    }, autoOpenDelay);
+  }
+
+  // Huỷ tự mở khi khách chủ động tương tác với trang
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(evt => {
+    document.addEventListener(evt, cancelAutoOpen, { passive: true, once: true });
+  });
+
+  setTimeout(runAutoOpenCountdown, AUTO_OPEN_START_DELAY);
 }
 
 initEnvelope();

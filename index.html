@@ -53,191 +53,65 @@
 
   <!-- Canvas hiệu ứng cánh hoa rơi lãng mạn -->
   <canvas class="petals-canvas" id="petalsCanvas"></canvas>
-  <!-- Trang bìa mở thiệp: Phong bì hoàng gia & Con dấu sáp L & C -->
+<!-- Trang bìa mở thiệp: Thiết kế mới — nền sao đêm, logo Liu Chiu phát sáng -->
   <div class="cover" id="cover">
     <!-- Canvas hiệu ứng mở thiệp nằm dưới nội dung để không che chữ -->
     <canvas class="burst-canvas" id="burstCanvas"></canvas>
 
-    <!-- Hạt bụi vàng lấp lánh nền -->
-    <div class="cover-sparkles"></div>
+    <!-- Hai lớp sao: nhỏ lấp lánh & sao to nhấp nháy -->
+    <div class="stars" aria-hidden="true"></div>
+    <div class="stars stars--big" aria-hidden="true"></div>
+
+    <!-- Tuyết bụi sáng trôi chậm -->
+    <div class="dust" aria-hidden="true"></div>
+
+    <!-- Sao băng ngẫu nhiên -->
+    <span class="shooting-star" aria-hidden="true"></span>
+    <span class="shooting-star" aria-hidden="true"></span>
+    <span class="shooting-star" aria-hidden="true"></span>
+
+    <!-- Đốm sáng bokeh lớn mờ -->
+    <span class="bokeh bokeh-1" aria-hidden="true"></span>
+    <span class="bokeh bokeh-2" aria-hidden="true"></span>
+    <span class="bokeh bokeh-3" aria-hidden="true"></span>
+    <span class="bokeh bokeh-4" aria-hidden="true"></span>
+    <span class="bokeh bokeh-5" aria-hidden="true"></span>
 
     <div class="cover-content">
-      <picture class="cover-logo">
-        <source media="(min-width: 1024px)" srcset="assets/images/logo_liu_chiu_desktop.webp"/>
-        <source media="(min-width: 768px)" srcset="assets/images/logo_liu_chiu_tablet.webp"/>
-        <img alt="Logo Liu Chiu" src="assets/images/logo_liu_chiu_mobile.webp"/>
-      </picture>
-
-      <!-- Khung tiêu đề trang trọng mở đầu -->
-      <header class="cover-intro">
-        <span class="cover-eyebrow">The Wedding Invitation</span>
-        <p class="cover-date">12 · 12 · 2026</p>
-      </header>
-
-      <!-- Khung hiển thị chiếc phong bì hoàng gia 3D -->
-      <div class="envelope-scene" id="envelopeScene">
-        <div class="envelope" id="envelope">
-          <!-- Lá thiệp mời sang trọng bên trong lòng phong bì -->
-          <div class="envelope-card" id="envelopeCard">
-            <svg aria-hidden="true" class="envelope-card-emboss" viewBox="0 0 400 215" preserveAspectRatio="none">
-              <g fill="none" stroke="#aa8d62" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 72 C20 55 18 42 29 32 C39 22 54 25 55 35 C56 43 48 47 43 42 C39 38 43 33 47 35 M25 67 C34 61 39 53 39 45 M21 52 C13 46 14 37 19 34 C24 33 28 40 21 45 M31 31 C27 23 31 16 37 17 C43 18 44 24 38 28 M19 57 C13 54 9 57 11 62 C13 66 18 64 19 57" stroke-width="1.15"/>
-                <path d="M24 49 C31 46 34 40 33 34 M28 39 C23 35 23 30 27 28 M34 25 C33 20 36 17 40 19" stroke-width=".7"/>
-                <path d="M0 74 C7 72 12 70 17 66 M18 14 C25 11 31 10 38 11" stroke-width=".65" opacity=".72"/>
-                <path d="M17 72 C20 55 18 42 29 32 C39 22 54 25 55 35 C56 43 48 47 43 42 C39 38 43 33 47 35 M25 67 C34 61 39 53 39 45 M21 52 C13 46 14 37 19 34 C24 33 28 40 21 45 M31 31 C27 23 31 16 37 17 C43 18 44 24 38 28 M19 57 C13 54 9 57 11 62 C13 66 18 64 19 57" transform="translate(400 0) scale(-1 1)" stroke-width="1.15"/>
-                <path d="M24 49 C31 46 34 40 33 34 M28 39 C23 35 23 30 27 28 M34 25 C33 20 36 17 40 19" transform="translate(400 0) scale(-1 1)" stroke-width=".7"/>
-                <path d="M0 74 C7 72 12 70 17 66 M18 14 C25 11 31 10 38 11" transform="translate(400 0) scale(-1 1)" stroke-width=".65" opacity=".72"/>
-                <path d="M17 72 C20 55 18 42 29 32 C39 22 54 25 55 35 C56 43 48 47 43 42 C39 38 43 33 47 35 M25 67 C34 61 39 53 39 45 M21 52 C13 46 14 37 19 34 C24 33 28 40 21 45 M31 31 C27 23 31 16 37 17 C43 18 44 24 38 28 M19 57 C13 54 9 57 11 62 C13 66 18 64 19 57" transform="translate(0 215) scale(1 -1)" stroke-width="1.15"/>
-                <path d="M24 49 C31 46 34 40 33 34 M28 39 C23 35 23 30 27 28 M34 25 C33 20 36 17 40 19" transform="translate(0 215) scale(1 -1)" stroke-width=".7"/>
-                <path d="M0 74 C7 72 12 70 17 66 M18 14 C25 11 31 10 38 11" transform="translate(0 215) scale(1 -1)" stroke-width=".65" opacity=".72"/>
-                <path d="M17 72 C20 55 18 42 29 32 C39 22 54 25 55 35 C56 43 48 47 43 42 C39 38 43 33 47 35 M25 67 C34 61 39 53 39 45 M21 52 C13 46 14 37 19 34 C24 33 28 40 21 45 M31 31 C27 23 31 16 37 17 C43 18 44 24 38 28 M19 57 C13 54 9 57 11 62 C13 66 18 64 19 57" transform="translate(400 215) scale(-1 -1)" stroke-width="1.15"/>
-                <path d="M24 49 C31 46 34 40 33 34 M28 39 C23 35 23 30 27 28 M34 25 C33 20 36 17 40 19" transform="translate(400 215) scale(-1 -1)" stroke-width=".7"/>
-                <path d="M0 74 C7 72 12 70 17 66 M18 14 C25 11 31 10 38 11" transform="translate(400 215) scale(-1 -1)" stroke-width=".65" opacity=".72"/>
-                <path d="M68 13 C112 9 153 9 181 13 M219 13 C253 9 291 9 332 13 M68 202 C112 206 153 206 181 202 M219 202 C253 206 291 206 332 202" stroke-width=".55" opacity=".6"/>
-                <path d="M190 13 C194 8 198 8 200 13 C202 8 206 8 210 13 C206 17 202 18 200 22 C198 18 194 17 190 13 Z M190 202 C194 197 198 197 200 202 C202 197 206 197 210 202 C206 206 202 207 200 211 C198 207 194 206 190 202 Z" stroke-width=".8"/>
-              </g>
-              <g fill="#aa8d62" opacity=".68">
-                <circle cx="200" cy="13" r="1.3"/><circle cx="200" cy="202" r="1.3"/>
-                <path d="M57 35 C64 31 68 33 67 38 C64 42 60 41 57 35 Z M343 35 C336 31 332 33 333 38 C336 42 340 41 343 35 Z M57 180 C64 184 68 182 67 177 C64 173 60 174 57 180 Z M343 180 C336 184 332 182 333 177 C336 173 340 174 343 180 Z"/>
-              </g>
-            </svg>
-            <div class="envelope-card-border"></div>
-            <span class="envelope-card-eyebrow">Wedding Invitation</span>
-            <picture>
-              <source media="(min-width: 1024px)" srcset="assets/images/logo_liu_chiu_desktop.webp"/>
-              <source media="(min-width: 768px)" srcset="assets/images/logo_liu_chiu_tablet.webp"/>
-              <img alt="Logo Liu Chiu" src="assets/images/logo_liu_chiu_mobile.webp"/>
-            </picture>
-            <h2 class="envelope-card-names">Lan <i>&amp;</i> Chung</h2>
-            <p class="envelope-card-date">Thứ Bảy · 12.12.2026</p>
-          </div>
-
-          <!-- Thân phong bì (Pocket) -->
-          <div class="envelope-pocket">
-            <div class="envelope-pocket-bg"></div>
-            <div class="envelope-pocket-crease-left"></div>
-            <div class="envelope-pocket-crease-right"></div>
-            <div class="envelope-pocket-front"></div>
-          </div>
-
-          <!-- Nắp phong bì mở ngược lên khi unboxing -->
-          <div class="envelope-flap-top" id="envelopeFlapTop">
-            <div class="envelope-liner"></div>
-          </div>
-
-          <!-- Nắp phong bì tam giác gập xuống -->
-          <div class="envelope-flap" id="envelopeFlap">
-            <span aria-hidden="true" class="envelope-flap-ornament"><span>✦</span></span>
-            <img alt="" aria-hidden="true" class="envelope-flap-floral" src="assets/images/4.svg"/>
-            <svg class="envelope-flap-svg" viewBox="0 0 400 215" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="flapGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#fffaf4" />
-                  <stop offset="65%" stop-color="#f5ebe3" />
-                  <stop offset="100%" stop-color="#e8ddd0" />
-                </linearGradient>
-              </defs>
-              <polygon points="0,0 400,0 200,210" fill="url(#flapGrad)" />
-              <polygon points="0,0 400,0 200,210" stroke="rgba(212, 168, 83, 0.45)" stroke-width="1.5" fill="none" />
-              <polyline points="18,5 200,196 382,5" stroke="rgba(212, 168, 83, 0.35)" stroke-dasharray="3 3" stroke-width="1" fill="none" />
-            </svg>
-          </div>
-
-          <div class="cover-guest-badge" id="guestCardBadge" hidden>
-            <span class="cover-guest-prefix">Thân mời:</span>
-            <strong class="cover-guest-name" id="guestCoverName"></strong>
-          </div>
-
-          <!-- Con dấu sáp hoàng gia dập nổi chữ LC -->
-          <button aria-label="Con dấu LC - chạm để mở thiệp cưới" class="wax-seal" id="open" type="button">
-            <div class="wax-seal-wrapper">
-              <svg class="wax-seal-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <radialGradient id="waxGrad" cx="36%" cy="32%" r="68%">
-                    <stop offset="0%" stop-color="#d77b78"/>
-                    <stop offset="42%" stop-color="#b84f53"/>
-                    <stop offset="82%" stop-color="#96373e"/>
-                    <stop offset="100%" stop-color="#70242f"/>
-                  </radialGradient>
-                  <linearGradient id="goldEmbroidery" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#fff2be"/>
-                    <stop offset="35%" stop-color="#e8c372"/>
-                    <stop offset="70%" stop-color="#bf933d"/>
-                    <stop offset="100%" stop-color="#ffe299"/>
-                  </linearGradient>
-                  <filter id="waxShadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#70242f" flood-opacity="0.55"/>
-                    <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.3"/>
-                  </filter>
-                  <filter id="emboss" x="-10%" y="-10%" width="120%" height="120%">
-                    <feDropShadow dx="0" dy="1" stdDeviation="0.4" flood-color="#000" flood-opacity="0.7"/>
-                  </filter>
-                </defs>
-                <!-- Hình dáng mép sáp nóng chảy tự nhiên dập nổi -->
-                <path d="M50 3.5 C68 2.5 85 11 92 27 C98 41 95 61 88 75 C80 90 62 96.5 45 95.5 C28 94.5 11 85.5 5 69.5 C-2 53.5 2 33.5 12 19.5 C22 6.5 36 3.5 50 3.5 Z" fill="url(#waxGrad)" filter="url(#waxShadow)"/>
-                <!-- Gờ viền tròn dập chìm -->
-                <circle cx="50" cy="49" r="35" stroke="rgba(0,0,0,0.35)" stroke-width="1.5" fill="none"/>
-                <circle cx="50" cy="49" r="33" stroke="url(#goldEmbroidery)" stroke-width="1.2" stroke-dasharray="2.5 1.5" fill="none" opacity="0.85"/>
-                <!-- Vòng nguyệt quế hoàng gia mạ vàng -->
-                <g stroke="url(#goldEmbroidery)" stroke-width="1" fill="none" opacity="0.8" filter="url(#emboss)">
-                  <path d="M28 63 C22 51 24 37 34 27 C36 25 39 23 43 22"/>
-                  <path d="M72 63 C78 51 76 37 66 27 C64 25 61 23 57 22"/>
-                  <path d="M26 56 C22 54 22 48 25 46 C28 45 30 50 26 56" fill="url(#goldEmbroidery)"/>
-                  <path d="M25 44 C21 42 22 36 25 34 C28 34 29 39 25 44" fill="url(#goldEmbroidery)"/>
-                  <path d="M28 33 C25 30 27 25 31 24 C34 25 34 30 28 33" fill="url(#goldEmbroidery)"/>
-                  <path d="M74 56 C78 54 78 48 75 46 C72 45 70 50 74 56" fill="url(#goldEmbroidery)"/>
-                  <path d="M75 44 C79 42 78 36 75 34 C72 34 71 39 75 44" fill="url(#goldEmbroidery)"/>
-                  <path d="M72 33 C75 30 73 25 69 24 C66 25 66 30 72 33" fill="url(#goldEmbroidery)"/>
-                </g>
-              </svg>
-              <span aria-hidden="true" class="wax-seal-monogram"><span>L</span><span class="wax-seal-ampersand">&amp;</span><span>C</span></span>
-            </div>
-          </button>
-
-          <!-- Mặt sau phong bì: postcard hành trình ngày vui -->
-          <div class="envelope-back" id="envelopeBack">
-            <header class="envelope-back-header">
-              <span class="envelope-back-eyebrow">Trân trọng kính mời</span>
-              <h3 class="envelope-back-title">Lan <i>&amp;</i> Chung</h3>
-              <p class="envelope-back-date">Thứ Bảy · 12.12.2026</p>
-            </header>
-
-            <div aria-hidden="true" class="back-route">
-              <span>Hạ Long</span>
-              <span class="back-route-mark">✦</span>
-              <span>Sóc Sơn</span>
-            </div>
-
-            <div aria-label="Lịch trình hai buổi tiệc" class="back-events">
-              <article class="back-event">
-                <span class="back-event-time">10:30</span>
-                <span class="back-event-type">Tiệc nhà gái</span>
-                <strong>Seabay Hạ Long</strong>
-              </article>
-              <article class="back-event">
-                <span class="back-event-time">16:30</span>
-                <span class="back-event-type">Tiệc nhà trai</span>
-                <strong>Tư gia nhà trai</strong>
-              </article>
-            </div>
-
-            <p class="back-blessing">Rất mong được đón bạn trong ngày vui của chúng mình.</p>
-          </div>
-        </div>
+      <!-- Logo Liu Chiu trong vòng tròn vàng phát sáng + bụi vàng bay quỹ đạo -->
+      <div class="cover-logo-wrap" aria-hidden="true">
+        <span class="orbit-dot"></span>
+        <span class="orbit-dot"></span>
+        <span class="orbit-dot"></span>
+        <picture>
+          <source media="(min-width: 768px)" srcset="assets/images/logo_liu_chiu_tablet.webp" />
+          <img alt="Logo Liu Chiu" class="cover-logo" src="assets/images/logo_liu_chiu_mobile.webp" />
+        </picture>
       </div>
 
-      <!-- Nút lật xem lịch trình ở bìa ngoài: chỉ ẩn trên điện thoại -->
-      <button aria-label="Lật xem lịch trình sự kiện đám cưới" class="cover-flip-btn" id="coverFlipBtn" type="button">
-        <span class="cover-flip-icon">↻</span>
-        <span class="cover-flip-text">Lật xem lịch trình sự kiện</span>
+      <span class="cover-eyebrow"><i>✦</i> The Wedding Invitation <i>✦</i></span>
+
+      <h1 class="cover-names">
+        Ngọc Lan
+        <span class="amp">&amp;</span>
+        Văn Chung
+      </h1>
+
+      <p class="cover-date">12 <i>·</i> 12 <i>·</i> 2026</p>
+
+      <div class="guest-block">
+        <span class="prefix">Kính mời</span>
+        <span class="name" id="guestCoverName">Quý khách</span>
+      </div>
+
+      <button class="open-btn" id="openBtn" type="button" aria-label="Mở thiệp cưới Lan và Chung">
+        <span>Mở thiệp</span>
       </button>
 
-      <!-- Lời mời chạm mở thiệp -->
-      <div class="cover-cta" id="coverCta" role="button" tabindex="0" aria-label="Chạm để mở thiệp">
-        <span aria-hidden="true" class="cover-cta-sparkle">✦</span>
-        <span>Chạm để mở thiệp</span>
-        <span aria-hidden="true" class="cover-cta-sparkle">✦</span>
-      </div>
+      <!-- Thông báo đếm ngược tự mở thiệp -->
+      <p class="auto-open-note" id="autoOpenNote" aria-hidden="true">
+        Thiệp sẽ tự mở sau <b id="autoOpenSeconds">5</b>s
+      </p>
     </div>
   </div>
 
@@ -406,7 +280,7 @@
           </article>
           <article class="reveal">
             <b>02</b>
-            <time>Tháng 01/2026</time>
+            <time>Tháng 1/2026</time>
             <h3>Ngày mình có nhau</h3>
             <p>Từ những câu chuyện nhỏ, những lần gặp gỡ và những chuyến đi, chúng mình dần tìm thấy sự đồng điệu. Từ tình bạn, chúng mình trở thành người thương, cùng sẻ chia, trưởng thành và trở thành một phần trong cuộc sống của nhau.</p>
           </article>
@@ -831,6 +705,7 @@
     <!-- 11. Section Closing (Lời cảm ơn) -->
     <section class="closing reveal">
       <div class="closing-content">
+        <!-- <h2>Hạnh phúc<em>sẽ trọn vẹn hơn</em>khi có bạn cùng chứng kiến</h2> -->
         <h2>Cảm ơn bạn <em>đã là một phần</em> trong ngày đặc biệt.</h2>
         <p>Lan & Chung · 12.12.2026</p>
       </div>

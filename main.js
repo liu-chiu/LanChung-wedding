@@ -619,8 +619,10 @@ function applyPersonalization() {
     // Hiển thị trên lá thiệp bìa phong bì
     const guestCardBadge = window.__weddingHelpers.$('#guestCardBadge');
     const guestCoverName = window.__weddingHelpers.$('#guestCoverName');
-    if (guestCardBadge && guestCoverName) {
+    if (guestCoverName) {
       guestCoverName.textContent = guestName;
+    }
+    if (guestCardBadge) {
       guestCardBadge.hidden = false;
     }
 
@@ -676,8 +678,10 @@ function applyPersonalization() {
 
     const guestCardBadge = window.__weddingHelpers.$('#guestCardBadge');
     const guestCoverName = window.__weddingHelpers.$('#guestCoverName');
-    if (guestCardBadge && guestCoverName) {
+    if (guestCoverName) {
       guestCoverName.textContent = defaultName;
+    }
+    if (guestCardBadge) {
       guestCardBadge.hidden = false;
     }
 
