@@ -3,6 +3,10 @@
 // ==========================================
 // RSVP + LỜI CHÚC (FORM UI)
 // ==========================================
+const wishViewAllButton = $('#wishViewAll');
+const wishBookDialog = $('#wishBookDialog');
+const wishBookEntries = $('#wishBookEntries');
+
 function appendWish(wish, label = 'Đã duyệt') {
   const wishList = $('#wishList');
   if (!wishList) return;
@@ -21,6 +25,47 @@ function appendWish(wish, label = 'Đã duyệt') {
 
   article.append(small, quote, author);
   wishList.prepend(article);
+  if (wishBookDialog?.open) renderWishBook();
+}
+
+function renderWishBook() {
+  if (!wishBookEntries) return;
+  const wishes = $$('#wishList .wish').filter(wish => $('small', wish)?.textContent?.trim() !== 'Mẫu');
+  wishBookEntries.replaceChildren();
+
+  if (wishes.length === 0) {
+    const emptyMessage = document.createElement('p');
+    emptyMessage.className = 'wish-book-empty';
+    emptyMessage.textContent = 'Chưa có lời chúc nào. Hãy là người gửi lời chúc đầu tiên nhé!';
+    wishBookEntries.append(emptyMessage);
+    return;
+  }
+
+  wishes.forEach(wish => {
+    const quoteText = $('blockquote', wish)?.textContent?.trim() || '';
+    const authorText = $('p', wish)?.textContent?.trim() || '';
+    const entry = document.createElement('article');
+    entry.className = 'wish-book-entry';
+
+    const quote = document.createElement('blockquote');
+    quote.textContent = quoteText;
+    const author = document.createElement('p');
+    author.textContent = authorText;
+    entry.append(quote, author);
+    wishBookEntries.append(entry);
+  });
+}
+
+if (wishViewAllButton && wishBookDialog?.showModal) {
+  wishViewAllButton.addEventListener('click', () => {
+    renderWishBook();
+    wishBookDialog.showModal();
+  });
+
+  $('#wishBookClose')?.addEventListener('click', () => wishBookDialog.close());
+  wishBookDialog.addEventListener('click', event => {
+    if (event.target === wishBookDialog) wishBookDialog.close();
+  });
 }
 
 async function loadApprovedWishes() {
@@ -67,6 +112,60 @@ function initRsvpAndWishes() {
   deferUntilVisible('#rsvp', checkBackend);
   deferUntilVisible('#wishes', loadApprovedWishes);
 
+  // Gửi form lời chúc
+  if ($('#wishForm')) {
+    const form = $('#wishForm');
+    const wishTextarea = $('textarea[name="wish"]', form);
+    const resizeWishTextarea = () => {
+      if (!wishTextarea) return;
+      wishTextarea.style.height = 'auto';
+      const minHeight = Number.parseFloat(getComputedStyle(wishTextarea).minHeight) || 0;
+      wishTextarea.style.height = `${Math.max(wishTextarea.scrollHeight, minHeight)}px`;
+    };
+
+    wishTextarea?.addEventListener('input', resizeWishTextarea);
+    resizeWishTextarea();
+
+    form.onsubmit = async event => {
+      event.preventDefault();
+
+      if (!form.reportValidity()) return;
+
+      const data = Object.fromEntries(new FormData(form));
+      const status = $('#wishStatus');
+      const button = $('button[type="submit"]', form) || $('button', form);
+
+      button.disabled = true;
+      if (status) status.textContent = 'Cảm ơn bạn đã gửi lời chúc thật dễ thương! Tụi mình đã nhận được rồi nhé.';
+
+      try {
+        const wish = {
+          website: data.website || '',
+          name: data.guestName.trim(),
+          wish: data.wish.trim()
+        };
+
+        await submitAndVerify({ type: 'wish', ...wish });
+        if (window.trackWeddingEvent) {
+          window.trackWeddingEvent('wish_success', { length: wish.wish.length });
+        }
+        appendWish(wish, 'Vừa gửi');
+        $('#wishList .wish')?.classList.add('is-new');
+
+        form.reset();
+        resizeWishTextarea();
+      } catch (error) {
+        if (window.trackWeddingEvent) {
+          window.trackWeddingEvent('wish_error', { message: String(error && error.message || error).slice(0, 100) });
+        }
+        console.error('Không gửi được lời chúc:', error);
+        if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Chúng mình nhé.';
+      } finally {
+        button.disabled = false;
+      }
+    };
+  }
+
   const rsvpTransportOptions = {
     self: 'Tự di chuyển',
     bride: 'Đi cùng xe đoàn về nhà gái',
@@ -79,8 +178,8 @@ function initRsvpAndWishes() {
       items: [
         ['Thời gian đoàn di chuyển', '7:00 sáng ngày 12/12/2026'],
         ['Địa điểm đón khách', 'Ngõ 36 Giang Văn Minh, Phường Kim Mã, Hà Nội'],
-        ['Trưởng đoàn', 'Anh A'],
-        ['Số điện thoại trưởng đoàn', '0081028124', 'phone'],
+        ['Trưởng đoàn', 'Updating'],
+        ['Số điện thoại trưởng đoàn', 'Updating', 'phone'],
         ['Cô dâu', 'Ngọc Lan'],
         ['Số điện thoại cô dâu', '0325022345', 'phone']
       ]
@@ -90,8 +189,8 @@ function initRsvpAndWishes() {
       items: [
         ['Thời gian đoàn di chuyển', '15:00 chiều ngày 12/12/2026'],
         ['Địa điểm đón khách', '11 A Cát Linh, Ô Chợ Dừa, Hà Nội'],
-        ['Trưởng đoàn', 'Anh B'],
-        ['Số điện thoại trưởng đoàn', '0081028124', 'phone'],
+        ['Trưởng đoàn', 'Updating'],
+        ['Số điện thoại trưởng đoàn', 'Updating', 'phone'],
         ['Chú rể', 'Văn Chung'],
         ['Số điện thoại chú rể', '0376147556', 'phone']
       ]
@@ -161,7 +260,7 @@ function initRsvpAndWishes() {
 
   $('#rsvpTravelInfoButton')?.addEventListener('click', showRsvpTravelInfo);
 
-  function showRsvpConfirmation(attendance, transportation, hasWish) {
+  function showRsvpConfirmation(attendance, transportation) {
     if (!rsvpConfirmationDialog?.showModal || !rsvpConfirmationTitle || !rsvpConfirmationContent) return;
 
     rsvpConfirmationContent.replaceChildren();
@@ -169,9 +268,7 @@ function initRsvpAndWishes() {
     submissionStatus.className = 'rsvp-confirmation-status';
     submissionStatus.setAttribute('role', 'status');
     submissionStatus.setAttribute('aria-live', 'polite');
-    submissionStatus.textContent = hasWish
-      ? 'Đang gửi lời chúc và xác nhận…'
-      : 'Đang gửi xác nhận…';
+    submissionStatus.textContent = 'Đang gửi xác nhận…';
     rsvpConfirmationContent.append(submissionStatus);
 
     if (attendance === 'Không thể tham dự') {
@@ -239,7 +336,6 @@ function initRsvpAndWishes() {
     const attendanceInputs = $$('[name="attendance"]', form);
     const status = $('#rsvpStatus');
     let isSubmitting = false;
-    let savedRsvpSignature = '';
 
     const clearPreviousStatus = () => {
       if (!isSubmitting && status) status.textContent = '';
@@ -285,81 +381,48 @@ function initRsvpAndWishes() {
       if (!currentForm.reportValidity()) return;
 
       const data = Object.fromEntries(new FormData(currentForm));
-      const wishText = String(data.wish || '').trim();
-      const rsvpPayload = {
-        type: 'rsvp',
-        website: data.website || '',
-        name: data.name.trim(),
-        guests: data.guests,
-        event: data.event,
-        attendance: data.attendance,
-        transportation: data.transportation || '',
-        phone: data.phone || '',
-        message: data.message || ''
-      };
-      const rsvpSignature = JSON.stringify(rsvpPayload);
       const button = $('button[type="submit"]', currentForm) || $('button', currentForm);
 
       isSubmitting = true;
       button.disabled = true;
-      if (status) status.textContent = 'Tụi mình đang gửi lời chúc và xác nhận đến Lan & Chung nhé…';
-      const confirmationStatus = showRsvpConfirmation(data.attendance, data.transportation, Boolean(wishText));
+      if (status) status.textContent = 'Cảm ơn bạn, tụi mình đang gửi phản hồi đến Lan & Chung nhé…';
+      const confirmationStatus = showRsvpConfirmation(data.attendance, data.transportation);
 
       try {
-        if (rsvpSignature !== savedRsvpSignature) {
-          await submitAndVerify(rsvpPayload);
-          savedRsvpSignature = rsvpSignature;
+        await submitAndVerify({
+          type: 'rsvp',
+          website: data.website || '',
+          name: data.name.trim(),
+          guests: data.guests,
+          event: data.event,
+          attendance: data.attendance,
+          transportation: data.transportation || '',
+          phone: data.phone || '',
+          message: data.message || ''
+        });
 
-          if (window.trackWeddingEvent) {
-            window.trackWeddingEvent('rsvp_success', {
-              event_slot: data.event,
-              attendance: data.attendance,
-              guests: Number(data.guests) || 0
-            });
-          }
-        }
-
-        if (wishText) {
-          const wish = { name: data.name.trim(), wish: wishText };
-          await submitAndVerify({
-            type: 'wish',
-            website: data.website || '',
-            ...wish
+        if (window.trackWeddingEvent) {
+          window.trackWeddingEvent('rsvp_success', {
+            event_slot: data.event,
+            attendance: data.attendance,
+            guests: Number(data.guests) || 0
           });
-          if (window.trackWeddingEvent) {
-            window.trackWeddingEvent('wish_success', { length: wishText.length });
-          }
-          appendWish(wish, 'Vừa gửi');
         }
-
         if (status) status.textContent = '';
         if (confirmationStatus) {
-          confirmationStatus.textContent = wishText
-            ? 'Đã gửi lời chúc và xác nhận thành công. Cảm ơn bạn!'
-            : 'Đã gửi xác nhận thành công. Cảm ơn bạn!';
+          confirmationStatus.textContent = 'Đã gửi xác nhận thành công. Cảm ơn bạn!';
           confirmationStatus.classList.add('is-success');
         }
         currentForm.reset();
-        savedRsvpSignature = '';
         updateTransportationVisibility();
       } catch (error) {
-        const rsvpWasSaved = rsvpSignature === savedRsvpSignature;
-        if (!rsvpWasSaved && window.trackWeddingEvent) {
+        if (window.trackWeddingEvent) {
           window.trackWeddingEvent('rsvp_error', { message: String(error && error.message || error).slice(0, 100) });
         }
-        if (rsvpWasSaved && wishText && window.trackWeddingEvent) {
-          window.trackWeddingEvent('wish_error', { message: String(error && error.message || error).slice(0, 100) });
-        }
-        console.error(rsvpWasSaved ? 'Không gửi được lời chúc:' : 'Không gửi được xác nhận tham dự:', error);
-        if (status) {
-          status.textContent = rsvpWasSaved && wishText
-            ? 'Đã nhận xác nhận tham dự nhưng lời chúc chưa gửi được. Giữ nguyên thông tin và lời chúc rồi gửi lại nhé.'
-            : 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Lan & Chung nhé.';
-        }
+        console.error('Không gửi được xác nhận tham dự:', error);
+        if (status) status.textContent = 'Tụi mình chưa nhận được xác nhận gửi thành công. Bạn thử lại sau hoặc nhắn trực tiếp cho Lan & Chung nhé.';
         if (confirmationStatus) {
-          confirmationStatus.textContent = rsvpWasSaved && wishText
-            ? 'Đã nhận xác nhận tham dự nhưng lời chúc chưa gửi được. Vui lòng đóng cửa sổ này và gửi lại để thử gửi lời chúc.'
-            : 'Chưa gửi được xác nhận. Vui lòng đóng cửa sổ này và thử gửi lại.';
+          confirmationStatus.textContent = 'Chưa gửi được xác nhận. Vui lòng đóng cửa sổ này và thử gửi lại.';
           confirmationStatus.classList.add('is-error');
         }
       } finally {
