@@ -886,6 +886,36 @@ window.__weddingHelpers.$$('.gift-box-btn').forEach(button => {
   };
 });
 
+// Xử lý nút "Lưu mã QR" - tải ảnh QR về thiết bị
+window.__weddingHelpers.$$('.save-qr').forEach(btn => {
+  btn.onclick = async () => {
+    const qrSrc = btn.dataset.qrSrc;
+    const qrName = btn.dataset.qrName || 'QR';
+    if (!qrSrc) return;
+
+    try {
+      const response = await fetch(qrSrc);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${qrName}.webp`;
+      a.click();
+      
+      URL.revokeObjectURL(url);
+      
+      if (navigator.vibrate) {
+        try { navigator.vibrate([20, 35]); } catch (e) {}
+      }
+      window.__weddingHelpers.notify?.(`Đã tải mã QR: ${qrName}.webp`);
+    } catch (e) {
+      console.error('Không thể tải mã QR:', e);
+      window.__weddingHelpers.notify?.('Không thể tải mã QR. Vui lòng chụp màn hình hoặc tải thủ công.');
+    }
+  };
+});
+
 window.__weddingHelpers.$$('.gift-close-btn').forEach(btn => {
   btn.onclick = () => {
     const targetId = btn.dataset.closeTarget;

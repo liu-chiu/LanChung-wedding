@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
   <meta content="telephone=no, date=no, address=no, email=no" name="format-detection"/>
-  <meta content="#f6efe8" name="theme-color"/>
+  <meta content="#0b1526" name="theme-color"/>
   <meta content="Thiệp cưới Lan và Chung, ngày 12 tháng 12 năm 2026" name="description"/>
   <title>Lan & Chung | 12.12.2026</title>
   <link href="https://liu-chiu.github.io/LanChung-wedding/" rel="canonical"/>
@@ -55,6 +55,9 @@
   <canvas class="petals-canvas" id="petalsCanvas"></canvas>
 <!-- Trang bìa mở thiệp: Thiết kế mới — nền sao đêm, logo Liu Chiu phát sáng -->
   <div class="cover" id="cover">
+    <!-- Vầng sáng xanh nhạt ở đỉnh bìa — bầu trời đêm sâu -->
+    <div class="cover-sky-glow" aria-hidden="true"></div>
+
     <!-- Canvas hiệu ứng mở thiệp nằm dưới nội dung để không che chữ -->
     <canvas class="burst-canvas" id="burstCanvas"></canvas>
 
@@ -76,6 +79,12 @@
     <span class="bokeh bokeh-3" aria-hidden="true"></span>
     <span class="bokeh bokeh-4" aria-hidden="true"></span>
     <span class="bokeh bokeh-5" aria-hidden="true"></span>
+
+    <!-- Vầng sáng vàng ấm mọc từ đường chân trời — "bình minh ngày cưới" -->
+    <div class="cover-horizon-glow" aria-hidden="true"></div>
+
+    <!-- Dải chuyển sáng ở đáy bìa: đêm → cream của dự án -->
+    <div class="cover-transition" aria-hidden="true"></div>
 
     <div class="cover-content">
       <!-- Logo Liu Chiu trong vòng tròn vàng phát sáng + bụi vàng bay quỹ đạo -->
@@ -658,10 +667,9 @@
           <!-- Nội dung mã QR (Xuất hiện khi mở hộp quà) -->
           <div class="gift-content" id="giftContentBride" hidden>
             <div class="qr-frame">
-              <img alt="Mã QR chuyển khoản VPBank cho cô dâu" class="qr" height="240" loading="lazy" src="assets/images/QR-co-dau.webp" width="240"/>
+              <img alt="Mã QR chuyển khoản Techcombank cho cô dâu" class="qr" height="240" loading="lazy" src="assets/images/QR-co-dau.webp" width="240"/>
             </div>
-            <p class="bank-info"><span>Bùi Ngọc Lan</span><span>Techcombank</span><strong>19037213961014</strong></p>
-            <button class="btn outline copy-account" data-copy="Techcombank - 19037213961014 - BUI NGOC LAN" data-copy-message="Đã sao chép thông tin tài khoản cô dâu" type="button">Sao chép thông tin</button>
+            <button class="btn outline save-qr" data-qr-src="assets/images/QR-co-dau.webp" data-qr-name="QR-Bui-Ngoc-Lan" type="button">Lưu mã QR</button>
             <button class="gift-close-btn" type="button" data-close-target="giftBrideCard">Thu gọn hộp quà ✕</button>
           </div>
         </article>
@@ -694,8 +702,7 @@
             <div class="qr-frame">
               <img alt="Mã QR chuyển khoản Techcombank cho chú rể" class="qr" height="240" loading="lazy" src="assets/images/QR-chu-re.webp" width="240"/>
             </div>
-            <p class="bank-info"><span>Nguyễn Văn Chung</span><span>Techcombank</span><strong>19031119300014</strong></p>
-            <button class="btn outline copy-account" data-copy="Techcombank - 19031119300014 - NGUYEN VAN CHUNG" data-copy-message="Đã sao chép thông tin tài khoản chú rể" type="button">Sao chép thông tin</button>
+            <button class="btn outline save-qr" data-qr-src="assets/images/QR-chu-re.webp" data-qr-name="QR-Nguyen-Van-Chung" type="button">Lưu mã QR</button>
             <button class="gift-close-btn" type="button" data-close-target="giftGroomCard">Thu gọn hộp quà ✕</button>
           </div>
         </article>
