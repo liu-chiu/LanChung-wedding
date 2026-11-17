@@ -650,12 +650,6 @@ function applyPersonalization() {
       rsvpNameInput.value = guestName;
     }
 
-    // Điền sẵn vào Form Gửi lời chúc
-    const wishNameInput = window.__weddingHelpers.$('input[name="guestName"]');
-    if (wishNameInput) {
-      wishNameInput.value = guestName;
-    }
-
     // Cập nhật mã VietQR động với lời chúc cá nhân hóa
     const qrBride = window.__weddingHelpers.$('#giftContentBride img.qr');
     if (qrBride) {

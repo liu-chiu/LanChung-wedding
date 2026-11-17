@@ -3973,6 +3973,90 @@ fieldset input[type="radio"] {
   margin-top: 0.5rem;
 }
 
+#rsvpForm textarea[name="wish"] {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.rsvp .wish-feed {
+  grid-column: 1 / -1;
+  width: min(100%, 1300px);
+  justify-self: center;
+  min-width: 0;
+  margin-top: clamp(0.5rem, 2vw, 1.5rem);
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.24);
+  scroll-margin-top: 100px;
+}
+
+.wish-feed-heading {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.wish-feed-heading .eyebrow {
+  color: var(--rose);
+}
+
+.wish-feed-heading h3 {
+  margin: 0.35rem 0 0.4rem;
+  font: 500 clamp(2rem, 4vw, 3.2rem) var(--serif);
+}
+
+.wish-feed-heading h3 em {
+  color: #f2c8c3;
+}
+
+.wish-feed-heading p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.9rem;
+}
+
+#wishes #wishList.wish-scroll-list {
+  display: grid;
+  gap: 0.85rem;
+  max-height: min(48vh, 460px);
+  max-height: min(48dvh, 460px);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding: 0.3rem 0.8rem 0.3rem 0.15rem;
+  scrollbar-color: var(--rose) rgba(255, 255, 255, 0.16);
+  scrollbar-width: thin;
+}
+
+#wishes .wish {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1.25rem clamp(1.1rem, 2.5vw, 2rem);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 6px;
+  background: var(--paper);
+  box-shadow: 0 8px 24px rgba(12, 24, 20, 0.12);
+  color: var(--ink);
+}
+
+#wishes .wish small {
+  color: var(--green);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#wishes .wish blockquote {
+  margin: 0;
+  font: 500 clamp(1.05rem, 1.5vw, 1.25rem)/1.55 var(--serif);
+  overflow-wrap: anywhere;
+}
+
+#wishes .wish p {
+  margin: 0;
+  color: var(--green);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: right;
+}
+
 #rsvpTransportationField[hidden] {
   display: none;
 }
