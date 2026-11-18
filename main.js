@@ -894,7 +894,8 @@ window.__weddingHelpers.$$('.save-qr').forEach(btn => {
       
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${qrName}.webp`;
+      const qrExt = (qrSrc.split('.').pop() || 'jpg').toLowerCase();
+      a.download = `${qrName}.${qrExt}`;
       a.click();
       
       URL.revokeObjectURL(url);
@@ -902,7 +903,7 @@ window.__weddingHelpers.$$('.save-qr').forEach(btn => {
       if (navigator.vibrate) {
         try { navigator.vibrate([20, 35]); } catch (e) {}
       }
-      window.__weddingHelpers.notify?.(`Đã tải mã QR: ${qrName}.webp`);
+      window.__weddingHelpers.notify?.(`Đã tải mã QR: ${qrName}.${qrExt}`);
     } catch (e) {
       console.error('Không thể tải mã QR:', e);
       window.__weddingHelpers.notify?.('Không thể tải mã QR. Vui lòng chụp màn hình hoặc tải thủ công.');

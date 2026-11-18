@@ -5777,96 +5777,10 @@ html:not(.js-loaded) .reveal {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  gap: clamp(0.75rem, 2vh, 1.15rem);
+  gap: clamp(0.9rem, 2.6vh, 1.4rem);
   color: var(--paper);
-}
-
-/* --- LOGO LIU CHIU trong vòng tròn vàng phát sáng --- */
-.cover-logo-wrap {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: clamp(108px, 26vw, 132px);
-  aspect-ratio: 1;
-  margin-bottom: 0.35rem;
-  animation: coverRiseIn 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
-}
-
-.cover-logo-wrap::before,
-.cover-logo-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.cover-logo-wrap::before {
-  border: 1px solid rgba(233, 173, 50, 0.55);
-  box-shadow:
-    0 0 22px rgba(233, 173, 50, 0.28),
-    inset 0 0 16px rgba(233, 173, 50, 0.16);
-  animation: haloPulse 3.6s ease-in-out infinite;
-}
-
-.cover-logo-wrap::after {
-  inset: -11px;
-  border: 1px dashed rgba(233, 173, 50, 0.35);
-  animation: haloSpin 26s linear infinite;
-}
-
-@keyframes haloPulse {
-  0%, 100% { box-shadow: 0 0 18px rgba(233,173,50,0.22), inset 0 0 14px rgba(233,173,50,0.14); }
-  50%      { box-shadow: 0 0 34px rgba(233,173,50,0.42), inset 0 0 20px rgba(233,173,50,0.22); }
-}
-
-@keyframes haloSpin {
-  to { transform: rotate(360deg); }
-}
-
-/* 3 chấm bụi vàng bay theo quỹ đạo tròn quanh logo */
-.orbit-dot {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: haloSpin linear infinite;
-}
-
-.orbit-dot::before {
-  content: "";
-  position: absolute;
-  top: -3px;
-  left: 50%;
-  width: 6px; height: 6px;
-  margin-left: -3px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffe9b8 0%, rgba(233,173,50,0.9) 55%, rgba(233,173,50,0) 75%);
-  box-shadow: 0 0 10px rgba(233, 173, 50, 0.9);
-}
-
-.orbit-dot:nth-child(1) { animation-duration: 7s; }
-.orbit-dot:nth-child(1)::before { width: 7px; height: 7px; }
-.orbit-dot:nth-child(2) { animation-duration: 11s; animation-direction: reverse; }
-.orbit-dot:nth-child(2)::before { top: auto; bottom: -3px; width: 5px; height: 5px; opacity: 0.85; }
-.orbit-dot:nth-child(3) { animation-duration: 17s; }
-.orbit-dot:nth-child(3)::before { width: 4px; height: 4px; opacity: 0.7; top: 50%; left: -3px; margin-left: 0; margin-top: -2px; }
-
-/* Logo căn chính giữa + hiệu ứng thở nhẹ */
-.cover-logo {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 74%;
-  height: auto;
-  transform: translate(-50%, -50%);
-  animation: logoBreathe 4.2s ease-in-out infinite;
-}
-
-@keyframes logoBreathe {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 8px rgba(255,244,214,0.3)); }
-  50%      { transform: translate(-50%, -50%) scale(1.05); filter: drop-shadow(0 0 16px rgba(255,244,214,0.55)); }
 }
 
 /* --- Eyebrow "The Wedding Invitation" --- */
@@ -6065,12 +5979,12 @@ html:not(.js-loaded) .reveal {
 .auto-open-note {
   margin: 0.7rem 0 0;
   min-height: 1.2em;
-  font-size: 0.6rem;
-  font-weight: 500;
+  font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.18em;
   text-indent: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 244, 214, 0.55);
+  color: rgba(255, 255, 255, 0.82);
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
@@ -6080,8 +5994,9 @@ html:not(.js-loaded) .reveal {
 .auto-open-note.is-visible { opacity: 1; }
 
 .auto-open-note b {
-  color: var(--gold);
-  font-weight: 700;
+  color: #7be0c3;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(123, 224, 195, 0.55);
 }
 
 /* ============ HIỆU ỨNG MỞ THIỆP ============ */
@@ -6114,7 +6029,6 @@ html:not(.js-loaded) .reveal {
 /* ============ RESPONSIVE & GIẢM CHUYỂN ĐỘNG ============ */
 @media (max-height: 700px) {
   .cover-content { gap: 0.55rem; }
-  .cover-logo-wrap { width: 92px; }
   .cover-names { font-size: clamp(2.5rem, 10vw, 3.6rem); }
   .open-btn { min-height: 46px; margin-top: 0.7rem; }
   .guest-block { margin-top: 0.25rem; }
@@ -6125,11 +6039,7 @@ html:not(.js-loaded) .reveal {
   .stars--big,
   .dust,
   .bokeh,
-  .shooting-star,
-  .orbit-dot,
-  .cover-logo,
-  .cover-logo-wrap::before,
-  .cover-logo-wrap::after {
+  .shooting-star {
     animation: none;
     opacity: 0.6;
   }
