@@ -100,7 +100,7 @@
     });
 
     // 2. Mở phong bì (bìa thiệp đầu trang)
-    document.querySelectorAll('.envelope-scene, #coverFlipBtn').forEach(el => {
+    document.querySelectorAll('.envelope-scene, #coverFlipBtn, #openBtn, #coverCta').forEach(el => {
       el.addEventListener('click', () => track('envelope_open'), { once: true });
     });
 
@@ -120,7 +120,7 @@
     }
 
     // 5. Nhạc nền
-    const musicBtn = $('#musicToggle') || $('.music-toggle');
+    const musicBtn = $('#musicToggle') || $('#music') || $('.music-toggle') || $('.music');
     if (musicBtn) {
       let playing = false;
       musicBtn.addEventListener('click', () => {

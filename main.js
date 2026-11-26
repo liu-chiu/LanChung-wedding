@@ -127,6 +127,17 @@ mobileNavigation.addEventListener('change', () => {
 
 // Hiệu ứng cuộn trang hiện dần (Scroll Reveal)
 function setupRevealObserver() {
+  // Gán độ trễ so le cho các phần tử reveal cùng hàng đợi để hiệu ứng nối tiếp sang trọng.
+  const revealElements = window.__weddingHelpers.$$('.reveal');
+  const groupCounters = new Map();
+  revealElements.forEach(element => {
+    const parent = element.parentElement || document.body;
+    const index = groupCounters.get(parent) || 0;
+    groupCounters.set(parent, index + 1);
+    // Tối đa 5 bước trễ, mỗi bước 90ms — đủ tinh tế, không làm chậm trang.
+    element.style.setProperty('--reveal-delay', `${Math.min(index, 5) * 90}ms`);
+  });
+
   const observer = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
@@ -136,10 +147,10 @@ function setupRevealObserver() {
         }
       });
     },
-    { threshold: 0.08 }
+    { threshold: 0.08, rootMargin: '0px 0px -8% 0px' }
   );
 
-  window.__weddingHelpers.$$('.reveal').forEach(element => observer.observe(element));
+  revealElements.forEach(element => observer.observe(element));
 }
 
 // Initialize reveal observer after cover is removed (or immediately if no cover)
@@ -926,3 +937,149 @@ window.__weddingHelpers.$$('.gift-close-btn').forEach(btn => {
     }
   };
 });
+
+// ==========================================
+// THANH TIẾN TRÌNH CUỘN + PARALLAX HERO (Luxury polish)
+// ==========================================
+(function initScrollProgressAndParallax() {
+  const bar = window.__weddingHelpers.$('#scrollProgressBar');
+  const heroFigure = window.__weddingHelpers.$('.hero figure picture img');
+  const reduceMotion = window.__weddingHelpers.prefersReducedMotion;
+  let ticking = false;
+
+  const update = () => {
+    ticking = false;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    const ratio = scrollable > 0 ? Math.min(1, Math.max(0, scrollTop / scrollable)) : 0;
+
+    if (bar) bar.style.transform = `scaleX(${ratio.toFixed(4)})`;
+
+    if (heroFigure && !reduceMotion.matches && scrollTop < window.innerHeight * 1.2) {
+      // Nhích ảnh hero chậm hơn trang để tạo chiều sâu tinh tế.
+      heroFigure.style.transform = `translate3d(0, ${(scrollTop * 0.12).toFixed(1)}px, 0) scale(1.06)`;
+    }
+  };
+
+  const onScroll = () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  update();
+})();
+
+// ==========================================
+// LỚP HIỆU ỨNG CAO CẤP (Luxury effects): Spotlight, Tilt 3D,
+// Nút cuộn lên đầu trang, Đếm ngược nhảy số.
+// ==========================================
+(function initLuxuryEffects() {
+  const reduceMotion = window.__weddingHelpers.prefersReducedMotion;
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+  // --- Spotlight bám theo con trỏ ---
+  const spotlight = window.__weddingHelpers.$('#cursorSpotlight');
+  if (spotlight && finePointer.matches && !reduceMotion.matches) {
+    let spotFrame = null;
+    let spotX = 0;
+    let spotY = 0;
+    window.addEventListener('pointermove', event => {
+      spotX = event.clientX;
+      spotY = event.clientY;
+      spotlight.classList.add('is-active');
+      if (spotFrame === null) {
+        spotFrame = requestAnimationFrame(() => {
+          spotlight.style.setProperty('--spot-x', `${spotX}px`);
+          spotlight.style.setProperty('--spot-y', `${spotY}px`);
+          spotFrame = null;
+        });
+      }
+    }, { passive: true });
+    document.addEventListener('pointerleave', () => spotlight.classList.remove('is-active'));
+  }
+
+  // --- Tilt 3D tinh tế trên thẻ thiệp & hộp quà ---
+  if (finePointer.matches && !reduceMotion.matches) {
+    const tiltTargets = window.__weddingHelpers.$$('.hero-card-widget, .gift-box-card');
+    tiltTargets.forEach(target => {
+      const face = target.querySelector('.hero-card-face') || target.querySelector('.gift-box-graphic');
+      if (!face) return;
+      const MAX = 7;
+      let raf = null;
+      let rx = 0;
+      let ry = 0;
+
+      const apply = () => {
+        face.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+        raf = null;
+      };
+
+      target.addEventListener('pointermove', event => {
+        const rect = target.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width - 0.5;
+        const py = (event.clientY - rect.top) / rect.height - 0.5;
+        ry = px * MAX * 2;
+        rx = -py * MAX * 2;
+        if (raf === null) raf = requestAnimationFrame(apply);
+      }, { passive: true });
+
+      target.addEventListener('pointerleave', () => {
+        rx = 0;
+        ry = 0;
+        // Trả thẻ về dáng CSS gốc (góc nghiêng mặc định) thay vì làm phẳng.
+        if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
+        face.style.transform = '';
+      });
+    });
+  }
+
+  // --- Nút cuộn lên đầu trang ---
+  const toTop = window.__weddingHelpers.$('#toTop');
+  if (toTop) {
+    let topTicking = false;
+    const updateTop = () => {
+      topTicking = false;
+      toTop.classList.toggle('is-visible', (window.scrollY || 0) > window.innerHeight * 0.9);
+    };
+    window.addEventListener('scroll', () => {
+      if (!topTicking) {
+        topTicking = true;
+        requestAnimationFrame(updateTop);
+      }
+    }, { passive: true });
+    toTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    });
+    updateTop();
+  }
+
+  // --- Đếm ngược: thêm hiệu ứng nhảy số khi giá trị đổi ---
+  const tickIds = ['days', 'hours', 'mins', 'secs'];
+  const lastValues = new Map();
+  const tickObserver = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      const raw = mutation.target;
+      const el = raw && raw.nodeType === 3 ? raw.parentElement : raw;
+      if (!el || !tickIds.includes(el.id)) return;
+      const next = el.textContent;
+      if (lastValues.get(el.id) === next) return;
+      const first = !lastValues.has(el.id);
+      lastValues.set(el.id, next);
+      if (first || reduceMotion.matches) return;
+      el.classList.remove('is-tick');
+      void el.offsetWidth;
+      el.classList.add('is-tick');
+    });
+  });
+  tickIds.forEach(id => {
+    const el = window.__weddingHelpers.$('#' + id);
+    if (el) {
+      lastValues.set(id, el.textContent);
+      tickObserver.observe(el, { childList: true, characterData: true, subtree: true });
+    }
+  });
+})();

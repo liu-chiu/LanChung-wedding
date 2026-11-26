@@ -2190,6 +2190,31 @@ header {
   transform: translateY(-100%);
 }
 
+/* Thanh tiến trình cuộn trang — điểm nhấn vàng kim sang trọng */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 200;
+  height: 3px;
+  pointer-events: none;
+  background: transparent;
+}
+
+.scroll-progress-bar {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--green) 0%, var(--gold) 55%, var(--rose) 100%);
+  box-shadow: 0 0 12px rgba(233, 173, 50, 0.55);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress { display: none; }
+}
+
 .brand img {
   display: block;
   width: 78px;
@@ -4974,16 +4999,29 @@ button[data-copy].is-copied {
 }
 
 /* Hiệu ứng Reveal khi cuộn trang */
-/* Hiệu ứng Reveal khi cuộn trang */
+/* Hiệu ứng Reveal khi cuộn trang — chuyển động mượt, so le sang trọng */
 .reveal {
   opacity: 1;
   transform: none;
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition:
+    opacity 0.85s cubic-bezier(0.2, 0.75, 0.25, 1),
+    transform 0.85s cubic-bezier(0.2, 0.75, 0.25, 1),
+    filter 0.85s ease;
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
 }
 
-.reveal.visible {
+/* Chỉ ẩn khi JS đã sẵn sàng (tránh FOUC / nội dung biến mất nếu JS lỗi) */
+.js-loaded .reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  filter: blur(6px);
+}
+
+.js-loaded .reveal.visible {
   opacity: 1;
   transform: none;
+  filter: blur(0);
 }
 
 /* Fallback: nếu JS chưa chạy hoặc IntersectionObserver không hỗ trợ, nội dung vẫn hiển thị */
@@ -4991,6 +5029,16 @@ button[data-copy].is-copied {
 html:not(.js-loaded) .reveal {
   opacity: 1;
   transform: none;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-loaded .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
 }
 
 :focus-visible {
@@ -6080,4 +6128,212 @@ html:not(.js-loaded) .reveal {
     animation: none;
     opacity: 0.6;
   }
+}
+
+/* ==========================================================================
+   18. LỚP HIỆU ỨNG CAO CẤP (LUXURY EFFECTS LAYER)
+   Spotlight bám con trỏ · Nút cuộn lên · Tilt 3D · Lấp lánh vàng kim ·
+   Đếm ngược nhảy số · Đường chân trang mảnh
+   Toàn bộ tôn trọng prefers-reduced-motion.
+   ========================================================================== */
+
+/* --- Lớp sáng bám theo con trỏ (chỉ thiết bị trỏ tinh) --- */
+.cursor-spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background: radial-gradient(
+    220px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgba(233, 173, 50, 0.14),
+    rgba(233, 173, 50, 0.05) 42%,
+    transparent 68%
+  );
+  mix-blend-mode: multiply;
+  will-change: background;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cursor-spotlight.is-active { opacity: 1; }
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .cursor-spotlight { display: none; }
+}
+
+/* --- Nút cuộn lên đầu trang --- */
+.to-top {
+  position: fixed;
+  right: max(1.1rem, env(safe-area-inset-right));
+  bottom: max(1.1rem, env(safe-area-inset-bottom));
+  z-index: 120;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(177, 144, 99, 0.5);
+  border-radius: 50%;
+  background: rgba(255, 253, 249, 0.82);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--green-deep);
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.9);
+  box-shadow: 0 10px 26px -8px rgba(56, 41, 31, 0.35);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0.35s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.to-top:hover,
+.to-top:focus-visible {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 14px 30px -8px rgba(36, 92, 88, 0.55);
+}
+
+.to-top span {
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.to-top:hover span { transform: translateY(-3px); }
+
+/* --- Tilt 3D mượt trên thẻ thiệp & hộp quà (chỉ trỏ tinh) --- */
+@media (hover: hover) and (pointer: fine) {
+  .hero-card-widget,
+  .gift-box-card {
+    transform-style: preserve-3d;
+  }
+
+  .hero-card-widget .hero-card-face,
+  .gift-box-card .gift-box-graphic {
+    transition:
+      transform 0.5s cubic-bezier(0.2, 0.75, 0.25, 1),
+      box-shadow 0.5s ease;
+    will-change: transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card-widget .hero-card-face,
+  .gift-box-card .gift-box-graphic {
+    transition: none;
+    will-change: auto;
+  }
+}
+
+/* --- Tiêu đề chương lấp lánh vàng kim khi hiện --- */
+.js-loaded .heading h2 em,
+.js-loaded .section .heading h2 em {
+  background: linear-gradient(
+    100deg,
+    var(--rose) 0%,
+    var(--rose) 38%,
+    var(--gold) 50%,
+    var(--rose) 62%,
+    var(--rose) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.js-loaded .heading.visible h2 em,
+.js-loaded .heading.visible h2 i {
+  animation: goldSweep 2.6s cubic-bezier(0.4, 0, 0.2, 1) 0.25s;
+}
+
+@keyframes goldSweep {
+  0%   { background-position: 130% 0; }
+  100% { background-position: -30% 0; }
+}
+
+/* Nếu không có JS: giữ màu chữ đặc, không trong suốt */
+html:not(.js-loaded) .heading h2 em,
+html:not(.js-loaded) .section .heading h2 em {
+  -webkit-text-fill-color: currentColor;
+  color: var(--rose);
+  background: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-loaded .heading h2 em,
+  .js-loaded .section .heading h2 em {
+    -webkit-text-fill-color: currentColor;
+    color: var(--rose);
+    background: none;
+  }
+  .js-loaded .heading.visible h2 em,
+  .js-loaded .heading.visible h2 i {
+    animation: none;
+  }
+}
+
+/* --- Đếm ngược: số nhảy nhẹ khi đổi giá trị --- */
+.count-grid b {
+  display: inline-block;
+  transform-origin: 50% 60%;
+}
+
+.count-grid b.is-tick {
+  animation: digitTick 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes digitTick {
+  0%   { transform: translateY(-22%) scale(1.12); opacity: 0.25; filter: blur(2px); }
+  60%  { opacity: 1; filter: blur(0); }
+  100% { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .count-grid b.is-tick { animation: none; }
+}
+
+/* --- Đường kẻ vàng kim mảnh dưới chân trang --- */
+footer {
+  position: relative;
+}
+
+footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(240px, 60%);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(233, 173, 50, 0.7), transparent);
+}
+
+/* --- Viền sáng mảnh chạy quanh thẻ quà khi mở --- */
+.gift-box-card.is-open {
+  animation: cardGlow 2.8s ease-in-out 1;
+}
+
+@keyframes cardGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(233, 173, 50, 0); }
+  40%  { box-shadow: 0 0 42px 2px rgba(233, 173, 50, 0.28); }
+  100% { box-shadow: 0 0 0 0 rgba(233, 173, 50, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gift-box-card.is-open { animation: none; }
 }

@@ -50,6 +50,11 @@
 <body class="locked">
   <a class="skip" href="#main">Đi đến nội dung chính</a>
 
+  <!-- Thanh tiến trình cuộn trang sang trọng (Luxury scroll progress) -->
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true">
+    <span class="scroll-progress-bar" id="scrollProgressBar"></span>
+  </div>
+
   <!-- Canvas hiệu ứng cánh hoa rơi lãng mạn -->
   <canvas class="petals-canvas" id="petalsCanvas"></canvas>
 <!-- Trang bìa mở thiệp: Thiết kế mới — nền sao đêm, logo Liu Chiu phát sáng -->
@@ -697,6 +702,14 @@
   </button>
   <div aria-hidden="true" class="music-audio-player" id="musicPlayer"></div>
   <div class="toast" id="toast"></div>
+
+  <!-- Lớp sáng bám theo con trỏ (Spotlight) — chỉ trên thiết bị trỏ tinh -->
+  <div class="cursor-spotlight" id="cursorSpotlight" aria-hidden="true"></div>
+
+  <!-- Nút cuộn lên đầu trang sang trọng -->
+  <button aria-label="Cuộn lên đầu trang" class="to-top" id="toTop" type="button">
+    <span aria-hidden="true">↑</span>
+  </button>
 
   <!-- Lightbox Album tương tác vuốt chạm (Touch/Swipe) -->
   <div aria-label="Album ảnh cưới" aria-modal="true" class="lightbox" hidden="" id="lightbox" role="dialog">

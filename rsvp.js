@@ -401,6 +401,26 @@ function initRsvpAndWishes() {
           message: data.message || ''
         });
 
+        // Lời chúc gõ trong form RSVP trước đây bị bỏ sót — gửi kèm vào sổ lưu bút.
+        // Không để lỗi gửi lời chúc làm hỏng xác nhận RSVP đã thành công.
+        const wishText = (data.wish || '').trim();
+        if (wishText) {
+          try {
+            await submitAndVerify({
+              type: 'wish',
+              website: data.website || '',
+              name: data.name.trim(),
+              wish: wishText
+            });
+            if (window.trackWeddingEvent) {
+              window.trackWeddingEvent('wish_success', { length: wishText.length, source: 'rsvp' });
+            }
+            appendWish({ name: data.name.trim(), wish: wishText }, 'Vừa gửi');
+          } catch (wishError) {
+            console.warn('Không gửi được lời chúc kèm RSVP:', wishError);
+          }
+        }
+
         if (window.trackWeddingEvent) {
           window.trackWeddingEvent('rsvp_success', {
             event_slot: data.event,
