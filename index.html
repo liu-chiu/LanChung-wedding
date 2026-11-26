@@ -45,6 +45,7 @@
   <script defer="" src="rsvp.js"></script>
   <script defer="" src="utilities.js"></script>
   <script defer="" src="main.js"></script>
+  <script defer="" src="guest-delights.js"></script>
 </head>
 
 <body class="locked">
@@ -686,7 +687,7 @@
 
   <!-- Footer -->
   <footer>
-    <span>LAN & CHUNG</span>
+    <span class="footer-wordmark" id="footerWordmark" role="button" tabindex="0" title="Chạm 5 lần để xem điều bất ngờ">LAN &amp; CHUNG</span>
     <span>Hạ Long · Hà Nội</span>
     <button class="admin-link-btn" id="openLinkModalBtn" title="Tạo link gửi khách mời riêng biệt" type="button">💌 Tạo link khách</button>
     <span>12.12.2026</span>
@@ -710,6 +711,31 @@
   <button aria-label="Cuộn lên đầu trang" class="to-top" id="toTop" type="button">
     <span aria-hidden="true">↑</span>
   </button>
+
+  <!-- Nút "Gửi yêu thương" — thả tim & lời chúc dễ thương -->
+  <button aria-label="Gửi yêu thương đến cô dâu chú rể" class="send-love" id="sendLove" type="button">
+    <span class="send-love-icon" aria-hidden="true">💛</span>
+    <span class="send-love-count" id="sendLoveCount" aria-hidden="true"></span>
+  </button>
+
+  <!-- Băng chào mừng cá nhân hóa (hiện khi khách mở thiệp qua link riêng) -->
+  <div class="welcome-banner" id="welcomeBanner" role="status" aria-live="polite" hidden>
+    <span class="welcome-banner-text" id="welcomeBannerText"></span>
+    <button class="welcome-banner-close" id="welcomeBannerClose" type="button" aria-label="Đóng lời chào">×</button>
+  </div>
+
+  <!-- Lá thư tình bí mật (Easter egg) -->
+  <dialog class="love-letter" id="loveLetter" aria-labelledby="loveLetterTitle">
+    <div class="love-letter-card">
+      <button class="love-letter-close" id="loveLetterClose" type="button" aria-label="Đóng lá thư">×</button>
+      <span class="love-letter-eyebrow">A little secret, just for you</span>
+      <h2 id="loveLetterTitle">Gửi bạn — người đã ghé qua</h2>
+      <p>Cảm ơn bạn đã dành một khoảnh khắc để mở thiệp và ở lại cùng chúng mình. Giữa hàng triệu người, bạn đã đến — và điều đó khiến ngày vui của Lan &amp; Chung thêm trọn vẹn.</p>
+      <p>Hẹn gặp bạn vào <strong>12.12.2026</strong> nhé. Cùng nâng ly, cùng cười, cùng lưu giữ một ngày thật đẹp.</p>
+      <span class="love-letter-sign">Với tất cả yêu thương,<br/><i>Lan &amp; Chung</i></span>
+      <span class="love-letter-heart" aria-hidden="true">💖</span>
+    </div>
+  </dialog>
 
   <!-- Lightbox Album tương tác vuốt chạm (Touch/Swipe) -->
   <div aria-label="Album ảnh cưới" aria-modal="true" class="lightbox" hidden="" id="lightbox" role="dialog">
